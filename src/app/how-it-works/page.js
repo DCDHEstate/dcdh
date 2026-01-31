@@ -1,0 +1,311 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+const tenantSteps = [
+  {
+    step: 1,
+    title: 'Create Your Account',
+    desc: 'Sign up using your mobile number. Receive a secure WhatsApp OTP for instant, password-free login.',
+    icon: 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
+  },
+  {
+    step: 2,
+    title: 'Search & Shortlist',
+    desc: 'Use our advanced filters – locality, budget, property type – to discover verified properties. Shortlist your favorites and explore them on Google Maps.',
+    icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+  },
+  {
+    step: 3,
+    title: 'Raise Enquiries',
+    desc: 'Found something you like? Raise an enquiry directly. Your request goes straight to the owner and our team for quick follow-up.',
+    icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+  },
+  {
+    step: 4,
+    title: 'Schedule Visits',
+    desc: 'Coordinate property visits at your convenience. Our team helps you schedule and accompanies you if needed.',
+    icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+  },
+  {
+    step: 5,
+    title: 'Move In',
+    desc: 'Complete the rental agreement, pay the deposit, and move into your new home. We assist with documentation and handover.',
+    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+  },
+];
+
+const ownerSteps = [
+  {
+    step: 1,
+    title: 'Complete Onboarding',
+    desc: 'Register as a property owner with your basic details. Upload verification documents like ID proof and property papers.',
+    icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  },
+  {
+    step: 2,
+    title: 'List Your Property',
+    desc: 'Add property details – type, price, amenities, and exact location using Google Maps. Upload high-quality photos and videos.',
+    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+  },
+  {
+    step: 3,
+    title: 'Verification & Go Live',
+    desc: 'Our team reviews your listing for accuracy. Once approved, your property goes live and starts receiving enquiries.',
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+  {
+    step: 4,
+    title: 'Manage Leads',
+    desc: 'Access your Owner Portal to view and respond to tenant enquiries. Track lead status and communicate directly.',
+    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+  },
+  {
+    step: 5,
+    title: 'Close the Deal',
+    desc: 'Finalize agreements with tenants or buyers. Our team assists with documentation and smooth property handover.',
+    icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  },
+];
+
+const referrerSteps = [
+  {
+    step: 1,
+    title: 'Refer a Friend (Tenant)',
+    desc: "Know someone looking for a property? Enter their WhatsApp number in your dashboard. They'll receive an instant login link.",
+    icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
+  },
+  {
+    step: 2,
+    title: 'Refer a Property',
+    desc: 'Know an owner who wants to list? Share the property details, photos/videos, owner contact, and location through your dashboard.',
+    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+  },
+  {
+    step: 3,
+    title: 'Track Your Referrals',
+    desc: 'Monitor all your referrals in the Referral Dashboard. See status updates as your referrals progress through the system.',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+  },
+  {
+    step: 4,
+    title: 'Earn Rewards',
+    desc: 'When your referred friend closes a deal or a property gets onboarded, you earn rewards. Track potential earnings in your wallet.',
+    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+];
+
+const adminFeatures = [
+  { title: 'Lead Management', desc: 'Track and manage all incoming leads from enquiries, referrals, and walk-ins.' },
+  { title: 'Property Verification', desc: 'Review and approve property listings before they go live on the platform.' },
+  { title: 'User Management', desc: 'Manage tenant, owner, and partner accounts with role-based access control.' },
+  { title: 'Analytics Dashboard', desc: 'Monitor platform performance, conversion rates, and business metrics.' },
+];
+
+const tabs = [
+  { id: 'tenants', label: 'For Tenants', color: 'red' },
+  { id: 'owners', label: 'For Owners', color: 'blue' },
+  { id: 'referrers', label: 'For Referrers', color: 'amber' },
+];
+
+export default function HowItWorksPage() {
+  const [activeTab, setActiveTab] = useState('tenants');
+
+  const getSteps = () => {
+    switch (activeTab) {
+      case 'tenants': return tenantSteps;
+      case 'owners': return ownerSteps;
+      case 'referrers': return referrerSteps;
+      default: return tenantSteps;
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <main>
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gray-950 pb-24 pt-32">
+          <div className="absolute inset-0">
+            <Image
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000"
+              alt="How It Works"
+              fill
+              className="object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-950/95 to-gray-950" />
+          </div>
+
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2">
+                <svg className="h-4 w-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span className="text-sm font-medium text-red-400">Simple & Transparent</span>
+              </div>
+              <h1 className="mb-6 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                How <span className="bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent">DCDH Estate</span> Works
+              </h1>
+              <p className="text-lg leading-relaxed text-gray-400 md:text-xl">
+                Whether you're searching for a home, listing your property, or referring friends – we've made every step simple and transparent.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Steps Section */}
+        <section className="bg-white py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            {/* Tabs */}
+            <div className="mb-16 flex justify-center">
+              <div className="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`rounded-xl px-8 py-4 text-sm font-semibold transition-all duration-300 ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Steps Grid */}
+            <div className="mx-auto max-w-5xl">
+              <div className="relative">
+                {/* Vertical Line */}
+                <div className="absolute left-8 top-0 hidden h-full w-0.5 bg-gradient-to-b from-red-200 via-red-300 to-red-200 lg:left-1/2 lg:-ml-px lg:block" />
+
+                <div className="space-y-12">
+                  {getSteps().map((item, i) => (
+                    <div key={item.step} className={`relative flex flex-col gap-8 lg:flex-row ${i % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+                      {/* Step Number - Center */}
+                      <div className="absolute left-8 top-0 z-10 hidden h-16 w-16 -translate-x-1/2 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-2xl font-bold text-white shadow-xl shadow-red-500/30 lg:left-1/2 lg:flex">
+                        {item.step}
+                      </div>
+
+                      {/* Content Card */}
+                      <div className={`flex-1 ${i % 2 === 1 ? 'lg:pr-16' : 'lg:pl-16'}`}>
+                        <div className="flex gap-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-lg transition-all duration-300 hover:border-red-200 hover:shadow-xl lg:gap-8">
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-2xl font-bold text-white shadow-lg shadow-red-500/30 lg:hidden">
+                            {item.step}
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-red-50 lg:flex">
+                              <svg className="h-7 w-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="mb-2 text-xl font-bold text-gray-900">{item.title}</h3>
+                              <p className="text-gray-600">{item.desc}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Spacer */}
+                      <div className="hidden flex-1 lg:block" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-16 text-center">
+              <a
+                href="https://wa.me/918306034440"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 px-10 py-5 text-lg font-semibold text-white shadow-xl shadow-green-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/30"
+              >
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a47.6 47.6 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                Start on WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Behind the Scenes Section */}
+        <section className="bg-gradient-to-b from-gray-50 to-white py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mb-16 text-center">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-4 py-2">
+                <svg className="h-4 w-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-sm font-medium text-purple-600">Behind the Scenes</span>
+              </div>
+              <h2 className="mb-4 text-4xl font-bold tracking-tight text-gray-900">
+                How We <span className="text-gradient">Ensure Quality</span>
+              </h2>
+              <p className="mx-auto max-w-2xl text-lg text-gray-600">
+                Our admin team works behind the scenes to verify listings, manage leads, and ensure every property journey is smooth.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {adminFeatures.map((feature, i) => (
+                <div key={i} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:border-purple-200 hover:shadow-lg">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50">
+                    <svg className="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-gray-900">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-gray-950 py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-500 to-red-600 p-12 text-center md:p-20">
+              <div className="absolute left-0 top-0 h-full w-full opacity-10">
+                <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-white blur-3xl" />
+                <div className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-white blur-3xl" />
+              </div>
+              <div className="relative">
+                <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+                  Ready to Get Started?
+                </h2>
+                <p className="mx-auto mb-8 max-w-2xl text-lg text-white/90">
+                  Whether you're a tenant, owner, or partner – your property journey begins here.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link href="/search" className="rounded-xl bg-white px-8 py-4 font-semibold text-red-600 shadow-xl transition-all duration-300 hover:bg-gray-50">
+                    Search Properties
+                  </Link>
+                  <Link href="/owner-portal" className="rounded-xl border-2 border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20">
+                    List Your Property
+                  </Link>
+                  <Link href="/referral" className="rounded-xl border-2 border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20">
+                    Join Referral Program
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
