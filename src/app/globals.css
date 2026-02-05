@@ -1,5 +1,100 @@
 @import "tailwindcss";
 
+/*
+ * ============================================
+ * DCDH ESTATE — DESIGN SYSTEM TOKENS
+ * ============================================
+ * This file is the SINGLE SOURCE OF TRUTH for
+ * the entire theme. All components reference
+ * these tokens via Tailwind classes.
+ *
+ * To change the brand:
+ *   1. Edit the @theme block below
+ *   2. Edit the CSS custom properties in :root
+ *   3. Everything else updates automatically
+ *
+ * Token naming convention:
+ *   --color-primary-*   → Main brand / buttons / CTAs
+ *   --color-accent-*    → Gold/warm highlights
+ *   --color-surface-*   → Backgrounds & cards
+ *   --color-text-*      → Typography hierarchy
+ *   --color-border-*    → Borders & dividers
+ *   --color-muted-*     → Subtle UI elements
+ *   --color-whatsapp    → Functional: WhatsApp green
+ *   --color-verified    → Functional: Verification
+ * ============================================
+ */
+
+/* ---- Tailwind v4 Theme Extension ---- */
+@theme {
+  /* Primary — dark warm stone for buttons, CTAs, key UI */
+  --color-primary: #1c1917;
+  --color-primary-light: #292524;
+  --color-primary-hover: #44403c;
+  --color-primary-soft: #57534e;
+  --color-primary-muted: #78716c;
+
+  /* Accent — warm gold/amber for highlights */
+  --color-accent: #d4a574;
+  --color-accent-light: #e8c9a0;
+  --color-accent-dark: #b8860b;
+  --color-accent-soft: #fef3c7;
+  --color-accent-muted: #92400e;
+
+  /* Surface — backgrounds & cards */
+  --color-surface: #fafaf8;
+  --color-surface-white: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-subtle: #f5f5f4;
+  --color-surface-input: rgba(245, 245, 244, 0.5);
+  --color-surface-dark: #0c0a09;
+  --color-surface-dark-card: rgba(255, 255, 255, 0.05);
+
+  /* Text — hierarchy on light backgrounds */
+  --color-heading: #1c1917;
+  --color-body: #44403c;
+  --color-muted: #78716c;
+  --color-subtle: #a8a29e;
+  --color-faint: #d6d3d1;
+
+  /* Text — hierarchy on dark backgrounds */
+  --color-heading-on-dark: #ffffff;
+  --color-body-on-dark: #a8a29e;
+  --color-muted-on-dark: #78716c;
+  --color-subtle-on-dark: #57534e;
+
+  /* Borders */
+  --color-border: #e7e5e4;
+  --color-border-light: #f5f5f4;
+  --color-border-soft: rgba(231, 229, 228, 0.6);
+  --color-border-dark: rgba(255, 255, 255, 0.08);
+  --color-border-dark-hover: rgba(255, 255, 255, 0.15);
+
+  /* Functional */
+  --color-whatsapp: #4ade80;
+  --color-whatsapp-dark: #16a34a;
+  --color-verified: #059669;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 40px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-elevated: 0 25px 60px -12px rgba(0, 0, 0, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+  --shadow-premium: 0 32px 64px -16px rgba(139, 94, 60, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 32px 64px -16px rgba(0, 0, 0, 0.1), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Spacing — section rhythm */
+  --spacing-section: 7rem;
+  --spacing-section-inner: 4rem;
+}
+
+/* ---- Base ---- */
 html {
   scroll-behavior: smooth;
 }
@@ -7,48 +102,68 @@ html {
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-surface);
+  color: var(--color-body);
 }
 
-/* Premium gradient text */
+/* ---- Premium Gradient Text ---- */
 .text-gradient {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+  background: linear-gradient(135deg, #8b5e3c 0%, var(--color-accent) 50%, var(--color-accent-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glass morphism */
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 50%, #c9956b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Premium shadows */
+/* ---- Glass Morphism ---- */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-dark {
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--color-border-dark);
+}
+
+/* ---- Shadows (class-based for non-Tailwind usage) ---- */
 .shadow-soft {
-  box-shadow: 0 2px 40px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-soft);
 }
 
 .shadow-elevated {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-elevated);
 }
 
-/* Hover animations */
+.shadow-premium {
+  box-shadow: var(--shadow-premium);
+}
+
+/* ---- Card Hover ---- */
 .card-hover {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .card-hover:hover {
-  transform: translateY(-12px);
-  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* Floating animation */
+/* ---- Animations ---- */
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(2deg); }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
 }
 
 .animate-float {
@@ -56,8 +171,8 @@ body {
 }
 
 @keyframes float-delayed {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(-2deg); }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 .animate-float-delayed {
@@ -65,23 +180,22 @@ body {
   animation-delay: 1s;
 }
 
-/* Shimmer effect */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-/* Premium button */
+/* ---- Premium Button ---- */
 .btn-premium {
   position: relative;
   overflow: hidden;
-  transition: all 0.4s ease;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .btn-premium::before {
@@ -91,22 +205,49 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s ease;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.7s ease;
 }
 
 .btn-premium:hover::before {
   left: 100%;
 }
 
-/* Smooth scroll reveal */
+/* ---- Scroll Reveal ---- */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .reveal.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ---- Elegant Divider ---- */
+.divider-elegant {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 94, 60, 0.2), transparent);
+}
+
+/* ---- Section Spacing ---- */
+.section-premium {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+}
+
+/* ---- Grain Texture Overlay ---- */
+.texture-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ---- Letter Spacing ---- */
+.tracking-elegant {
+  letter-spacing: 0.15em;
 }

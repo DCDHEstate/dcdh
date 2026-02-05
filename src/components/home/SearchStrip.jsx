@@ -6,29 +6,26 @@ export default function SearchStrip() {
   const [searchType, setSearchType] = useState('rent');
 
   return (
-    <section className="relative z-10 -mt-8 pb-20">
+    <section className="relative z-10 -mt-2 pb-28">
       <div className="mx-auto max-w-5xl px-4">
-        <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl shadow-gray-200/50 md:p-10">
+        <div className="rounded-2xl border border-border-soft bg-surface-white p-8 shadow-elevated md:p-10">
           {/* Tabs */}
           <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-2xl bg-gray-100 p-1.5">
+            <div className="inline-flex rounded-full bg-surface-subtle p-1">
               {[
-                { id: 'rent', label: 'Rent', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                { id: 'buy', label: 'Buy', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
-                { id: 'commercial', label: 'Commercial', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+                { id: 'rent', label: 'Rent' },
+                { id: 'buy', label: 'Buy' },
+                { id: 'commercial', label: 'Commercial' },
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setSearchType(tab.id)}
-                  className={`flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-300 ${
+                  className={`rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 ${
                     searchType === tab.id
-                      ? 'bg-white text-gray-900 shadow-lg'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-muted hover:text-body'
                   }`}
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
-                  </svg>
                   {tab.label}
                 </button>
               ))}
@@ -37,65 +34,65 @@ export default function SearchStrip() {
 
           {/* Search Fields */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <div className="group">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">City</label>
+            <div>
+              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">CITY</label>
               <div className="relative">
-                <select className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 pr-10 text-gray-700 transition-all duration-300 focus:border-red-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-100">
+                <select className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle">
                   <option>Jaipur</option>
                   <option>Delhi</option>
                   <option>Mumbai</option>
                 </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
 
-            <div className="group">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Locality</label>
+            <div>
+              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">LOCALITY</label>
               <input
                 type="text"
                 placeholder="e.g. Malviya Nagar"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-gray-700 placeholder-gray-400 transition-all duration-300 focus:border-red-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-100"
+                className="w-full rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body placeholder-subtle transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle"
               />
             </div>
 
-            <div className="group">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Property Type</label>
+            <div>
+              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">PROPERTY TYPE</label>
               <div className="relative">
-                <select className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 pr-10 text-gray-700 transition-all duration-300 focus:border-red-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-100">
+                <select className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle">
                   <option>All Types</option>
                   <option>Apartment</option>
                   <option>Villa</option>
                   <option>House</option>
                   <option>Office</option>
                 </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
 
-            <div className="group">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Budget</label>
+            <div>
+              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">BUDGET</label>
               <div className="relative">
-                <select className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 pr-10 text-gray-700 transition-all duration-300 focus:border-red-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-100">
+                <select className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle">
                   <option>Any Budget</option>
                   <option>5K - 10K</option>
                   <option>10K - 20K</option>
                   <option>20K - 50K</option>
                   <option>50K+</option>
                 </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
 
             <div className="flex items-end">
-              <button className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3.5 font-semibold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <button className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:bg-primary-hover">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Search
               </button>
@@ -103,12 +100,12 @@ export default function SearchStrip() {
           </div>
 
           {/* Popular Tags */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-gray-100 pt-6">
-            <span className="text-sm font-medium text-gray-400">Popular:</span>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-border-light pt-6">
+            <span className="text-xs font-medium text-subtle">Popular:</span>
             {['2 BHK', '3 BHK', 'Villa', 'Furnished', 'Near Metro'].map(tag => (
               <button
                 key={tag}
-                className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600 transition-all duration-300 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                className="rounded-full border border-border bg-surface-white px-4 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-faint hover:bg-surface-subtle hover:text-body"
               >
                 {tag}
               </button>
