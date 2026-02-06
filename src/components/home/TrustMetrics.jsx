@@ -84,7 +84,7 @@ export default function TrustMetrics() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <a
-            href="https://wa.me/918306034440"
+            href="https://wa.me/919257533440"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-premium inline-flex items-center gap-3 rounded-full bg-surface-white px-10 py-4 text-sm font-medium text-heading shadow-premium transition-all duration-300 hover:bg-surface-subtle"

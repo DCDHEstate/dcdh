@@ -225,7 +225,7 @@ export default function HowItWorksPage() {
             {/* CTA */}
             <div className="mt-16 text-center">
               <a
-                href="https://wa.me/918306034440"
+                href="https://wa.me/919257533440"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 px-10 py-5 text-lg font-semibold text-white shadow-xl shadow-green-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/30"

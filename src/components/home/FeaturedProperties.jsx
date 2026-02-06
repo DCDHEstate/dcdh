@@ -31,7 +31,7 @@ export default function FeaturedProperties() {
           {properties.map((p, i) => (
             <div
               key={p.id}
-              className="card-hover glow-accent group overflow-hidden rounded-2xl border border-border-soft bg-surface-card reveal-stagger"
+              className="card-hover glow-accent group overflow-hidden rounded-2xl glass-card reveal-stagger"
               style={{ '--stagger': `${i * 100}ms` }}
             >
               {/* Image */}
@@ -48,13 +48,11 @@ export default function FeaturedProperties() {
 
                 {/* Tags */}
                 <div className="absolute left-4 top-4 flex gap-2">
-                  <span className={`rounded-full px-3 py-1 text-[11px] font-medium tracking-wide text-white ${
-                    p.type === 'Rent' ? 'bg-primary/80 backdrop-blur-sm' : p.type === 'Buy' ? 'bg-primary-light/80 backdrop-blur-sm' : 'bg-primary-soft/80 backdrop-blur-sm'
-                  }`}>
+                  <span className={`glass-badge-dark rounded-full px-3 py-1 text-[11px] font-medium tracking-wide text-white`}>
                     {p.type}
                   </span>
                   {p.featured && (
-                    <span className="flex items-center gap-1 rounded-full bg-accent-muted/90 px-3 py-1 text-[11px] font-medium tracking-wide text-white backdrop-blur-sm animate-pulse-glow">
+                    <span className="flex items-center gap-1 rounded-full glass-badge px-3 py-1 text-[11px] font-medium tracking-wide text-accent-dark animate-pulse-glow">
                       Featured
                     </span>
                   )}
@@ -62,7 +60,7 @@ export default function FeaturedProperties() {
 
                 {/* Verified */}
                 <div className="absolute right-4 top-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full glass-badge">
                     <svg className="h-4 w-4 text-verified" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
@@ -71,7 +69,7 @@ export default function FeaturedProperties() {
 
                 {/* Price */}
                 <div className="absolute bottom-4 left-4">
-                  <span className="text-xl font-semibold text-accent-light drop-shadow-md">{p.price}</span>
+                  <span className="glass-badge-dark rounded-full px-4 py-1.5 text-lg font-semibold text-accent-light">{p.price}</span>
                 </div>
               </div>
 
@@ -110,7 +108,7 @@ export default function FeaturedProperties() {
 
                 {/* CTA */}
                 <a
-                  href={`https://wa.me/918306034440?text=Hi, I'm interested in ${p.title} at ${p.location}`}
+                  href={`https://wa.me/919257533440?text=Hi, I'm interested in ${p.title} at ${p.location}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-primary-hover group-hover:shadow-soft"

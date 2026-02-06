@@ -86,7 +86,7 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 rounded-2xl border border-border-light bg-surface-white p-6 pb-8 transition-all duration-300 hover:border-accent/20 hover:shadow-elevated">
+                <div className="flex-1 rounded-2xl glass-card p-6 pb-8 transition-all duration-300 hover:border-accent/20 hover:shadow-elevated glass-hover">
                   <div className="mb-3 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-subtle transition-colors duration-300 group-hover:bg-accent-soft">
                       <svg className="h-5 w-5 text-body" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export default function HowItWorks() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <a
-            href="https://wa.me/918306034440"
+            href="https://wa.me/919257533440"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-premium inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 text-sm font-medium text-white shadow-premium transition-all duration-300 hover:bg-primary-hover"

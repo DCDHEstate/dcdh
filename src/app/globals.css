@@ -1,143 +1,479 @@
 @import "tailwindcss";
 
-/*
- * ============================================
- * DCDH ESTATE — DESIGN SYSTEM TOKENS
- * ============================================
- * This file is the SINGLE SOURCE OF TRUTH for
- * the entire theme. All components reference
- * these tokens via Tailwind classes.
+/**
+ * ╔═══════════════════════════════════════════════════════════════════════════╗
+ * ║                                                                           ║
+ * ║                    DCDH ESTATE — DESIGN SYSTEM                            ║
+ * ║                                                                           ║
+ * ║   This file is the SINGLE SOURCE OF TRUTH for the entire application.     ║
+ * ║   All visual decisions flow from here. Never hardcode colors, shadows,    ║
+ * ║   or spacing values in components — always use these tokens.              ║
+ * ║                                                                           ║
+ * ╚═══════════════════════════════════════════════════════════════════════════╝
  *
- * To change the brand:
- *   1. Edit the @theme block below
- *   2. Edit the CSS custom properties in :root
- *   3. Everything else updates automatically
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                         DESIGN PHILOSOPHY                                  │
+ * └───────────────────────────────────────────────────────────────────────────┘
  *
- * Token naming convention:
- *   --color-primary-*   → Main brand / buttons / CTAs
- *   --color-accent-*    → Gold/warm highlights
- *   --color-surface-*   → Backgrounds & cards
- *   --color-text-*      → Typography hierarchy
- *   --color-border-*    → Borders & dividers
- *   --color-muted-*     → Subtle UI elements
- *   --color-whatsapp    → Functional: WhatsApp green
- *   --color-verified    → Functional: Verification
- * ============================================
+ * 1. WARMTH & TRUST
+ *    Real estate is personal. Our warm gold accents and earthy tones create
+ *    an inviting, trustworthy atmosphere. Avoid cold blues or harsh colors.
+ *
+ * 2. PREMIUM BUT APPROACHABLE
+ *    We balance luxury aesthetics with accessibility. Glass morphism adds
+ *    sophistication, but we maintain high contrast for readability.
+ *
+ * 3. MOTION WITH PURPOSE
+ *    Every animation should feel intentional — guiding attention, providing
+ *    feedback, or creating delight. Never animate just for effect.
+ *
+ * 4. CONTENT FIRST
+ *    Visual elements support content, never compete with it. Properties and
+ *    information should always be the hero, not the UI chrome.
+ *
+ * 5. PROGRESSIVE ENHANCEMENT
+ *    Core functionality works without animations. Glass effects have fallbacks.
+ *    Mobile-first, then enhance for larger screens.
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                          VISUAL HIERARCHY                                  │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * BACKGROUNDS (light → dark):
+ *   surface-white  →  Pure white (#ffffff) — Cards, modals
+ *   surface        →  Warm off-white (#fafaf8) — Page background
+ *   surface-subtle →  Slightly darker (#f5f5f4) — Hover states, inputs
+ *   surface-dark   →  Near black (#0c0a09) — Hero sections, dark mode
+ *
+ * TEXT (most → least prominent):
+ *   heading        →  Near black (#1c1917) — Headlines, titles
+ *   body           →  Dark stone (#44403c) — Body copy, descriptions
+ *   muted          →  Medium gray (#78716c) — Secondary info, captions
+ *   subtle         →  Light gray (#a8a29e) — Placeholders, hints
+ *   faint          →  Very light (#d6d3d1) — Disabled states
+ *
+ * ACCENT USAGE:
+ *   accent         →  Primary gold (#d4a574) — CTAs, highlights, links
+ *   accent-light   →  Soft gold (#e8c9a0) — Hover states, gradients
+ *   accent-dark    →  Deep gold (#b8860b) — Active states, emphasis
+ *   accent-soft    →  Pale gold (#fef3c7) — Backgrounds, badges
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                         COLOR PALETTE GUIDE                                │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * PRIMARY (Dark Warm Stone) — Used for:
+ *   • Primary buttons & CTAs
+ *   • Navigation elements
+ *   • Important UI controls
+ *   • Header/Footer backgrounds
+ *
+ * ACCENT (Warm Gold/Amber) — Used for:
+ *   • Highlights and emphasis
+ *   • Links and interactive elements
+ *   • Success states and verification badges
+ *   • Decorative elements (underlines, dividers)
+ *   • Gradient text for premium feel
+ *
+ * FUNCTIONAL COLORS:
+ *   whatsapp (#4ade80)  — WhatsApp integration, chat CTAs
+ *   verified (#059669)  — Verification badges, success states
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                          COMPONENT PATTERNS                                │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * CARDS:
+ *   Default:     bg-surface-card rounded-2xl shadow-soft
+ *   Interactive: + card-hover (lifts on hover)
+ *   Glass:       glass-card or glass-warm
+ *   Dark:        glass-dark (for dark backgrounds)
+ *
+ * BUTTONS:
+ *   Primary:     bg-primary text-white rounded-full px-8 py-4 btn-premium
+ *   Secondary:   border border-border bg-surface-white rounded-full
+ *   Accent:      bg-accent text-surface-dark rounded-xl
+ *   Ghost:       text-body hover:text-accent (links/text buttons)
+ *
+ * SECTIONS:
+ *   Light:       bg-surface or bg-surface-white
+ *   Dark:        bg-surface-dark (Hero, Trust sections)
+ *   Spacing:     section-premium (7rem top/bottom)
+ *   Alternating: Alternate bg-surface and bg-surface-white for rhythm
+ *
+ * TYPOGRAPHY:
+ *   Headlines:   text-heading font-semibold tracking-tight
+ *   Subheads:    text-body font-medium
+ *   Body:        text-body or text-muted
+ *   Labels:      text-xs font-medium tracking-elegant text-accent
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                           ANIMATION GUIDE                                  │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * SCROLL REVEALS (add to elements that should animate in):
+ *   .reveal         — Fade up (default)
+ *   .reveal-left    — Slide in from left
+ *   .reveal-right   — Slide in from right
+ *   .reveal-scale   — Scale up from 95%
+ *   .reveal-stagger — Staggered fade up (use with --stagger CSS var)
+ *
+ * CONTINUOUS ANIMATIONS:
+ *   .animate-float        — Gentle floating motion (6s)
+ *   .animate-float-delayed— Delayed float for variation (7s, 1s delay)
+ *   .animate-pulse-slow   — Slow opacity pulse for glows (4s)
+ *   .animate-pulse-glow   — Pulsing box-shadow glow (3s)
+ *   .animate-gradient-shift— Moving gradient for text (3s)
+ *   .animate-ken-burns    — Slow zoom for hero images (20s)
+ *   .shimmer              — Moving shine effect (3s)
+ *
+ * HOVER EFFECTS:
+ *   .card-hover           — Lift + enhanced shadow on hover
+ *   .btn-premium          — Shine sweep on hover
+ *   .glass-hover          — Glass effect intensifies on hover
+ *   .glow-accent          — Warm glow appears on hover
+ *   .border-gradient-hover— Accent underline sweeps in on hover
+ *
+ * TIMING:
+ *   Standard easing: cubic-bezier(0.23, 1, 0.32, 1) — smooth deceleration
+ *   Duration: 0.3s (quick), 0.5s (standard), 1s (reveal)
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                         GLASS MORPHISM GUIDE                               │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * Glass effects add depth and premium feel. Use sparingly on:
+ *   • Cards floating over images/gradients
+ *   • Badges and tags
+ *   • Navigation when scrolled
+ *   • Modals and overlays
+ *
+ * VARIANTS:
+ *   .glass       — Standard: white, high blur, works on light backgrounds
+ *   .glass-dark  — Dark: semi-transparent black, for dark backgrounds
+ *   .glass-warm  — Warm: white with gold tint, premium feel
+ *   .glass-card  — Opaque: higher opacity for readability
+ *   .glass-badge — Compact: for small floating elements
+ *   .glass-hover — Interactive: intensifies on hover
+ *
+ * FALLBACKS:
+ *   Glass uses backdrop-filter which has good support, but always
+ *   include a solid background color as fallback for older browsers.
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                         FILE ORGANIZATION                                  │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * This file is organized in the following sections:
+ *
+ *   1. THEME TOKENS (@theme block)
+ *      - Colors (primary, accent, surface, text, borders, functional)
+ *      - Shadows
+ *      - Border radii
+ *      - Spacing
+ *
+ *   2. BASE STYLES
+ *      - HTML/body defaults
+ *      - Font smoothing
+ *
+ *   3. GRADIENT TEXT
+ *      - .text-gradient, .text-gradient-gold
+ *
+ *   4. GLASS MORPHISM
+ *      - All glass-* variants
+ *
+ *   5. SHADOWS
+ *      - Shadow utility classes
+ *
+ *   6. INTERACTIVE
+ *      - Card hover, button effects
+ *
+ *   7. ANIMATIONS
+ *      - @keyframes definitions
+ *      - Animation utility classes
+ *
+ *   8. SCROLL REVEAL
+ *      - All reveal-* classes
+ *
+ *   9. DECORATIVE
+ *      - Dividers, accent lines, textures
+ *
+ *  10. LAYOUT UTILITIES
+ *      - Section spacing, typography helpers
+ *
+ *
+ * ┌───────────────────────────────────────────────────────────────────────────┐
+ * │                          QUICK REFERENCE                                   │
+ * └───────────────────────────────────────────────────────────────────────────┘
+ *
+ * Need a card?          → bg-surface-card rounded-2xl shadow-soft p-6
+ * Need a button?        → bg-primary text-white rounded-full px-8 py-4
+ * Need gold text?       → text-gradient-gold (or text-accent for solid)
+ * Need a section?       → section-premium bg-surface (or bg-surface-white)
+ * Need glass?           → glass-card (or glass-dark on dark bg)
+ * Need animation?       → reveal (with useScrollReveal hook)
+ * Need a divider?       → divider-elegant (or divider-diamond)
+ * Need WhatsApp CTA?    → text-whatsapp, border-whatsapp/30
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/* ---- Tailwind v4 Theme Extension ---- */
+/* =============================================================================
+   1. THEME TOKENS — Tailwind v4 Theme Extension
+   ============================================================================= */
+
 @theme {
-  /* Primary — dark warm stone for buttons, CTAs, key UI */
-  --color-primary: #1c1917;
-  --color-primary-light: #292524;
-  --color-primary-hover: #44403c;
-  --color-primary-soft: #57534e;
-  --color-primary-muted: #78716c;
+  /*
+   * PRIMARY — Dark Warm Stone
+   * Main brand color for buttons, CTAs, and key UI elements.
+   * Based on stone-900 to stone-500 for a warm, grounded feel.
+   */
+  --color-primary: #1c1917; /* stone-900: Buttons, headers */
+  --color-primary-light: #292524; /* stone-800: Hover backgrounds */
+  --color-primary-hover: #44403c; /* stone-700: Hover state for primary */
+  --color-primary-soft: #57534e; /* stone-600: Muted primary */
+  --color-primary-muted: #78716c; /* stone-500: Disabled, decorative */
 
-  /* Accent — warm gold/amber for highlights */
-  --color-accent: #d4a574;
-  --color-accent-light: #e8c9a0;
-  --color-accent-dark: #b8860b;
-  --color-accent-soft: #fef3c7;
-  --color-accent-muted: #92400e;
+  /*
+   * ACCENT — Warm Gold/Amber
+   * Used for highlights, links, CTAs, and premium decorative elements.
+   * Our signature warmth that differentiates us from cold tech platforms.
+   */
+  --color-accent: #d4a574; /* Primary gold: Links, highlights */
+  --color-accent-light: #e8c9a0; /* Soft gold: Hover, gradient end */
+  --color-accent-dark: #b8860b; /* Deep gold: Active, emphasis */
+  --color-accent-soft: #fef3c7; /* Pale gold: Backgrounds, badges */
+  --color-accent-muted: #92400e; /* Brown gold: Text on light */
 
-  /* Surface — backgrounds & cards */
-  --color-surface: #fafaf8;
-  --color-surface-white: #ffffff;
-  --color-surface-card: #ffffff;
-  --color-surface-subtle: #f5f5f4;
-  --color-surface-input: rgba(245, 245, 244, 0.5);
-  --color-surface-dark: #0c0a09;
-  --color-surface-dark-card: rgba(255, 255, 255, 0.05);
+  /*
+   * SURFACE — Backgrounds & Cards
+   * Layered backgrounds create depth without harsh contrasts.
+   */
+  --color-surface: #fafaf8; /* Main page background */
+  --color-surface-white: #ffffff; /* Cards, modals, elevated surfaces */
+  --color-surface-card: #ffffff; /* Card backgrounds */
+  --color-surface-subtle: #f5f5f4; /* Input backgrounds, hover states */
+  --color-surface-input: rgba(245, 245, 244, 0.5); /* Form inputs */
+  --color-surface-dark: #0c0a09; /* Dark sections (Hero, Footer) */
+  --color-surface-dark-card: rgba(255, 255, 255, 0.05); /* Cards on dark */
 
-  /* Text — hierarchy on light backgrounds */
-  --color-heading: #1c1917;
-  --color-body: #44403c;
-  --color-muted: #78716c;
-  --color-subtle: #a8a29e;
-  --color-faint: #d6d3d1;
+  /*
+   * TEXT — Hierarchy on Light Backgrounds
+   * Clear hierarchy guides the eye to important content.
+   */
+  --color-heading: #1c1917; /* Headlines, titles (stone-900) */
+  --color-body: #44403c; /* Body copy, descriptions (stone-700) */
+  --color-muted: #78716c; /* Secondary info, captions (stone-500) */
+  --color-subtle: #a8a29e; /* Hints, placeholders (stone-400) */
+  --color-faint: #d6d3d1; /* Disabled states (stone-300) */
 
-  /* Text — hierarchy on dark backgrounds */
-  --color-heading-on-dark: #ffffff;
-  --color-body-on-dark: #a8a29e;
-  --color-muted-on-dark: #78716c;
-  --color-subtle-on-dark: #57534e;
+  /*
+   * TEXT — Hierarchy on Dark Backgrounds
+   * Inverted hierarchy for dark mode sections.
+   */
+  --color-heading-on-dark: #ffffff; /* White headlines on dark */
+  --color-body-on-dark: #a8a29e; /* Body text on dark (stone-400) */
+  --color-muted-on-dark: #78716c; /* Muted text on dark (stone-500) */
+  --color-subtle-on-dark: #57534e; /* Subtle text on dark (stone-600) */
 
-  /* Borders */
-  --color-border: #e7e5e4;
-  --color-border-light: #f5f5f4;
-  --color-border-soft: rgba(231, 229, 228, 0.6);
-  --color-border-dark: rgba(255, 255, 255, 0.08);
-  --color-border-dark-hover: rgba(255, 255, 255, 0.15);
+  /*
+   * BORDERS — Dividers & Container Edges
+   * Subtle borders that separate without drawing attention.
+   */
+  --color-border: #e7e5e4; /* Default border (stone-200) */
+  --color-border-light: #f5f5f4; /* Very subtle (stone-100) */
+  --color-border-soft: rgba(231, 229, 228, 0.6); /* Semi-transparent */
+  --color-border-dark: rgba(255, 255, 255, 0.08); /* Borders on dark */
+  --color-border-dark-hover: rgba(255, 255, 255, 0.15); /* Hover on dark */
 
-  /* Functional */
-  --color-whatsapp: #4ade80;
-  --color-whatsapp-dark: #16a34a;
-  --color-verified: #059669;
+  /*
+   * FUNCTIONAL COLORS — Specific Purposes
+   * Reserved for specific features, not general UI.
+   */
+  --color-whatsapp: #4ade80; /* WhatsApp brand green */
+  --color-whatsapp-dark: #16a34a; /* WhatsApp hover/active */
+  --color-verified: #059669; /* Verification badges */
 
-  /* Shadows */
+  /*
+   * SHADOWS — Depth & Elevation
+   * Warm-tinted shadows maintain our earthy feel.
+   */
   --shadow-soft: 0 2px 40px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-elevated: 0 25px 60px -12px rgba(0, 0, 0, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
-  --shadow-premium: 0 32px 64px -16px rgba(139, 94, 60, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 32px 64px -16px rgba(0, 0, 0, 0.1), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+  --shadow-elevated:
+    0 25px 60px -12px rgba(0, 0, 0, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+  --shadow-premium:
+    0 32px 64px -16px rgba(139, 94, 60, 0.12),
+    /* Warm tint */ 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover:
+    0 32px 64px -16px rgba(0, 0, 0, 0.1), 0 8px 24px -8px rgba(0, 0, 0, 0.04);
 
-  /* Radii */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
+  /*
+   * BORDER RADII — Consistent Roundedness
+   * Larger radii for cards/sections, smaller for inputs/badges.
+   */
+  --radius-sm: 0.5rem; /* 8px: Badges, small elements */
+  --radius-md: 0.75rem; /* 12px: Inputs, buttons */
+  --radius-lg: 1rem; /* 16px: Cards */
+  --radius-xl: 1.25rem; /* 20px: Large cards */
+  --radius-2xl: 1.5rem; /* 24px: Sections, modals */
+  --radius-full: 9999px; /* Pills, avatars */
 
-  /* Spacing — section rhythm */
-  --spacing-section: 7rem;
-  --spacing-section-inner: 4rem;
+  /*
+   * SPACING — Section Rhythm
+   * Consistent vertical rhythm between sections.
+   */
+  --spacing-section: 7rem; /* 112px: Between major sections */
+  --spacing-section-inner: 4rem; /* 64px: Within sections */
 }
 
-/* ---- Base ---- */
+/* =============================================================================
+   2. BASE STYLES
+   ============================================================================= */
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--color-surface);
   color: var(--color-body);
 }
 
-/* ---- Premium Gradient Text ---- */
+/* =============================================================================
+   3. GRADIENT TEXT
+
+   Premium gradient text for headlines and emphasis.
+   Use sparingly — typically on hero headlines or key callouts.
+
+   Usage:
+     <h1 className="text-gradient">Premium Properties</h1>
+     <span className="text-gradient-gold">{price}</span>
+   ============================================================================= */
+
 .text-gradient {
-  background: linear-gradient(135deg, #8b5e3c 0%, var(--color-accent) 50%, var(--color-accent-light) 100%);
+  background: linear-gradient(
+    135deg,
+    #8b5e3c 0%,
+    var(--color-accent) 50%,
+    var(--color-accent-light) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 50%, #c9956b 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-dark) 0%,
+    var(--color-accent) 50%,
+    #c9956b 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ---- Glass Morphism ---- */
+/* =============================================================================
+   4. GLASS MORPHISM
+
+   Frosted glass effects for modern, premium UI elements.
+   Requires backdrop-filter support (95%+ browser coverage).
+
+   Usage:
+     <div className="glass-card p-6">Content on image</div>
+     <nav className="glass">Navigation</nav>
+     <div className="glass-dark">On dark backgrounds</div>
+   ============================================================================= */
+
+/* Standard glass — white, works on light backgrounds */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
+/* Dark glass — for elements on dark backgrounds */
 .glass-dark {
-  background: rgba(15, 15, 15, 0.7);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(15, 15, 15, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--color-border-dark);
 }
 
-/* ---- Shadows (class-based for non-Tailwind usage) ---- */
+/* Warm glass — white with gold tint, premium feel */
+.glass-warm {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(212, 165, 116, 0.15);
+  box-shadow:
+    0 8px 32px rgba(139, 94, 60, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* Card glass — higher opacity for better text readability */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Hover glass — intensifies glass effect on hover */
+.glass-hover {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-color: rgba(212, 165, 116, 0.2);
+  box-shadow: 0 8px 32px rgba(139, 94, 60, 0.1);
+}
+
+/* Badge glass — compact glass for tags and labels */
+.glass-badge {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark badge glass — for badges on dark backgrounds */
+.glass-badge-dark {
+  background: rgba(28, 25, 23, 0.8);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* =============================================================================
+   5. SHADOWS
+
+   Shadow utility classes for non-Tailwind usage or custom components.
+   Prefer Tailwind classes when possible: shadow-soft, shadow-elevated, etc.
+   ============================================================================= */
+
 .shadow-soft {
   box-shadow: var(--shadow-soft);
 }
@@ -150,109 +486,264 @@ body {
   box-shadow: var(--shadow-premium);
 }
 
-/* ---- Card Hover ---- */
+/* =============================================================================
+   6. INTERACTIVE COMPONENTS
+
+   Reusable interactive patterns for cards and buttons.
+   ============================================================================= */
+
+/*
+ * Card Hover — Lifts card and enhances shadow on hover
+ * Usage: <div className="card-hover">...</div>
+ */
 .card-hover {
   transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
-
 .card-hover:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-card-hover);
 }
 
-/* ---- Animations ---- */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float-delayed {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.animate-float-delayed {
-  animation: float-delayed 7s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-/* ---- Premium Button ---- */
+/*
+ * Premium Button — Adds shine sweep on hover
+ * Usage: <button className="btn-premium bg-primary text-white">CTA</button>
+ */
 .btn-premium {
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
-
 .btn-premium::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
   transition: left 0.7s ease;
 }
-
 .btn-premium:hover::before {
   left: 100%;
 }
 
-/* ---- Scroll Reveal ---- */
+/*
+ * Accent Glow — Warm glow appears behind element on hover
+ * Usage: <div className="glow-accent">Card content</div>
+ */
+.glow-accent {
+  position: relative;
+}
+.glow-accent::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 165, 116, 0.15),
+    transparent,
+    rgba(212, 165, 116, 0.1)
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.glow-accent:hover::after {
+  opacity: 1;
+}
+
+/*
+ * Gradient Border Hover — Accent underline sweeps in on hover
+ * Usage: <a className="border-gradient-hover">Link text</a>
+ */
+.border-gradient-hover {
+  position: relative;
+  overflow: hidden;
+}
+.border-gradient-hover::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent),
+    transparent
+  );
+  transform: scaleX(0);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.border-gradient-hover:hover::before {
+  transform: scaleX(1);
+}
+
+/* =============================================================================
+   7. ANIMATIONS
+
+   Keyframe definitions and animation utility classes.
+   All animations respect prefers-reduced-motion automatically via Tailwind.
+   ============================================================================= */
+
+/* --- Floating Motion --- */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float-delayed {
+  animation: float-delayed 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* --- Shimmer / Shine --- */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* --- Pulsing Effects --- */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(212, 165, 116, 0.15);
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* --- Fade In Up (for reveal animations) --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Ken Burns (slow zoom for hero images) --- */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+.animate-ken-burns {
+  animation: ken-burns 20s ease-out forwards;
+}
+
+/* --- Gradient Shift (animated gradient text) --- */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* --- Expand Width (for animated underlines) --- */
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 200px;
+  }
+}
+
+/* =============================================================================
+   8. SCROLL REVEAL
+
+   Elements with these classes start invisible and animate in when
+   they enter the viewport. Requires useScrollReveal hook to add .active class.
+
+   Usage:
+     <div className="reveal">Fades up</div>
+     <div className="reveal-left">Slides from left</div>
+     <div className="reveal-stagger" style={{ '--stagger': '100ms' }}>Delayed</div>
+   ============================================================================= */
+
+/* Default reveal — fade up */
 .reveal {
   opacity: 0;
   transform: translateY(20px);
   transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
-
 .reveal.active {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ---- Elegant Divider ---- */
-.divider-elegant {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(139, 94, 60, 0.2), transparent);
-}
-
-/* ---- Section Spacing ---- */
-.section-premium {
-  padding-top: var(--spacing-section);
-  padding-bottom: var(--spacing-section);
-}
-
-/* ---- Grain Texture Overlay ---- */
-.texture-grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  pointer-events: none;
-}
-
-/* ---- Letter Spacing ---- */
-.tracking-elegant {
-  letter-spacing: 0.15em;
-}
-
-/* ---- Scroll Reveal Variants ---- */
+/* Slide from left */
 .reveal-left {
   opacity: 0;
   transform: translateX(-30px);
@@ -263,6 +754,7 @@ body {
   transform: translateX(0);
 }
 
+/* Slide from right */
 .reveal-right {
   opacity: 0;
   transform: translateX(30px);
@@ -273,6 +765,7 @@ body {
   transform: translateX(0);
 }
 
+/* Scale up */
 .reveal-scale {
   opacity: 0;
   transform: scale(0.95);
@@ -283,6 +776,7 @@ body {
   transform: scale(1);
 }
 
+/* Staggered reveal — use --stagger CSS variable for delay */
 .reveal-stagger {
   opacity: 0;
   transform: translateY(20px);
@@ -294,80 +788,33 @@ body {
   transform: translateY(0);
 }
 
-/* ---- Accent Line ---- */
-.accent-line {
-  width: 48px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
-  border-radius: 9999px;
+/* =============================================================================
+   9. DECORATIVE ELEMENTS
+
+   Dividers, accent lines, and background textures.
+   ============================================================================= */
+
+/*
+ * Elegant Divider — subtle horizontal line
+ * Usage: <div className="divider-elegant mx-auto max-w-sm" />
+ */
+.divider-elegant {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 94, 60, 0.2),
+    transparent
+  );
 }
 
-/* ---- Dot Pattern Background ---- */
-.texture-dots::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: radial-gradient(circle, var(--color-primary-muted) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-}
-
-/* ---- Accent Glow on Hover ---- */
-.glow-accent {
-  position: relative;
-}
-.glow-accent::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), transparent, rgba(212, 165, 116, 0.1));
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-  z-index: -1;
-}
-.glow-accent:hover::after {
-  opacity: 1;
-}
-
-/* ---- Gradient Border on Hover ---- */
-.border-gradient-hover {
-  position: relative;
-  overflow: hidden;
-}
-.border-gradient-hover::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  transform: scaleX(0);
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.border-gradient-hover:hover::before {
-  transform: scaleX(1);
-}
-
-/* ---- Pulse Glow for Icons ---- */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.3); }
-  50% { box-shadow: 0 0 20px 4px rgba(212, 165, 116, 0.15); }
-}
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* ---- Fade In Up (for Hero text) ---- */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ---- Section Divider with Diamond ---- */
+/*
+ * Diamond Divider — decorative divider with center diamond
+ * Usage:
+ *   <div className="divider-diamond">
+ *     <span className="h-2 w-2 rotate-45 rounded-sm bg-accent/30" />
+ *   </div>
+ */
 .divider-diamond {
   display: flex;
   align-items: center;
@@ -376,7 +823,7 @@ body {
 }
 .divider-diamond::before,
 .divider-diamond::after {
-  content: '';
+  content: "";
   flex: 1;
   max-width: 120px;
   height: 1px;
@@ -385,3 +832,86 @@ body {
 .divider-diamond::after {
   background: linear-gradient(90deg, rgba(139, 94, 60, 0.2), transparent);
 }
+
+/*
+ * Accent Line — short gold gradient line for section headers
+ * Usage: <div className="accent-line mx-auto" />
+ */
+.accent-line {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent),
+    var(--color-accent-light)
+  );
+  border-radius: 9999px;
+}
+
+/*
+ * Grain Texture — subtle noise overlay for depth
+ * Apply to parent element with position: relative
+ * Usage: <section className="texture-grain relative">...</section>
+ */
+.texture-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/*
+ * Dot Pattern — subtle dot grid for backgrounds
+ * Usage: <section className="texture-dots relative">...</section>
+ */
+.texture-dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: radial-gradient(
+    circle,
+    var(--color-primary-muted) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   10. LAYOUT UTILITIES
+
+   Spacing, typography, and layout helpers.
+   ============================================================================= */
+
+/*
+ * Section Spacing — consistent vertical padding
+ * Usage: <section className="section-premium">...</section>
+ */
+.section-premium {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+}
+
+/*
+ * Elegant Letter Spacing — for labels and eyebrows
+ * Usage: <span className="tracking-elegant text-xs">FEATURED</span>
+ */
+.tracking-elegant {
+  letter-spacing: 0.15em;
+}
+
+/* =============================================================================
+   END OF DESIGN SYSTEM
+
+   Remember:
+   • This file is the single source of truth
+   • Never hardcode colors or shadows in components
+   • Use Tailwind classes that reference these tokens
+   • Test glass effects on both light and dark backgrounds
+   • Ensure animations have purpose and don't distract
+
+   For questions or updates, consult the design system documentation.
+   ============================================================================= */

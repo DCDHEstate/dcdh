@@ -6,15 +6,15 @@ export default function SearchStrip() {
   const [searchType, setSearchType] = useState('rent');
 
   return (
-    <section className="relative z-10 -mt-2 pb-28">
+    <section className="relative z-10 -mt-32 pb-16">
       <div className="mx-auto max-w-5xl px-4">
-        <div className="reveal-scale relative overflow-hidden rounded-2xl border border-border-soft bg-surface-white p-8 shadow-premium md:p-10">
+        <div className="reveal-scale relative overflow-hidden rounded-2xl bg-white p-8 shadow-premium md:p-10">
           {/* Top accent line */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
 
           {/* Tabs */}
           <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-full bg-surface-subtle p-1">
+            <div className="inline-flex rounded-full glass-badge p-1">
               {[
                 { id: 'rent', label: 'Rent' },
                 { id: 'buy', label: 'Buy' },

@@ -28,7 +28,7 @@ export default function UpcomingFeatures() {
           {services.map((s, i) => (
             <div
               key={i}
-              className="card-hover border-gradient-hover group cursor-pointer rounded-2xl border border-border-light bg-surface-card p-6 text-center transition-all duration-400 reveal-stagger"
+              className="card-hover border-gradient-hover group cursor-pointer rounded-2xl glass-card p-6 text-center transition-all duration-400 reveal-stagger glass-hover"
               style={{ '--stagger': `${i * 80}ms` }}
             >
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-surface-subtle text-muted transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:shadow-soft">
@@ -43,7 +43,7 @@ export default function UpcomingFeatures() {
         </div>
 
         {/* WhatsApp CTA */}
-        <div className="relative overflow-hidden rounded-2xl border border-accent/15 bg-gradient-to-r from-surface-card to-accent-soft/20 p-8 shadow-elevated md:p-12 reveal-scale texture-grain">
+        <div className="relative overflow-hidden rounded-2xl glass-warm p-8 shadow-elevated md:p-12 reveal-scale texture-grain">
           <div className="relative flex flex-col items-center gap-8 md:flex-row">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary animate-pulse-glow">
               <svg className="h-8 w-8 text-whatsapp" fill="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function UpcomingFeatures() {
             </div>
 
             <a
-              href="https://wa.me/918306034440?text=Hi, I want to know more about upcoming services"
+              href="https://wa.me/919257533440?text=Hi, I want to know more about upcoming services"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-premium shrink-0 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-white shadow-soft transition-all duration-300 hover:bg-primary-hover hover:shadow-premium"

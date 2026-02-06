@@ -23,7 +23,7 @@ export default function ReferralProgram() {
         <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
           {/* Refer a Friend */}
           <div
-            className="card-hover glow-accent group rounded-2xl border border-border-light bg-surface-white p-8 transition-all duration-500 reveal-stagger"
+            className="card-hover glow-accent group rounded-2xl glass-card p-8 transition-all duration-500 reveal-stagger glass-hover"
             style={{ '--stagger': '0ms' }}
           >
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-primary shadow-premium">
@@ -62,7 +62,7 @@ export default function ReferralProgram() {
 
           {/* Refer a Property */}
           <div
-            className="card-hover glow-accent group rounded-2xl border border-border-light bg-surface-white p-8 transition-all duration-500 reveal-stagger"
+            className="card-hover glow-accent group rounded-2xl glass-card p-8 transition-all duration-500 reveal-stagger glass-hover"
             style={{ '--stagger': '150ms' }}
           >
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent-dark to-accent shadow-premium">
@@ -102,7 +102,7 @@ export default function ReferralProgram() {
 
         {/* CTA Banner */}
         <div className="mx-auto mt-16 max-w-4xl reveal-scale">
-          <div className="relative overflow-hidden rounded-2xl bg-primary px-10 py-14 text-center md:px-16 shadow-premium border border-accent-dark/20 texture-grain">
+          <div className="relative overflow-hidden rounded-2xl glass-dark px-10 py-14 text-center md:px-16 shadow-premium texture-grain">
             <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-accent-dark/10 blur-3xl" />
             <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-accent-dark/8 blur-3xl" />
             {/* Shimmer sweep */}
@@ -116,12 +116,12 @@ export default function ReferralProgram() {
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
                   href="/referral"
-                  className="btn-premium rounded-full bg-surface-white px-8 py-3.5 text-sm font-medium text-heading shadow-soft transition-all duration-300 hover:shadow-elevated"
+                  className="btn-premium rounded-full glass-badge px-8 py-3.5 text-sm font-medium text-heading transition-all duration-300 hover:shadow-elevated"
                 >
                   Join Referral Program
                 </Link>
                 <a
-                  href="https://wa.me/918306034440?text=Hi, I want to know more about the referral program"
+                  href="https://wa.me/919257533440?text=Hi, I want to know more about the referral program"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-premium flex items-center gap-2 rounded-full border border-border-dark-hover bg-surface-dark-card px-8 py-3.5 text-sm font-medium text-heading-on-dark backdrop-blur-sm transition-all duration-300 hover:bg-white/10"

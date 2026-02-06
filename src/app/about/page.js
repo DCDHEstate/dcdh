@@ -1,8 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
+// Custom hook for scroll reveal
+function useScrollReveal() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    const elements = ref.current?.querySelectorAll(
+      ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger"
+    );
+    elements?.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  return ref;
+}
 
 const founders = [
   {
@@ -94,67 +121,68 @@ const timeline = [
 
 export default function AboutPage() {
   const [activeTimeline, setActiveTimeline] = useState(3);
+  const containerRef = useScrollReveal();
 
   return (
     <>
-      <main className="overflow-hidden">
-        {/* Hero Section - Cinematic */}
-        <section className="relative min-h-[70vh] overflow-hidden bg-gray-950">
+      <main className="overflow-hidden" ref={containerRef}>
+        {/* Hero Section - Premium Dark */}
+        <section className="relative min-h-[70vh] overflow-hidden bg-surface-dark">
           <div className="absolute inset-0">
             <Image
               src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2000"
               alt="Skyline"
               fill
-              className="object-cover"
+              className="animate-ken-burns object-cover opacity-40"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-gray-950/30" />
+            <div className="absolute inset-0 bg-linear-to-r from-surface-dark via-surface-dark/95 to-surface-dark/70" />
+            <div className="absolute inset-0 bg-linear-to-t from-surface-dark via-transparent to-surface-dark/40" />
           </div>
 
-          {/* Animated elements */}
+          {/* Animated accent orbs */}
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute right-1/4 top-1/4 h-96 w-96 animate-pulse rounded-full bg-red-500/20 blur-[120px]" />
+            <div className="absolute right-1/4 top-1/4 h-96 w-96 animate-pulse-slow rounded-full bg-accent/20 blur-[120px]" />
             <div
-              className="absolute bottom-1/4 left-1/4 h-64 w-64 animate-pulse rounded-full bg-orange-500/10 blur-[100px]"
+              className="absolute bottom-1/4 left-1/4 h-64 w-64 animate-pulse-slow rounded-full bg-accent-light/15 blur-[100px]"
               style={{ animationDelay: "1s" }}
             />
           </div>
 
           <div className="relative mx-auto flex min-h-[70vh] max-w-7xl flex-col justify-center px-6 py-32 lg:px-8">
             <div className="max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
+              <div className="reveal mb-6 inline-flex items-center gap-2 rounded-full border border-border-dark bg-surface-dark-card px-4 py-2 backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
                 </span>
-                <span className="text-sm font-medium text-gray-300">
+                <span className="tracking-elegant text-xs font-medium uppercase text-body-on-dark">
                   About DCDH Estate
                 </span>
               </div>
 
-              <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="reveal mb-6 text-4xl font-semibold leading-tight tracking-tight text-heading-on-dark sm:text-5xl lg:text-6xl">
                 Transforming Real Estate
                 <br />
-                <span className="bg-gradient-to-r from-red-400 via-red-500 to-orange-500 bg-clip-text text-transparent">
+                <span className="text-gradient-gold">
                   One Family at a Time
                 </span>
               </h1>
 
-              <p className="mb-10 max-w-2xl text-lg leading-relaxed text-gray-400">
+              <p className="reveal mb-10 max-w-2xl text-lg leading-relaxed text-body-on-dark">
                 We're building India's most trusted, WhatsApp-first real estate
                 platform. Where transparency meets technology, and every
                 property journey is simplified.
               </p>
 
               {/* Stats inline */}
-              <div className="flex flex-wrap gap-8 border-t border-white/10 pt-8">
+              <div className="reveal flex flex-wrap gap-8 border-t border-border-dark pt-8">
                 {stats.map((stat, i) => (
-                  <div key={i}>
-                    <p className="text-3xl font-bold text-white">
+                  <div key={i} className="reveal-stagger" style={{ "--stagger": `${i * 100}ms` }}>
+                    <p className="text-3xl font-semibold text-heading-on-dark">
                       {stat.value}
                     </p>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className="text-sm text-muted-on-dark">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -163,35 +191,35 @@ export default function AboutPage() {
         </section>
 
         {/* Our Story Section - Split Design */}
-        <section className="relative bg-white py-24">
+        <section className="section-premium relative bg-surface-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid items-center gap-16 lg:grid-cols-2">
               {/* Image Side */}
-              <div className="relative">
-                <div className="absolute -left-8 -top-8 h-full w-full rounded-3xl bg-gradient-to-br from-red-100 to-orange-50" />
-                <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+              <div className="reveal-left relative">
+                <div className="absolute -left-8 -top-8 h-full w-full rounded-2xl bg-linear-to-br from-accent-soft to-surface" />
+                <div className="relative overflow-hidden rounded-2xl shadow-premium">
                   <Image
                     src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800"
                     alt="Our Journey"
                     width={600}
                     height={500}
-                    className="h-[500px] w-full object-cover"
+                    className="h-125 w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-surface-dark/70 via-transparent to-transparent" />
 
                   {/* Floating Card */}
-                  <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl">
+                  <div className="glass-dark absolute bottom-6 left-6 right-6 rounded-xl p-6">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 shadow-lg">
-                        <span className="text-2xl font-bold text-white">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-linear-to-br from-accent to-accent-dark shadow-lg">
+                        <span className="text-2xl font-semibold text-surface-dark">
                           6+
                         </span>
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-white">
+                        <p className="text-2xl font-semibold text-heading-on-dark">
                           Years of Trust
                         </p>
-                        <p className="text-white/70">Serving Jaipur Families</p>
+                        <p className="text-body-on-dark">Serving Jaipur Families</p>
                       </div>
                     </div>
                   </div>
@@ -199,10 +227,10 @@ export default function AboutPage() {
               </div>
 
               {/* Content Side */}
-              <div>
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2">
+              <div className="reveal-right">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2">
                   <svg
-                    className="h-4 w-4 text-red-500"
+                    className="h-4 w-4 text-accent-dark"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -214,23 +242,23 @@ export default function AboutPage() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-sm font-semibold text-red-600">
+                  <span className="tracking-elegant text-xs font-semibold uppercase text-accent-muted">
                     Our Story
                   </span>
                 </div>
 
-                <h2 className="mb-6 text-3xl font-bold tracking-tight text-gray-900 lg:text-4xl">
+                <h2 className="mb-6 text-3xl font-semibold tracking-tight text-heading lg:text-4xl">
                   From Local Expertise to
-                  <span className="block bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                  <span className="block text-gradient-gold">
                     Digital Innovation
                   </span>
                 </h2>
 
-                <div className="space-y-6 text-gray-600">
+                <div className="space-y-6 text-body">
                   <p className="text-lg leading-relaxed">
                     Founded in 2019, DCDH Estate started as a focused brokerage
                     serving tenants and owners in Jaipur with a simple promise:{" "}
-                    <strong className="text-gray-900">
+                    <strong className="text-heading">
                       genuine listings and honest advice.
                     </strong>
                   </p>
@@ -250,7 +278,7 @@ export default function AboutPage() {
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
                     href="/search"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 font-semibold text-white shadow-lg shadow-red-500/25 transition-all hover:shadow-xl"
+                    className="btn-premium inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 font-semibold text-white shadow-elevated transition-all hover:bg-primary-hover"
                   >
                     Explore Properties
                     <svg
@@ -269,7 +297,7 @@ export default function AboutPage() {
                   </Link>
                   <Link
                     href="/contact"
-                    className="inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 px-6 py-3 font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50"
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-border bg-surface-white px-8 py-4 font-semibold text-heading transition-all hover:border-accent hover:bg-surface"
                   >
                     Get in Touch
                   </Link>
@@ -280,12 +308,12 @@ export default function AboutPage() {
         </section>
 
         {/* Mission & Vision - Premium Cards */}
-        <section className="bg-gray-950 py-24">
+        <section className="section-premium bg-surface-dark texture-grain relative">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            <div className="reveal mb-16 text-center">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border-dark bg-surface-dark-card px-4 py-2">
                 <svg
-                  className="h-4 w-4 text-red-400"
+                  className="h-4 w-4 text-accent"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -297,26 +325,26 @@ export default function AboutPage() {
                     d="M13 10V3L4 14h7v7l9-11h-7z"
                   />
                 </svg>
-                <span className="text-sm font-medium text-gray-400">
+                <span className="tracking-elegant text-xs font-medium uppercase text-body-on-dark">
                   Our Purpose
                 </span>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight text-white lg:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-heading-on-dark lg:text-4xl">
                 Mission & Vision
               </h2>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2">
               {/* Mission Card */}
-              <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500 to-red-600 p-1">
-                <div className="relative h-full rounded-[22px] bg-gradient-to-br from-red-500 to-red-600 p-10">
+              <div className="reveal-left group relative overflow-hidden rounded-2xl bg-linear-to-br from-accent to-accent-dark p-1">
+                <div className="relative h-full rounded-[14px] bg-linear-to-br from-accent to-accent-dark p-10">
                   <div className="absolute right-0 top-0 h-64 w-64 translate-x-20 -translate-y-20 rounded-full bg-white/10 blur-3xl transition-transform duration-700 group-hover:translate-x-10" />
                   <div className="absolute bottom-0 left-0 h-32 w-32 -translate-x-10 translate-y-10 rounded-full bg-black/10 blur-2xl" />
 
                   <div className="relative">
-                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
                       <svg
-                        className="h-8 w-8 text-white"
+                        className="h-8 w-8 text-surface-dark"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -329,10 +357,10 @@ export default function AboutPage() {
                         />
                       </svg>
                     </div>
-                    <h3 className="mb-4 text-2xl font-bold text-white">
+                    <h3 className="mb-4 text-2xl font-semibold text-surface-dark">
                       Our Mission
                     </h3>
-                    <p className="text-lg leading-relaxed text-white/90">
+                    <p className="text-lg leading-relaxed text-surface-dark/90">
                       To democratize real estate in India by making property
                       discovery, verification and closure accessible,
                       transparent and hassle-free for every Indian family.
@@ -342,14 +370,14 @@ export default function AboutPage() {
               </div>
 
               {/* Vision Card */}
-              <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
-                <div className="relative h-full rounded-[22px] border border-white/5 bg-gray-900/50 p-10">
-                  <div className="absolute right-0 top-0 h-64 w-64 translate-x-20 -translate-y-20 rounded-full bg-red-500/10 blur-3xl transition-transform duration-700 group-hover:translate-x-10" />
+              <div className="reveal-right group glass-dark relative overflow-hidden rounded-2xl p-1">
+                <div className="relative h-full rounded-[14px] border border-border-dark bg-surface-dark/50 p-10">
+                  <div className="absolute right-0 top-0 h-64 w-64 translate-x-20 -translate-y-20 rounded-full bg-accent/10 blur-3xl transition-transform duration-700 group-hover:translate-x-10" />
 
                   <div className="relative">
-                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
                       <svg
-                        className="h-8 w-8 text-red-400"
+                        className="h-8 w-8 text-accent"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -368,10 +396,10 @@ export default function AboutPage() {
                         />
                       </svg>
                     </div>
-                    <h3 className="mb-4 text-2xl font-bold text-white">
+                    <h3 className="mb-4 text-2xl font-semibold text-heading-on-dark">
                       Our Vision
                     </h3>
-                    <p className="text-lg leading-relaxed text-gray-400">
+                    <p className="text-lg leading-relaxed text-body-on-dark">
                       To become India's most trusted, WhatsApp-first real estate
                       platform for tenants, owners and partners — where every
                       property journey can be tracked, verified and completed
@@ -385,12 +413,12 @@ export default function AboutPage() {
         </section>
 
         {/* Core Values */}
-        <section className="bg-white py-24">
+        <section className="section-premium bg-surface">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2">
+            <div className="reveal mb-16 text-center">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2">
                 <svg
-                  className="h-4 w-4 text-gray-500"
+                  className="h-4 w-4 text-accent-dark"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -402,31 +430,33 @@ export default function AboutPage() {
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                   />
                 </svg>
-                <span className="text-sm font-semibold text-gray-600">
+                <span className="tracking-elegant text-xs font-semibold uppercase text-accent-muted">
                   What Drives Us
                 </span>
               </div>
-              <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 lg:text-4xl">
+              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-heading lg:text-4xl">
                 Our Core Values
               </h2>
-              <p className="mx-auto max-w-2xl text-gray-600">
+              <p className="mx-auto max-w-2xl text-body">
                 The principles that guide every decision we make and every
                 family we serve.
               </p>
+              <div className="divider-elegant mx-auto mt-6 max-w-xs" />
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {values.map((value, i) => (
                 <div
                   key={i}
-                  className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-8 transition-all duration-500 hover:border-red-100 hover:shadow-xl hover:shadow-red-500/5"
+                  className="reveal-stagger card-hover glow-accent group relative overflow-hidden rounded-2xl border border-border bg-surface-card p-8 shadow-soft"
+                  style={{ "--stagger": `${i * 100}ms` }}
                 >
-                  <div className="absolute right-0 top-0 h-32 w-32 translate-x-16 -translate-y-16 rounded-full bg-gradient-to-br from-red-50 to-orange-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="absolute right-0 top-0 h-32 w-32 translate-x-16 -translate-y-16 rounded-full bg-linear-to-br from-accent-soft to-surface opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                   <div className="relative">
-                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/20">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary shadow-lg">
                       <svg
-                        className="h-7 w-7 text-white"
+                        className="h-7 w-7 text-accent"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -439,10 +469,10 @@ export default function AboutPage() {
                         />
                       </svg>
                     </div>
-                    <h3 className="mb-2 text-lg font-bold text-gray-900">
+                    <h3 className="mb-2 text-lg font-semibold text-heading">
                       {value.title}
                     </h3>
-                    <p className="text-sm leading-relaxed text-gray-600">
+                    <p className="text-sm leading-relaxed text-muted">
                       {value.description}
                     </p>
                   </div>
@@ -453,12 +483,12 @@ export default function AboutPage() {
         </section>
 
         {/* Timeline Section */}
-        <section className="bg-gradient-to-b from-gray-50 to-white py-24">
+        <section className="section-premium bg-linear-to-b from-surface-subtle to-surface-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-purple-50 px-4 py-2">
+            <div className="reveal mb-16 text-center">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2">
                 <svg
-                  className="h-4 w-4 text-purple-500"
+                  className="h-4 w-4 text-accent-dark"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -470,26 +500,26 @@ export default function AboutPage() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="text-sm font-semibold text-purple-600">
+                <span className="tracking-elegant text-xs font-semibold uppercase text-accent-muted">
                   Our Journey
                 </span>
               </div>
-              <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 lg:text-4xl">
+              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-heading lg:text-4xl">
                 The DCDH Timeline
               </h2>
             </div>
 
             {/* Timeline Navigation */}
-            <div className="mb-12 flex justify-center">
-              <div className="inline-flex rounded-full bg-gray-100 p-1">
+            <div className="reveal mb-12 flex justify-center">
+              <div className="inline-flex rounded-full bg-surface-subtle p-1.5 shadow-soft">
                 {timeline.map((item, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveTimeline(i)}
-                    className={`rounded-full px-6 py-2 text-sm font-semibold transition-all duration-300 ${
+                    className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 ${
                       activeTimeline === i
-                        ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? "bg-primary text-white shadow-lg"
+                        : "text-muted hover:text-heading"
                     }`}
                   >
                     {item.year}
@@ -499,15 +529,15 @@ export default function AboutPage() {
             </div>
 
             {/* Timeline Content */}
-            <div className="mx-auto max-w-2xl text-center">
-              <div className="rounded-3xl border border-gray-200 bg-white p-10 shadow-xl">
-                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-2xl font-bold text-white shadow-lg">
+            <div className="reveal-scale mx-auto max-w-2xl text-center">
+              <div className="glass-warm rounded-2xl border border-border p-10 shadow-premium">
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-linear-to-br from-accent to-accent-dark text-2xl font-semibold text-surface-dark shadow-lg">
                   {timeline[activeTimeline].year}
                 </div>
-                <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                <h3 className="mb-4 text-2xl font-semibold text-heading">
                   {timeline[activeTimeline].title}
                 </h3>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-body">
                   {timeline[activeTimeline].description}
                 </p>
               </div>
@@ -516,12 +546,12 @@ export default function AboutPage() {
         </section>
 
         {/* Leadership Team */}
-        <section className="bg-gray-950 py-24">
+        <section className="section-premium bg-surface-dark texture-dots relative">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+            <div className="reveal mb-16 text-center">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border-dark bg-surface-dark-card px-4 py-2">
                 <svg
-                  className="h-4 w-4 text-gray-400"
+                  className="h-4 w-4 text-accent"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -533,14 +563,14 @@ export default function AboutPage() {
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="text-sm font-medium text-gray-400">
+                <span className="tracking-elegant text-xs font-medium uppercase text-body-on-dark">
                   The People Behind DCDH
                 </span>
               </div>
-              <h2 className="mb-4 text-3xl font-bold tracking-tight text-white lg:text-4xl">
+              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-heading-on-dark lg:text-4xl">
                 Leadership Team
               </h2>
-              <p className="mx-auto max-w-2xl text-gray-400">
+              <p className="mx-auto max-w-2xl text-body-on-dark">
                 Meet the people driving DCDH Estate's mission to transform real
                 estate in India.
               </p>
@@ -550,26 +580,27 @@ export default function AboutPage() {
               {founders.map((founder, i) => (
                 <div
                   key={i}
-                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-500 hover:border-red-500/30 hover:bg-white/10"
+                  className="reveal-stagger group relative overflow-hidden rounded-2xl border border-border-dark bg-surface-dark-card backdrop-blur-sm transition-all duration-500 hover:border-accent/30 hover:bg-white/10"
+                  style={{ "--stagger": `${i * 150}ms` }}
                 >
-                  <div className="relative aspect-[4/5] overflow-hidden">
+                  <div className="relative aspect-4/5 overflow-hidden">
                     <Image
                       src={founder.image}
                       alt={founder.name}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/50 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-surface-dark via-surface-dark/50 to-transparent" />
 
                     {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <p className="mb-1 text-sm font-medium text-red-400">
+                      <p className="mb-1 text-sm font-medium text-accent">
                         {founder.role}
                       </p>
-                      <h3 className="mb-3 text-2xl font-bold text-white">
+                      <h3 className="mb-3 text-2xl font-semibold text-heading-on-dark">
                         {founder.name}
                       </h3>
-                      <p className="text-sm leading-relaxed text-gray-400">
+                      <p className="text-sm leading-relaxed text-body-on-dark">
                         {founder.bio}
                       </p>
 
@@ -577,7 +608,7 @@ export default function AboutPage() {
                       <div className="mt-4 flex gap-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <a
                           href={founder.linkedin}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-white/20"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-accent/20 hover:text-accent"
                         >
                           <svg
                             className="h-4 w-4"
@@ -597,38 +628,31 @@ export default function AboutPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-white py-24">
+        <section className="section-premium bg-surface-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
+            <div className="reveal relative overflow-hidden rounded-2xl bg-surface-dark">
               {/* Background Elements */}
               <div className="absolute inset-0">
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/20 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl" />
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-                    backgroundSize: "40px 40px",
-                  }}
-                />
+                <div className="absolute -right-20 -top-20 h-64 w-64 animate-pulse-slow rounded-full bg-accent/20 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-64 w-64 animate-pulse-slow rounded-full bg-accent-light/15 blur-3xl" style={{ animationDelay: "2s" }} />
+                <div className="texture-dots absolute inset-0" />
               </div>
 
               <div className="relative px-8 py-16 text-center md:px-16 md:py-24">
-                <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+                <h2 className="mb-4 text-3xl font-semibold text-heading-on-dark md:text-4xl lg:text-5xl">
                   Ready to Find Your
-                  <span className="block bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                  <span className="block text-gradient-gold">
                     Dream Property?
                   </span>
                 </h2>
-                <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
+                <p className="mx-auto mb-10 max-w-2xl text-lg text-body-on-dark">
                   Join thousands of happy families who found their perfect home
                   with DCDH Estate. Zero brokerage, 100% verified properties.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   <Link
                     href="/search"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-8 py-4 font-semibold text-white shadow-xl shadow-red-500/25 transition-all hover:shadow-2xl hover:shadow-red-500/30"
+                    className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 font-semibold text-surface-dark shadow-xl transition-all hover:bg-accent-light"
                   >
                     Explore Properties
                     <svg
@@ -646,13 +670,13 @@ export default function AboutPage() {
                     </svg>
                   </Link>
                   <a
-                    href="https://wa.me/918306034440"
+                    href="https://wa.me/919257533440"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-full border border-whatsapp/30 bg-whatsapp/10 px-8 py-4 font-semibold text-whatsapp backdrop-blur-sm transition-all hover:bg-whatsapp/20"
                   >
                     <svg
-                      className="h-5 w-5 text-green-400"
+                      className="h-5 w-5"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >

@@ -56,7 +56,7 @@ export default function Home() {
               "@type": "City",
               name: "Jaipur",
             },
-            sameAs: ["https://wa.me/918306034440"],
+            sameAs: ["https://wa.me/919257533440"],
             aggregateRating: {
               "@type": "AggregateRating",
               ratingValue: "4.8",
