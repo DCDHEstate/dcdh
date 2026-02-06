@@ -8,7 +8,10 @@ export default function SearchStrip() {
   return (
     <section className="relative z-10 -mt-2 pb-28">
       <div className="mx-auto max-w-5xl px-4">
-        <div className="rounded-2xl border border-border-soft bg-surface-white p-8 shadow-elevated md:p-10">
+        <div className="reveal-scale relative overflow-hidden rounded-2xl border border-border-soft bg-surface-white p-8 shadow-premium md:p-10">
+          {/* Top accent line */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
+
           {/* Tabs */}
           <div className="mb-8 flex justify-center">
             <div className="inline-flex rounded-full bg-surface-subtle p-1">
@@ -22,7 +25,7 @@ export default function SearchStrip() {
                   onClick={() => setSearchType(tab.id)}
                   className={`rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 ${
                     searchType === tab.id
-                      ? 'bg-primary text-white shadow-sm'
+                      ? 'bg-primary text-white shadow-sm ring-2 ring-accent/20 ring-offset-2 ring-offset-surface-white'
                       : 'text-muted hover:text-body'
                   }`}
                 >
@@ -90,7 +93,7 @@ export default function SearchStrip() {
             </div>
 
             <div className="flex items-end">
-              <button className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:bg-primary-hover">
+              <button className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-white shadow-premium transition-all duration-300 hover:bg-primary-hover">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -105,7 +108,7 @@ export default function SearchStrip() {
             {['2 BHK', '3 BHK', 'Villa', 'Furnished', 'Near Metro'].map(tag => (
               <button
                 key={tag}
-                className="rounded-full border border-border bg-surface-white px-4 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-faint hover:bg-surface-subtle hover:text-body"
+                className="rounded-full border border-border bg-surface-white px-4 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-accent/30 hover:bg-accent-soft/30 hover:text-body"
               >
                 {tag}
               </button>

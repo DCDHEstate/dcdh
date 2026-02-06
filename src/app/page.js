@@ -6,10 +6,11 @@ import Portals from "@/components/home/Portals";
 import ReferralProgram from "@/components/home/ReferralProgram";
 import UpcomingFeatures from "@/components/home/UpcomingFeatures";
 import TrustMetrics from "@/components/home/TrustMetrics";
+import ScrollRevealProvider from "@/components/ScrollRevealProvider";
 
 export default function Home() {
   return (
-    <>
+    <ScrollRevealProvider>
       {/* JSON-LD Structured Data for SEO */}
       <script
         type="application/ld+json"
@@ -71,14 +72,27 @@ export default function Home() {
       {/* Quick Search Strip */}
       <SearchStrip />
 
+      {/* Divider */}
+      <div className="relative py-4">
+        <div className="divider-diamond">
+          <span className="h-2 w-2 rotate-45 rounded-sm bg-accent/30" />
+        </div>
+      </div>
+
       {/* Featured Properties */}
       <FeaturedProperties />
+
+      {/* Divider */}
+      <div className="divider-elegant mx-auto max-w-sm" />
 
       {/* How It Works */}
       <HowItWorks />
 
       {/* Portals Section (Tenant & Owner) */}
       <Portals />
+
+      {/* Divider */}
+      <div className="divider-elegant mx-auto max-w-sm" />
 
       {/* Referral Program */}
       <ReferralProgram />
@@ -88,6 +102,6 @@ export default function Home() {
 
       {/* Trust Metrics */}
       <TrustMetrics />
-    </>
+    </ScrollRevealProvider>
   );
 }

@@ -22,7 +22,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-surface-dark" style={{ minHeight: "100vh" }}>
+    <section className="relative overflow-hidden bg-surface-dark texture-grain" style={{ minHeight: "100vh" }}>
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -40,6 +40,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -right-40 top-1/3 h-[500px] w-[500px] rounded-full bg-accent-dark/8 blur-[150px]" />
         <div className="absolute -left-40 bottom-1/3 h-[400px] w-[400px] rounded-full bg-primary-soft/10 blur-[120px]" />
+        <div className="absolute right-1/4 top-1/4 h-[300px] w-[300px] rounded-full bg-accent/5 blur-[100px] animate-float" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
@@ -56,9 +57,14 @@ export default function Hero() {
               Find Your
               <br />
               <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-accent-light via-accent to-accent-light bg-clip-text text-transparent">
+                <span
+                  key={currentType}
+                  className="inline-block bg-gradient-to-r from-accent-light via-accent to-accent-light bg-clip-text text-transparent"
+                  style={{ animation: 'fadeInUp 0.5s ease' }}
+                >
                   {propertyTypes[currentType]}
                 </span>
+                <span className="absolute -bottom-2 left-0 h-0.5 w-full rounded-full bg-gradient-to-r from-accent/60 via-accent-light/40 to-transparent" />
               </span>
             </h1>
 
@@ -106,9 +112,14 @@ export default function Hero() {
                 { value: "500+", label: "Happy Families" },
                 { value: "25+", label: "Localities" },
               ].map((stat, i) => (
-                <div key={i} className="group">
-                  <div className="text-2xl font-semibold text-heading-on-dark lg:text-3xl">{stat.value}</div>
-                  <div className="text-xs font-medium tracking-wide text-muted-on-dark">{stat.label}</div>
+                <div key={i} className="flex items-center gap-12">
+                  {i > 0 && <div className="h-10 w-px bg-gradient-to-b from-transparent via-border-dark-hover to-transparent -ml-12" />}
+                  <div className="group">
+                    <div className="text-2xl font-semibold lg:text-3xl">
+                      <span className="text-gradient-gold">{stat.value}</span>
+                    </div>
+                    <div className="text-xs font-medium tracking-wide text-muted-on-dark">{stat.label}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -117,7 +128,7 @@ export default function Hero() {
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-surface to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-surface to-transparent" />
     </section>
   );
 }
