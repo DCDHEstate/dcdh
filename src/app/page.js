@@ -18,13 +18,13 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "RealEstateAgent",
-            name: "DCDH Estate",
+            name: "DCDH Empire",
             description:
               "Zero brokerage real estate platform in Jaipur for buying, renting and referring properties with verified listings and WhatsApp-first experience.",
-            url: "https://dcdhestate.com",
-            logo: "https://dcdhestate.com/logo.png",
+            url: "https://dcdhempire.com",
+            logo: "https://dcdhempire.com/logo.png",
             telephone: "+91-83060-34440",
-            email: "support@dcdhestate.com",
+            email: "support@dcdhempire.com",
             address: {
               "@type": "PostalAddress",
               streetAddress: "Malviya Nagar",

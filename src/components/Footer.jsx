@@ -163,6 +163,17 @@ export default function Footer() {
           <p className="text-xs text-subtle-on-dark">
             &copy; {new Date().getFullYear()} DCDH Estate. All rights reserved.
           </p>
+          <p className="text-xs text-subtle-on-dark">
+            Powered by{' '}
+            <a
+              href="https://lancehawks.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-light/80 transition-colors duration-300 hover:text-accent-light"
+            >
+              Lancehawks
+            </a>
+          </p>
           <div className="flex gap-6">
             {links.legal.map(l => (
               <Link key={l.name} href={l.href} className="text-xs text-subtle-on-dark transition-colors duration-300 hover:text-accent-light">
