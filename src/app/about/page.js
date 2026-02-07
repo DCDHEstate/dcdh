@@ -33,15 +33,15 @@ function useScrollReveal() {
 
 const founders = [
   {
-    name: "Dileep Kumar",
+    name: "Dileep Parmar",
     role: "Founder & CEO",
-    bio: "With 6+ years of real estate expertise in Jaipur, Dileep founded DCDH Estate to bring transparency and trust to property transactions. He leads strategy, sales operations, and ensures every client receives personalized attention.",
+    bio: "With 5+ years of real estate expertise in Jaipur, Dileep founded DCDH Estate to bring transparency and trust to property transactions. He leads strategy, sales operations, and ensures every client receives personalized attention.",
     image: "/images/founders/Dileep.jpg",
     linkedin: "https://www.linkedin.com/in/dileep-parmar-03a790321/",
   },
   {
-    name: "Anand Purushottam",
-    role: "Co-founder & COO",
+    name: "Anand Purushottam Singh",
+    role: "Founder & CXO (Business & Operations)",
     bio: "Anand brings operational excellence and creative problem-solving to DCDH Estate. He manages day-to-day operations, partner relationships, and drives process improvements to deliver a seamless experience for owners and tenants.",
     image: "/images/founders/Anand.jpeg",
     linkedin: "https://www.linkedin.com/in/creativepurus/",
