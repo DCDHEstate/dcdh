@@ -17,11 +17,11 @@ function useScrollReveal() {
           }
         });
       },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
 
     const elements = ref.current?.querySelectorAll(
-      ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger"
+      ".reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger",
     );
     elements?.forEach((el) => observer.observe(el));
 
@@ -35,26 +35,23 @@ const founders = [
   {
     name: "Dileep Kumar",
     role: "Founder & CEO",
-    bio: "Leads DCDH Estate with a focus on trust, end-user value and scalable processes across sales and product.",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400",
-    linkedin: "#",
+    bio: "With 6+ years of real estate expertise in Jaipur, Dileep founded DCDH Estate to bring transparency and trust to property transactions. He leads strategy, sales operations, and ensures every client receives personalized attention.",
+    image: "/images/founders/Dileep.jpg",
+    linkedin: "https://www.linkedin.com/in/dileep-parmar-03a790321/",
   },
   {
     name: "Anand Purushottam",
     role: "Co-founder & COO",
-    bio: "Oversees operations and ensures seamless execution across all business functions.",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400",
-    linkedin: "#",
+    bio: "Anand brings operational excellence and creative problem-solving to DCDH Estate. He manages day-to-day operations, partner relationships, and drives process improvements to deliver a seamless experience for owners and tenants.",
+    image: "/images/founders/Anand.jpeg",
+    linkedin: "https://www.linkedin.com/in/creativepurus/",
   },
   {
     name: "Siddharth Rai",
     role: "Co-founder & CTO",
-    bio: "Drives technology strategy, automation and platform architecture to create a seamless property experience.",
-    image:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?q=80&w=400",
-    linkedin: "#",
+    bio: "A technology enthusiast with a passion for building scalable solutions, Siddharth leads the development of DCDH's digital platform. He architects the DCDH's experience and ensures our technology serves every user's needs.",
+    image: "/images/founders/Siddharth.jpg",
+    linkedin: "https://www.linkedin.com/in/siddrai7/",
   },
 ];
 
@@ -164,9 +161,7 @@ export default function AboutPage() {
               <h1 className="reveal mb-6 text-4xl font-semibold leading-tight tracking-tight text-heading-on-dark sm:text-5xl lg:text-6xl">
                 Transforming Real Estate
                 <br />
-                <span className="text-gradient-gold">
-                  One Family at a Time
-                </span>
+                <span className="text-gradient-gold">One Family at a Time</span>
               </h1>
 
               <p className="reveal mb-10 max-w-2xl text-lg leading-relaxed text-body-on-dark">
@@ -178,7 +173,11 @@ export default function AboutPage() {
               {/* Stats inline */}
               <div className="reveal flex flex-wrap gap-8 border-t border-border-dark pt-8">
                 {stats.map((stat, i) => (
-                  <div key={i} className="reveal-stagger" style={{ "--stagger": `${i * 100}ms` }}>
+                  <div
+                    key={i}
+                    className="reveal-stagger"
+                    style={{ "--stagger": `${i * 100}ms` }}
+                  >
                     <p className="text-3xl font-semibold text-heading-on-dark">
                       {stat.value}
                     </p>
@@ -219,7 +218,9 @@ export default function AboutPage() {
                         <p className="text-2xl font-semibold text-heading-on-dark">
                           Years of Trust
                         </p>
-                        <p className="text-body-on-dark">Serving Jaipur Families</p>
+                        <p className="text-body-on-dark">
+                          Serving Jaipur Families
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -546,12 +547,12 @@ export default function AboutPage() {
         </section>
 
         {/* Leadership Team */}
-        <section className="section-premium bg-surface-dark texture-dots relative">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <section className="section-premium bg-surface texture-dots relative">
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
             <div className="reveal mb-16 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border-dark bg-surface-dark-card px-4 py-2">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2">
                 <svg
-                  className="h-4 w-4 text-accent"
+                  className="h-4 w-4 text-accent-dark"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -563,63 +564,65 @@ export default function AboutPage() {
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span className="tracking-elegant text-xs font-medium uppercase text-body-on-dark">
+                <span className="tracking-elegant text-xs font-semibold uppercase text-accent-muted">
                   The People Behind DCDH
                 </span>
               </div>
-              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-heading-on-dark lg:text-4xl">
+              <h2 className="mb-4 text-3xl font-semibold tracking-tight text-heading lg:text-4xl">
                 Leadership Team
               </h2>
-              <p className="mx-auto max-w-2xl text-body-on-dark">
-                Meet the people driving DCDH Estate's mission to transform real
-                estate in India.
+              <p className="mx-auto max-w-2xl text-body">
+                Meet the people driving DCDH Estate&apos;s mission to transform
+                real estate in India.
               </p>
+              <div className="divider-elegant mx-auto mt-6 max-w-xs" />
             </div>
 
             <div className="grid gap-8 md:grid-cols-3">
               {founders.map((founder, i) => (
                 <div
                   key={i}
-                  className="reveal-stagger group relative overflow-hidden rounded-2xl border border-border-dark bg-surface-dark-card backdrop-blur-sm transition-all duration-500 hover:border-accent/30 hover:bg-white/10"
+                  className="reveal-stagger card-hover glow-accent group overflow-hidden rounded-2xl border border-border bg-surface-card shadow-soft"
                   style={{ "--stagger": `${i * 150}ms` }}
                 >
-                  <div className="relative aspect-4/5 overflow-hidden">
+                  {/* Image Container */}
+                  <div className="relative aspect-square overflow-hidden bg-surface-subtle">
                     <Image
                       src={founder.image}
                       alt={founder.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-linear-to-t from-surface-dark via-surface-dark/50 to-transparent" />
+                  </div>
 
-                    {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <p className="mb-1 text-sm font-medium text-accent">
-                        {founder.role}
-                      </p>
-                      <h3 className="mb-3 text-2xl font-semibold text-heading-on-dark">
-                        {founder.name}
-                      </h3>
-                      <p className="text-sm leading-relaxed text-body-on-dark">
-                        {founder.bio}
-                      </p>
+                  {/* Content */}
+                  <div className="p-6">
+                    <p className="mb-1 text-sm font-semibold text-accent">
+                      {founder.role}
+                    </p>
+                    <h3 className="mb-3 text-xl font-semibold text-heading">
+                      {founder.name}
+                    </h3>
+                    <p className="mb-4 text-sm leading-relaxed text-muted">
+                      {founder.bio}
+                    </p>
 
-                      {/* Social Links */}
-                      <div className="mt-4 flex gap-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        <a
-                          href={founder.linkedin}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-accent/20 hover:text-accent"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                          </svg>
-                        </a>
-                      </div>
-                    </div>
+                    {/* LinkedIn Link */}
+                    <a
+                      href={founder.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-body transition-colors hover:text-accent"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                      </svg>
+                      Connect on LinkedIn
+                    </a>
                   </div>
                 </div>
               ))}
@@ -634,7 +637,10 @@ export default function AboutPage() {
               {/* Background Elements */}
               <div className="absolute inset-0">
                 <div className="absolute -right-20 -top-20 h-64 w-64 animate-pulse-slow rounded-full bg-accent/20 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 h-64 w-64 animate-pulse-slow rounded-full bg-accent-light/15 blur-3xl" style={{ animationDelay: "2s" }} />
+                <div
+                  className="absolute -bottom-20 -left-20 h-64 w-64 animate-pulse-slow rounded-full bg-accent-light/15 blur-3xl"
+                  style={{ animationDelay: "2s" }}
+                />
                 <div className="texture-dots absolute inset-0" />
               </div>
 

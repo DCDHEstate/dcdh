@@ -53,13 +53,13 @@ export default function Header() {
         {/* CTA Buttons */}
         <div className="hidden items-center gap-4 lg:flex">
           <Link
-            href="/owner-portal"
+            href="/auth/login"
             className={`text-[13px] font-medium tracking-wide transition-all duration-300 ${isScrolled ? 'text-muted hover:text-heading' : 'text-white/80 hover:text-white'}`}
           >
-            List Property
+            Sign In
           </Link>
           <Link
-            href="/tenant-portal"
+            href="/auth/signup"
             className="btn-premium flex items-center gap-2 rounded-full bg-gradient-to-r from-primary-light to-primary px-6 py-2.5 text-[13px] font-medium tracking-wide text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-accent/20"
           >
             Get Started
@@ -83,8 +83,11 @@ export default function Header() {
           {links.map(l => (
             <Link key={l.name} href={l.href} onClick={() => setMobileOpen(false)} className="block rounded-xl px-4 py-3 text-[15px] font-medium text-body transition hover:bg-surface-subtle hover:text-heading">{l.name}</Link>
           ))}
-          <div className="mt-4 border-t border-border-light pt-4">
-            <Link href="/tenant-portal" className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-sm font-medium text-white">
+          <div className="mt-4 space-y-2 border-t border-border-light pt-4">
+            <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="block w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium text-body transition hover:bg-surface-subtle">
+              Sign In
+            </Link>
+            <Link href="/auth/signup" onClick={() => setMobileOpen(false)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 text-sm font-medium text-white">
               Get Started
             </Link>
           </div>

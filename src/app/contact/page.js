@@ -388,13 +388,13 @@ export default function ContactPage() {
 
                   {/* Map - Click to open in Google Maps */}
                   <a
-                    href="https://share.google/T90rVMBqvoRSPkkco"
+                    href="https://maps.google.com/maps?q=DCDH+ESTATE+PVT.+LTD.&ll=26.842627,75.816661"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative block h-64 w-full overflow-hidden bg-surface-subtle"
                   >
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.6088673825825!2d75.7831!3d26.8533!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjbCsDUxJzEyLjAiTiA3NcKwNDYnNTkuMiJF!5e0!3m2!1sen!2sin!4v1234567890"
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3712.881035825226!2d75.81666179999999!3d26.842627099999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db7007e650073%3A0x91be03a2d6c3245e!2sDCDH%20ESTATE%20PVT.%20LTD.%20(%20Best%20Real%20estate%20service%20company%20)%20Buy%20%7C%20Sell%20%7C%20Rent%20%7C%20Lease%7C%20Plot%20%7C%20To%20Let%20%7C%20Property%20consultant!5e1!3m2!1sen!2sin!4v1770481359066!5m2!1sen!2sin"
                       width="100%"
                       height="100%"
                       style={{ border: 0, pointerEvents: 'none' }}
