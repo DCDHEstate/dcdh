@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      // /auth/signup no longer exists — redirect permanently to the unified login page
+      { source: '/auth/signup', destination: '/auth/login', permanent: true },
+    ];
+  },
   images: {
     remotePatterns: [
       {

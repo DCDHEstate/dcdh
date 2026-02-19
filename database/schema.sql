@@ -58,15 +58,13 @@ CREATE TYPE notification_type AS ENUM ('lead_update', 'property_status', 'paymen
 
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  google_id VARCHAR(255) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  full_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) UNIQUE NOT NULL,       -- primary identity for WhatsApp OTP login
+  email VARCHAR(255) UNIQUE,               -- optional, filled in profile-setup
+  full_name VARCHAR(255),                  -- nullable until profile-setup complete
   avatar_url TEXT,
-  phone VARCHAR(20),
   whatsapp_number VARCHAR(20),
   role user_role NOT NULL DEFAULT 'tenant',
   status user_status NOT NULL DEFAULT 'active',
-  is_email_verified BOOLEAN DEFAULT TRUE, -- Google sign-in verifies email
   is_phone_verified BOOLEAN DEFAULT FALSE,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -80,6 +78,16 @@ CREATE TABLE sessions (
   expires_at TIMESTAMPTZ NOT NULL,
   ip_address INET,
   user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE otp_verifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  phone VARCHAR(20) NOT NULL,
+  otp_hash TEXT NOT NULL,          -- HMAC-SHA256 of the OTP using OTP_SECRET
+  expires_at TIMESTAMPTZ NOT NULL, -- NOW() + 10 minutes
+  is_used BOOLEAN DEFAULT FALSE,
+  attempts SMALLINT DEFAULT 0,     -- incremented on wrong guess; blocked at 5
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -672,10 +680,12 @@ CREATE TABLE admin_activity_log (
 
 -- Users
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_google_id ON users(google_id);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_status ON users(status);
-CREATE INDEX idx_users_phone ON users(phone);
+-- idx_users_phone not needed as a separate index — phone has UNIQUE constraint (implicit index)
+
+-- OTP Verifications
+CREATE INDEX idx_otp_verifications_phone ON otp_verifications(phone, created_at DESC);
 
 -- Sessions
 CREATE INDEX idx_sessions_user_id ON sessions(user_id);

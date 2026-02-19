@@ -80,10 +80,18 @@ export default function RoleSelectPage() {
 
     setIsLoading(true);
     try {
-      // TODO: Save role to database
-      // await updateUserRole(selectedRole);
+      const res = await fetch("/api/auth/role-select", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: selectedRole }),
+      });
 
-      // Redirect to profile setup based on role
+      if (!res.ok) {
+        const data = await res.json();
+        console.error("Failed to save role:", data.error);
+        return;
+      }
+
       if (selectedRole === "tenant") {
         router.push("/auth/profile-setup/tenant");
       } else {
