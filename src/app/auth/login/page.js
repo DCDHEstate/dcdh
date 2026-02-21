@@ -56,7 +56,7 @@ function PhoneStep({ onOtpSent }) {
       <div className="mb-8 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#25d366]/30 bg-[#25d366]/10 px-4 py-1.5">
           <WhatsAppIcon className="h-3.5 w-3.5 text-[#25d366]" />
-          <span className="text-xs font-medium tracking-widest text-[#25d366]">
+          <span className="text-xs font-medium tracking-elegant text-[#25d366]">
             WHATSAPP OTP
           </span>
         </div>

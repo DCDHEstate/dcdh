@@ -1,7 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import FooterWrapper from "@/components/FooterWrapper";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -94,9 +95,11 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#1c1917" />
       </head>
       <body className="antialiased">
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main>{children}</main>
+          <FooterWrapper />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -8,6 +8,9 @@ const OTP_LENGTH = 6;
  * Uses crypto.randomBytes to avoid Math.random() bias.
  */
 export function generateOTP() {
+  // TODO: Remove static OTP before going to production
+  if (process.env.NODE_ENV !== 'production') return '998999';
+
   const buffer = crypto.randomBytes(4);
   const num = buffer.readUInt32BE(0);
   return String(num % 1_000_000).padStart(OTP_LENGTH, "0");
@@ -48,6 +51,12 @@ export function verifyOTP(otp, storedHash) {
  * The OTP is passed in both the BODY and the URL button parameter (index 0).
  */
 export async function sendWhatsAppOTP(phone, otp) {
+  // TODO: Remove static bypass before going to production
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[OTP DEV] Phone: +91${phone} | OTP: ${otp} (static bypass active)`);
+    return { success: true, messageId: 'dev-bypass' };
+  }
+
   const apiKey = process.env.GETGABS_API_KEY;
   const sender = process.env.GETGABS_SENDER;
   const campaignId = process.env.GETGABS_CAMPAIGN_ID;

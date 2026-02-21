@@ -119,7 +119,7 @@ export default function RoleSelectPage() {
         <h1 className="mb-2 text-2xl font-semibold text-heading sm:text-3xl">
           How will you use DCDH Estate?
         </h1>
-        <p className="text-muted">
+        <p className="text-sm text-muted">
           Select your primary role. You can always access other features later.
         </p>
       </div>
