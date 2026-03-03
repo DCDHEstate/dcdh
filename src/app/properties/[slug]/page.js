@@ -102,7 +102,7 @@ export default async function PropertyDetailPage({ params }) {
     : JSON.parse(property.amenities || "[]");
 
   return (
-    <div className="min-h-screen bg-surface py-8 px-4 sm:px-6">
+    <div className="min-h-screen bg-surface pt-24 pb-8 px-4 sm:px-6">
       <div className="mx-auto max-w-5xl">
 
         {/* Breadcrumb */}

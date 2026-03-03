@@ -55,7 +55,7 @@ export default function Header() {
     setDropdownOpen(false);
   }, [pathname]);
 
-  const isDashboard = pathname.startsWith("/dashboard");
+  const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 
   const links = [
     { name: "Home", href: "/" },
@@ -87,7 +87,20 @@ export default function Header() {
     { name: "Profile", href: "/dashboard/tenant/profile", icon: UserIcon },
   ];
 
-  const roleLinks = user?.role === "owner" ? ownerLinks : tenantLinks;
+  const adminLinks = [
+    { name: "Dashboard", href: "/admin", icon: GridIcon },
+    { name: "Properties", href: "/admin/properties", icon: BuildingIcon },
+    { name: "Users", href: "/admin/users", icon: UsersIcon },
+    { name: "Leads", href: "/admin/leads", icon: UsersIcon },
+    { name: "Settings", href: "/admin/settings", icon: UserIcon },
+  ];
+
+  const roleLinks =
+    user?.role === "admin"
+      ? adminLinks
+      : user?.role === "owner"
+        ? ownerLinks
+        : tenantLinks;
 
   const isActive = (href) => {
     if (href === "/") return pathname === "/";
@@ -338,7 +351,7 @@ export default function Header() {
             <>
               <div className="my-3 h-px bg-border-light" />
               <p className="mb-2 px-4 text-[10px] font-medium uppercase tracking-elegant text-subtle">
-                {user.role === "owner" ? "Owner Portal" : "Tenant Portal"}
+                {user.role === "admin" ? "Admin Panel" : user.role === "owner" ? "Owner Portal" : "Tenant Portal"}
               </p>
               {roleLinks.map((link) => (
                 <Link
