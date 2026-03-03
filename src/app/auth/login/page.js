@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function WhatsAppIcon({ className }) {
@@ -357,7 +357,7 @@ function OtpStep({ phone, onBack, onSuccess }) {
 
 // ── Main page ────────────────────────────────────────────────────────────────
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState("phone");
@@ -407,5 +407,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }
