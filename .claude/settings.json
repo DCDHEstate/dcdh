@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/dashboard/tenant/complaints/[id]\")",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/dashboard/owner/complaints/[id])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/admin/complaints/[id])",
+      "Bash(npx next:*)",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/admin/properties/[slug])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/dashboard/owner/properties/[slug])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/admin/properties/[slug])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/properties/mine/[slug])"
+    ],
+    "additionalDirectories": [
+      "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/complaints/[id]",
+      "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/rent-payments/owner"
+    ]
+  }
+}

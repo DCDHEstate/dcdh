@@ -1,5 +1,4 @@
 import Hero from "@/components/home/Hero";
-import SearchStrip from "@/components/home/SearchStrip";
 import FeaturedProperties from "@/components/home/FeaturedProperties";
 import HowItWorks from "@/components/home/HowItWorks";
 import Portals from "@/components/home/Portals";
@@ -68,16 +67,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <Hero />
-
-      {/* Quick Search Strip */}
-      <SearchStrip />
-
-      {/* Divider */}
-      <div className="relative py-4">
-        <div className="divider-diamond">
-          <span className="h-2 w-2 rotate-45 rounded-sm bg-accent/30" />
-        </div>
-      </div>
 
       {/* Featured Properties */}
       <FeaturedProperties />

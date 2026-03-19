@@ -36,6 +36,7 @@ export default function OwnerProfileSetupPage() {
     bankAccountNumber: "",
     bankIfscCode: "",
     bankName: "",
+    referralCode: "",
   });
 
   // Pre-populate from auth once loaded
@@ -89,6 +90,7 @@ export default function OwnerProfileSetupPage() {
           bankAccountNumber: formData.bankAccountNumber,
           bankIfscCode: formData.bankIfscCode,
           bankName: formData.bankName,
+          referralCode: formData.referralCode,
         }),
       });
 
@@ -527,6 +529,25 @@ export default function OwnerProfileSetupPage() {
                 </div>
               </div>
             )}
+
+            {/* Referral Code */}
+            <div className="mb-8">
+              <label className="mb-2 block text-sm font-medium text-heading">
+                Referral Code <span className="text-xs font-normal text-muted">(optional)</span>
+              </label>
+              <input
+                type="text"
+                name="referralCode"
+                value={formData.referralCode}
+                onChange={(e) => setFormData(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
+                placeholder="e.g. KKHTSY"
+                maxLength={6}
+                className="w-full rounded-xl border border-border bg-surface-subtle px-4 py-3.5 text-sm text-body placeholder-subtle tracking-widest uppercase transition-all duration-300 focus:border-primary focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <p className="mt-1 text-xs text-muted">
+                Got a referral code from a friend? Enter it here to help them earn rewards.
+              </p>
+            </div>
 
             <div className="flex gap-3">
               <button

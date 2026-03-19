@@ -89,7 +89,7 @@ export default function OwnerPropertiesPage() {
                 {
                   label: "View",
                   onClick: () =>
-                    window.open(`/properties/${property.slug}`, "_blank"),
+                    (window.location.href = `/dashboard/owner/properties/${property.slug}`),
                 },
               ]}
             />

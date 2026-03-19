@@ -123,8 +123,8 @@
 ### 7. Owner Dashboard
 
 - [x] Dashboard layout with sidebar (desktop) and bottom nav (mobile)
-- [x] Stat cards (total properties, active listings, total leads, total views)
-- [x] Quick action buttons (post property, view leads)
+- [x] Stat cards (total properties, active listings, total leads, active tenancies, rent this month, open complaints, total views)
+- [x] Quick action buttons (post property, tenancies, rent, complaints)
 - [ ] Recent leads list on dashboard (latest 5)
 - [ ] Property performance overview (views & inquiries per property)
 - [ ] Notifications panel
@@ -134,8 +134,8 @@
 ### 8. Tenant Dashboard
 
 - [x] Dashboard layout with sidebar (desktop) and bottom nav (mobile)
-- [x] Stat cards (saved properties, total inquiries)
-- [x] Quick action buttons (browse properties, saved properties)
+- [x] Stat cards (saved properties, active tenancy, next rent due, open complaints)
+- [x] Quick action buttons (browse, my tenancy, rent, raise complaint)
 - [ ] Recent inquiries list on dashboard
 - [ ] Recommended properties based on preferences
 - [ ] Notifications panel
@@ -144,10 +144,10 @@
 
 ### 9. Tenancy Management (Post-deal)
 
-- [ ] View active tenancy details — tenant (lease dates, rent, deposit)
-- [ ] Agreement document upload / view
-- [ ] Tenancy status tracking (upcoming → active → completed / terminated)
-- [ ] View tenants on my property — owner
+- [x] View active tenancy details — tenant (lease dates, rent, deposit)
+- [x] Agreement document upload / view
+- [x] Tenancy status tracking (upcoming → active → completed / terminated)
+- [x] View tenants on my property — owner
 - [ ] Tenancy termination request
 
 **Flow:** Admin creates tenancy (tenant + property + owner) → Tenant sees in dashboard → Owner sees tenant details → Lease ends → Security deposit refund
@@ -156,11 +156,11 @@
 
 ### 10. Rent Payment Tracking
 
-- [ ] View rent due for current month — tenant
-- [ ] Rent payment history — tenant
-- [ ] Mark rent as paid (manual for MVP — admin/owner marks)
-- [ ] Late fee calculation
-- [ ] Rent collection overview — owner
+- [x] View rent due for current month — tenant
+- [x] Rent payment history — tenant
+- [x] Mark rent as paid (manual for MVP — admin marks)
+- [x] Late fee calculation (overdue detection)
+- [x] Rent collection overview — owner
 - [ ] Payout tracking to owner
 - [ ] Payment receipt generation
 
@@ -179,14 +179,14 @@
 
 ### 12. Complaints / Maintenance Requests
 
-- [ ] Raise complaint — tenant (category, priority, description, photos)
-- [ ] Complaint categories (plumbing, electrical, pest control, security, etc.)
-- [ ] Priority levels (low / medium / high / urgent)
-- [ ] Attach photos/videos to complaint
-- [ ] View complaint status — tenant
-- [ ] Comment thread on complaint
-- [ ] View complaints on my properties — owner
-- [ ] Satisfaction rating after resolution (1-5)
+- [x] Raise complaint — tenant (category, priority, description, photos)
+- [x] Complaint categories (plumbing, electrical, pest control, security, etc.)
+- [x] Priority levels (low / medium / high / urgent)
+- [x] Attach photos/videos to complaint (presigned URL upload)
+- [x] View complaint status — tenant
+- [x] Comment thread on complaint
+- [x] View complaints on my properties — owner
+- [x] Satisfaction rating after resolution (1-5)
 
 **Flow:** Tenant raises complaint → Owner notified → Status: open → acknowledged → in_progress → resolved → Tenant rates satisfaction
 
@@ -270,12 +270,12 @@
 
 ### 20. Admin Dashboard
 
-- [ ] Platform stats overview (total users, properties, leads, revenue)
+- [x] Platform stats overview (total users, properties, leads, active tenancies, overdue payments, open complaints, pending approvals)
 - [ ] Today's activity summary (new signups, properties, leads)
-- [ ] Pending property approvals count
-- [ ] Overdue payments count
-- [ ] Open complaints count
-- [ ] Quick action buttons
+- [x] Pending property approvals count
+- [x] Overdue payments count
+- [x] Open complaints count
+- [x] Quick action buttons (properties, tenancies, rent, complaints)
 
 ---
 
@@ -324,10 +324,10 @@
 
 ### 24. Tenancy Management
 
-- [ ] Create new tenancy (bind tenant + property + owner)
-- [ ] Set lease terms (dates, rent, deposit, increment %, lock-in, notice period)
-- [ ] Upload agreement document
-- [ ] View all active tenancies
+- [x] Create new tenancy (bind tenant + property + owner)
+- [x] Set lease terms (dates, rent, deposit, increment %, lock-in, notice period)
+- [x] Upload agreement document (S3 presigned URL)
+- [x] View all active tenancies (with filters and pagination)
 - [ ] Terminate tenancy with reason
 - [ ] Renew tenancy
 
@@ -335,10 +335,11 @@
 
 ### 25. Payment Management
 
-- [ ] Generate monthly rent entries for active tenancies
-- [ ] View all rent payments (filter by status, tenant, month)
-- [ ] Mark rent as paid (payment method, reference)
-- [ ] Apply late fees
+- [x] Generate monthly rent entries for active tenancies
+- [x] View all rent payments (filter by status, tenant, month)
+- [x] Mark rent as paid (payment method, reference)
+- [x] Mark rent as waived
+- [x] Overdue detection (auto-marks past-due payments)
 - [ ] Owner payout tracking (mark payout done)
 - [ ] Security deposit management (track deposits and refunds)
 - [ ] Payment reports / export
@@ -347,11 +348,11 @@
 
 ### 26. Complaint Management
 
-- [ ] View all complaints (filter by status, priority, property)
+- [x] View all complaints (filter by status, priority)
 - [ ] Assign complaint to team member
-- [ ] Update complaint status
-- [ ] Add admin comments
-- [ ] Mark as resolved
+- [x] Update complaint status (open → acknowledged → in_progress → resolved → closed)
+- [x] Add admin comments
+- [x] Mark as resolved (with resolution notes)
 - [ ] Complaint analytics (avg resolution time)
 
 ---

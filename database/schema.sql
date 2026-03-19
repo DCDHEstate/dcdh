@@ -66,6 +66,7 @@ CREATE TABLE users (
   role user_role NOT NULL DEFAULT 'tenant',
   status user_status NOT NULL DEFAULT 'active',
   is_phone_verified BOOLEAN DEFAULT FALSE,
+  referral_code VARCHAR(10) UNIQUE, -- auto-generated shareable code
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -552,9 +553,10 @@ CREATE TABLE rent_payments (
   -- What this payment is for
   payment_for_month DATE NOT NULL, -- first of the month, e.g. 2026-02-01
   amount_due NUMERIC(15, 2) NOT NULL,
+  electricity_charge NUMERIC(10, 2) DEFAULT 0,
   amount_paid NUMERIC(15, 2) DEFAULT 0,
   late_fee NUMERIC(10, 2) DEFAULT 0,
-  total_due NUMERIC(15, 2) GENERATED ALWAYS AS (amount_due + late_fee) STORED,
+  total_due NUMERIC(15, 2) GENERATED ALWAYS AS (amount_due + electricity_charge + late_fee) STORED,
 
   -- Payment info
   status payment_status NOT NULL DEFAULT 'pending',

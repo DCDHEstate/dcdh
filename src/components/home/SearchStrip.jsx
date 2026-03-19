@@ -51,7 +51,7 @@ const POPULAR_TAGS = [
   { label: 'Under 15K', params: { transactionType: 'rent', priceMax: '15000' } },
 ];
 
-export default function SearchStrip() {
+export default function SearchStrip({ embedded = false }) {
   const router = useRouter();
   const [searchType, setSearchType] = useState('rent');
   const [cityId, setCityId] = useState('');
@@ -146,9 +146,9 @@ export default function SearchStrip() {
   };
 
   return (
-    <section className="relative z-10 -mt-32 pb-16">
-      <div className="mx-auto max-w-5xl px-4">
-        <div className="reveal-scale relative overflow-hidden rounded-2xl bg-white p-8 shadow-premium md:p-10">
+    <section className={`relative z-10 ${embedded ? 'pb-12 pt-4' : '-mt-32 pb-16'}`}>
+      <div className={`mx-auto px-4 ${embedded ? 'max-w-6xl' : 'max-w-5xl'}`}>
+        <div className={`reveal-scale relative overflow-hidden rounded-2xl p-8 shadow-premium md:p-10 ${embedded ? 'bg-white/95 backdrop-blur-sm' : 'bg-white'}`}>
           {/* Top accent line */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
 

@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === 'production') {
   // Reuse connection across hot-reloads in dev to avoid exhausting the pool
   if (!global._sqlClient) {
     global._sqlClient = postgres(process.env.DATABASE_URL, {
+      ssl: { rejectUnauthorized: false },
       max: 5,
     });
   }

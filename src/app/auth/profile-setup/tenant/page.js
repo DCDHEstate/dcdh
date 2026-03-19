@@ -37,6 +37,7 @@ export default function TenantProfileSetupPage() {
     budgetMax: "",
     familySize: "",
     hasPets: false,
+    referralCode: "",
   });
 
   // Pre-populate from auth once loaded
@@ -79,6 +80,7 @@ export default function TenantProfileSetupPage() {
           budgetMax: formData.budgetMax,
           familySize: formData.familySize,
           hasPets: formData.hasPets,
+          referralCode: formData.referralCode,
         }),
       });
 
@@ -431,6 +433,31 @@ export default function TenantProfileSetupPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Referral Code */}
+        <div className="mb-8">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-heading">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-soft text-xs font-bold text-accent">
+              4
+            </span>
+            Referral Code
+            <span className="text-xs font-normal text-muted">(optional)</span>
+          </h2>
+          <div>
+            <input
+              type="text"
+              name="referralCode"
+              value={formData.referralCode}
+              onChange={(e) => setFormData(prev => ({ ...prev, referralCode: e.target.value.toUpperCase() }))}
+              placeholder="e.g. KKHTSY"
+              maxLength={6}
+              className="w-full rounded-xl border border-border bg-surface-subtle px-4 py-3.5 text-sm text-body placeholder-subtle tracking-widest uppercase transition-all duration-300 focus:border-accent focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-accent-soft"
+            />
+            <p className="mt-1 text-xs text-muted">
+              Got a referral code from a friend? Enter it here to help them earn rewards.
+            </p>
           </div>
         </div>
 

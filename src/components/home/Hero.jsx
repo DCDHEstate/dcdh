@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import SearchStrip from "./SearchStrip";
 
 const propertyTypes = [
   "Dream Home",
@@ -24,7 +25,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-surface-dark pb-24">
+    <section className="relative overflow-hidden bg-surface-dark pb-0">
       {/* Split Layout - Image on Right */}
       <div className="absolute inset-0 grid lg:grid-cols-2">
         {/* Left side - Dark gradient */}
@@ -71,12 +72,12 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex min-h-screen flex-col justify-center py-24 lg:py-32">
+        <div className="flex flex-col justify-center pt-24 pb-8 lg:pt-32 lg:pb-12">
           <div
             className={`max-w-2xl transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             {/* Eyebrow with animated border */}
-            <div className="mb-10 inline-block">
+            {/* <div className="mb-6 inline-block">
               <div className="relative">
                 <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-accent via-accent-light to-accent opacity-20 blur-sm animate-pulse-slow" />
                 <div className="relative flex items-center gap-3 rounded-lg border border-accent/30 bg-surface-dark/80 px-4 py-2 backdrop-blur-sm">
@@ -89,10 +90,10 @@ export default function Hero() {
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Main Headline - Large and Bold */}
-            <h1 className="mb-8">
+            <h1 className="mb-6">
               <span
                 className="block text-4xl font-light tracking-tight text-white/60 sm:text-5xl lg:text-6xl"
                 style={{
@@ -128,7 +129,7 @@ export default function Hero() {
 
             {/* Subheadline */}
             <p
-              className="mb-10 max-w-md text-lg leading-relaxed text-white/70"
+              className="mb-8 max-w-md text-lg leading-relaxed text-white/70"
               style={{
                 animation: isVisible ? "fadeInUp 0.6s ease forwards" : "none",
                 animationDelay: "0.3s",
@@ -245,6 +246,19 @@ export default function Hero() {
         </div>
       </div>
 
+      {/* Visual bridge - subtle separator line */}
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="flex items-center gap-4 pb-2">
+          <div className="h-px flex-1 bg-gradient-to-r from-accent/30 via-white/10 to-transparent" />
+          <span className="text-[11px] font-medium tracking-[0.2em] text-white/40">
+            SEARCH PROPERTIES
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-l from-accent/30 via-white/10 to-transparent" />
+        </div>
+      </div>
+
+      {/* Search Strip - inside hero so it's visible on load */}
+      <SearchStrip embedded />
     </section>
   );
 }

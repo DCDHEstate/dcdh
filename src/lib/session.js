@@ -38,7 +38,9 @@ export async function getSession(token) {
       u.role,
       u.status,
       u.is_phone_verified,
-      u.avatar_url
+      u.avatar_url,
+      u.whatsapp_number,
+      u.referral_code
     FROM sessions s
     JOIN users u ON u.id = s.user_id
     WHERE s.token = ${token}

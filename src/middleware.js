@@ -15,6 +15,23 @@ const PROTECTED_ROUTES = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  // Homepage: redirect logged-in users to their dashboard
+  if (pathname === '/') {
+    const cookie = request.cookies.get(SESSION_COOKIE_NAME);
+    const token = cookie?.value;
+    const user = token ? await getSession(token) : null;
+    if (user && user.status !== 'suspended' && user.role) {
+      const dashboardMap = {
+        owner: '/dashboard/owner',
+        tenant: '/dashboard/tenant',
+        admin: '/admin',
+      };
+      const dest = dashboardMap[user.role];
+      if (dest) return NextResponse.redirect(new URL(dest, request.url));
+    }
+    return NextResponse.next();
+  }
+
   // Find matching protected route — if none, allow through
   const protectedRoute = PROTECTED_ROUTES.find((r) => r.pattern.test(pathname));
   if (!protectedRoute) return NextResponse.next();

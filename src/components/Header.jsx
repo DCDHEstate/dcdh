@@ -57,6 +57,9 @@ export default function Header() {
 
   const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 
+  // Hide header entirely on dashboard/admin routes
+  if (isDashboard) return null;
+
   const links = [
     { name: "Home", href: "/" },
     { name: "Properties", href: "/search" },

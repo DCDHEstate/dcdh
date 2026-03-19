@@ -152,7 +152,7 @@ export default function AdminPropertiesPage() {
 
                   <div className="min-w-0">
                     <Link
-                      href={`/properties/${p.slug}`}
+                      href={`/admin/properties/${p.slug}`}
                       className="text-sm font-semibold text-heading hover:text-accent-dark"
                     >
                       {p.title}

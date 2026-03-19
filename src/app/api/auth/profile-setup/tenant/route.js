@@ -62,6 +62,7 @@ export async function POST(request) {
       budgetMax,
       familySize,
       hasPets,
+      referralCode,
     } = body;
 
     if (!fullName?.trim()) {
@@ -100,6 +101,24 @@ export async function POST(request) {
         family_size = EXCLUDED.family_size,
         has_pets = EXCLUDED.has_pets
     `;
+
+    // Handle referral code — link this user to the referrer
+    if (referralCode?.trim()) {
+      const code = referralCode.trim().toUpperCase();
+      const referrer = await sql`SELECT id, phone FROM users WHERE referral_code = ${code} AND id != ${user.id}`;
+      if (referrer.length > 0) {
+        // Check if referral already exists
+        const existing = await sql`
+          SELECT id FROM referrals WHERE referrer_id = ${referrer[0].id} AND referred_user_id = ${user.id}
+        `;
+        if (existing.length === 0) {
+          await sql`
+            INSERT INTO referrals (referrer_id, referral_type, referred_phone, referred_user_id, status)
+            VALUES (${referrer[0].id}, 'friend', ${user.phone}, ${user.id}, 'registered')
+          `;
+        }
+      }
+    }
 
     return NextResponse.json({
       message: 'Profile saved',
