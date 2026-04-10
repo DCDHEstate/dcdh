@@ -42,7 +42,7 @@ const founders = [
   {
     name: "Siddharth Rai",
     role: "Co-founder & CTO",
-    bio: "A technology enthusiast with a passion for building scalable solutions, Siddharth leads the development of DCDH's digital platform. He architects the DCDH's experience and ensures our technology serves every user's needs.",
+    bio: "A technology enthusiast and founder of Lancehawks, Siddharth leads the development of DCDH's digital platform. He architects the end-to-end experience and ensures our technology serves every user's needs.",
     image: "/images/founders/Siddharth.jpg",
     linkedin: "https://www.linkedin.com/in/siddrai7/",
   },
