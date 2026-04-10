@@ -40,18 +40,18 @@ const founders = [
     linkedin: "https://www.linkedin.com/in/dileep-parmar-03a790321/",
   },
   {
-    name: "Anand Purushottam Singh",
-    role: "Founder & CXO (Business & Operations)",
-    bio: "Anand brings operational excellence and creative problem-solving to DCDH Estate. He manages day-to-day operations, partner relationships, and drives process improvements to deliver a seamless experience for owners and tenants.",
-    image: "/images/founders/Anand.jpeg",
-    linkedin: "https://www.linkedin.com/in/creativepurus/",
-  },
-  {
     name: "Siddharth Rai",
     role: "Co-founder & CTO",
     bio: "A technology enthusiast with a passion for building scalable solutions, Siddharth leads the development of DCDH's digital platform. He architects the DCDH's experience and ensures our technology serves every user's needs.",
     image: "/images/founders/Siddharth.jpg",
     linkedin: "https://www.linkedin.com/in/siddrai7/",
+  },
+  {
+    name: "Rudrakshi Kumar",
+    role: "Director - Marketing",
+    bio: "Rudrakshi drives DCDH Estate's brand presence and growth strategy. With a keen eye for communication and market trends, she leads all marketing initiatives to connect the right properties with the right people.",
+    image: "/images/founders/Rudrakshi.jpeg",
+    linkedin: null,
   },
 ];
 
@@ -608,21 +608,23 @@ export default function AboutPage() {
                     </p>
 
                     {/* LinkedIn Link */}
-                    <a
-                      href={founder.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium text-body transition-colors hover:text-accent"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
+                    {founder.linkedin && (
+                      <a
+                        href={founder.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-body transition-colors hover:text-accent"
                       >
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                      </svg>
-                      Connect on LinkedIn
-                    </a>
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                        Connect on LinkedIn
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
