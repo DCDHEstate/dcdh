@@ -47,7 +47,7 @@ const founders = [
     linkedin: "https://www.linkedin.com/in/siddrai7/",
   },
   {
-    name: "Rudrakshi Kumar",
+    name: "Rudrakshi Kumari",
     role: "Director - Marketing",
     bio: "Rudrakshi drives DCDH Estate's brand presence and growth strategy. With a keen eye for communication and market trends, she leads all marketing initiatives to connect the right properties with the right people.",
     image: "/images/founders/Rudrakshi.jpeg",

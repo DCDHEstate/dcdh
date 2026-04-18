@@ -245,7 +245,7 @@ export async function POST(request) {
       const mediaInserts = mediaUrls.map((m, index) => ({
         property_id: property.id,
         media_url: m.url,
-        media_type: "image",
+        media_type: m.mediaType || "image",
         sort_order: index,
         is_primary: m.isPrimary ?? index === 0,
       }));

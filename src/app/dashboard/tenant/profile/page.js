@@ -19,7 +19,7 @@ const bhkOptions = [
 ];
 
 export default function TenantProfilePage() {
-  const { refreshUser } = useAuth();
+  const { refreshUser, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [success, setSuccess] = useState("");
@@ -333,6 +333,16 @@ export default function TenantProfilePage() {
           )}
         </button>
       </form>
+
+      <button
+        onClick={logout}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-500 transition-all hover:bg-red-100 lg:hidden"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+        </svg>
+        Sign Out
+      </button>
     </div>
   );
 }

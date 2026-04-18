@@ -12,7 +12,8 @@
     ],
     "additionalDirectories": [
       "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/complaints/[id]",
-      "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/rent-payments/owner"
+      "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/rent-payments/owner",
+      "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/dashboard/owner/properties/[slug]"
     ]
   }
 }

@@ -91,6 +91,11 @@ export default function OwnerPropertiesPage() {
                   onClick: () =>
                     (window.location.href = `/dashboard/owner/properties/${property.slug}`),
                 },
+                {
+                  label: "Edit",
+                  onClick: () =>
+                    (window.location.href = `/dashboard/owner/properties/${property.slug}/edit`),
+                },
               ]}
             />
           ))}

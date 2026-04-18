@@ -1,5 +1,5 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client } from "@aws-sdk/client-s3";
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSessionFromRequest } from "@/lib/session";
 import { randomUUID } from "crypto";
 
@@ -11,8 +11,11 @@ const s3 = new S3Client({
   },
 });
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+const ALLOWED_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;    // 5 MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024;  // 100 MB
 
 export async function POST(request) {
   const session = await getSessionFromRequest(request);
@@ -41,36 +44,45 @@ export async function POST(request) {
 
   if (!ALLOWED_TYPES.includes(fileType)) {
     return Response.json(
-      { error: "Only JPEG, PNG, and WebP images are allowed" },
+      { error: "Only JPEG, PNG, WebP images and MP4, WebM, MOV videos are allowed" },
       { status: 400 }
     );
   }
 
-  if (fileSize > MAX_FILE_SIZE) {
+  const maxSize = VIDEO_TYPES.includes(fileType) ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+  if (fileSize > maxSize) {
+    const limit = VIDEO_TYPES.includes(fileType) ? "100MB" : "5MB";
     return Response.json(
-      { error: "File size must not exceed 5MB" },
+      { error: `File size must not exceed ${limit}` },
       { status: 400 }
     );
   }
 
-  const ext = fileType.split("/")[1].replace("jpeg", "jpg");
+  const EXT_MAP = {
+    "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
+    "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov",
+  };
+  const ext = EXT_MAP[fileType] || "bin";
   const key = `properties/${session.id}/${randomUUID()}.${ext}`;
   const bucket = process.env.AWS_S3_BUCKET;
 
   try {
-    const command = new PutObjectCommand({
+    const { url, fields } = await createPresignedPost(s3, {
       Bucket: bucket,
       Key: key,
-      ContentType: fileType,
-      ContentLength: fileSize,
+      Conditions: [
+        ["content-length-range", 1, maxSize],
+        ["eq", "$Content-Type", fileType],
+      ],
+      Fields: { "Content-Type": fileType },
+      Expires: 300,
     });
 
-    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
     const publicUrl = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-    return Response.json({ uploadUrl, publicUrl });
+    return Response.json({ uploadUrl: url, uploadFields: fields, publicUrl });
   } catch (error) {
-    console.error("Failed to generate presigned URL:", error);
+    console.error("Failed to generate upload URL:", error);
     return Response.json(
       { error: "Failed to generate upload URL" },
       { status: 500 }

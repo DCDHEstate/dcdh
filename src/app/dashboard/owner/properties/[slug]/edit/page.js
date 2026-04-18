@@ -59,48 +59,7 @@ const AGE_OPTIONS = [
 
 const FACING_OPTIONS = ["North", "South", "East", "West", "North-East", "North-West", "South-East", "South-West"];
 
-// ─── Initial form state ───────────────────────────────────────────────────────
-
-const INITIAL_FORM = {
-  // Step 1
-  title: "",
-  category: "residential",
-  transactionType: "rent",
-  propertyType: "",
-  bedrooms: "",
-  bathrooms: "",
-  balconies: "",
-  furnishing: "",
-  floorNumber: "",
-  totalFloors: "",
-  parkingSlots: "0",
-  ageOfProperty: "",
-  possessionStatus: "Ready to Move",
-  // Step 2
-  stateId: "",
-  cityId: "",
-  localityId: "",
-  addressLine1: "",
-  addressLine2: "",
-  pincode: "",
-  googleMapsUrl: "",
-  // Step 3
-  description: "",
-  areaSqft: "",
-  carpetAreaSqft: "",
-  facing: "",
-  availableFrom: "",
-  amenities: [],
-  // Step 4 – handled separately via mediaItems state
-  // Step 5
-  price: "",
-  rentDeposit: "",
-  securityDeposit: "",
-  maintenanceCharge: "",
-  priceNegotiable: false,
-};
-
-// ─── Step sub-components ─────────────────────────────────────────────────────
+// ─── Shared field components ──────────────────────────────────────────────────
 
 function FieldLabel({ children, required }) {
   return (
@@ -140,7 +99,7 @@ function Textarea({ ...props }) {
   );
 }
 
-// ─── Step 1: Basic Info ───────────────────────────────────────────────────────
+// ─── Step 1 ───────────────────────────────────────────────────────────────────
 
 function Step1({ formData, onChange }) {
   const availableTypes = PROPERTY_TYPES[formData.category] || [];
@@ -154,7 +113,6 @@ function Step1({ formData, onChange }) {
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-heading">Basic Information</h2>
 
-      {/* Title */}
       <div>
         <FieldLabel required>Property Title</FieldLabel>
         <Input
@@ -166,7 +124,6 @@ function Step1({ formData, onChange }) {
         />
       </div>
 
-      {/* Transaction Type */}
       <div>
         <FieldLabel required>Listed For</FieldLabel>
         <div className="flex gap-3">
@@ -187,7 +144,6 @@ function Step1({ formData, onChange }) {
         </div>
       </div>
 
-      {/* Category */}
       <div>
         <FieldLabel required>Category</FieldLabel>
         <div className="grid grid-cols-3 gap-3">
@@ -207,11 +163,7 @@ function Step1({ formData, onChange }) {
               }`}
             >
               <span className="mb-1 block text-2xl">{cat.icon}</span>
-              <span
-                className={`text-sm font-medium ${
-                  formData.category === cat.id ? "text-primary" : "text-muted"
-                }`}
-              >
+              <span className={`text-sm font-medium ${formData.category === cat.id ? "text-primary" : "text-muted"}`}>
                 {cat.label}
               </span>
             </button>
@@ -219,7 +171,6 @@ function Step1({ formData, onChange }) {
         </div>
       </div>
 
-      {/* Property Type */}
       <div>
         <FieldLabel required>Property Type</FieldLabel>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -240,49 +191,32 @@ function Step1({ formData, onChange }) {
         </div>
       </div>
 
-      {/* BHK / rooms — only for residential */}
       {formData.category === "residential" && (
         <div className="grid grid-cols-3 gap-4">
           <div>
             <FieldLabel>Bedrooms</FieldLabel>
-            <Select
-              value={formData.bedrooms}
-              onChange={(e) => onChange("bedrooms", e.target.value)}
-            >
+            <Select value={formData.bedrooms} onChange={(e) => onChange("bedrooms", e.target.value)}>
               <option value="">—</option>
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <option key={n} value={n}>{n} BHK</option>
-              ))}
+              {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} BHK</option>)}
             </Select>
           </div>
           <div>
             <FieldLabel>Bathrooms</FieldLabel>
-            <Select
-              value={formData.bathrooms}
-              onChange={(e) => onChange("bathrooms", e.target.value)}
-            >
+            <Select value={formData.bathrooms} onChange={(e) => onChange("bathrooms", e.target.value)}>
               <option value="">—</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
+              {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
             </Select>
           </div>
           <div>
             <FieldLabel>Balconies</FieldLabel>
-            <Select
-              value={formData.balconies}
-              onChange={(e) => onChange("balconies", e.target.value)}
-            >
+            <Select value={formData.balconies} onChange={(e) => onChange("balconies", e.target.value)}>
               <option value="">—</option>
-              {[0, 1, 2, 3, 4].map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
+              {[0, 1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
             </Select>
           </div>
         </div>
       )}
 
-      {/* Furnishing */}
       <div>
         <FieldLabel>Furnishing</FieldLabel>
         <div className="flex gap-3">
@@ -307,54 +241,30 @@ function Step1({ formData, onChange }) {
         </div>
       </div>
 
-      {/* Floor / Parking / Age */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <FieldLabel>Floor No.</FieldLabel>
-          <Input
-            type="number"
-            min="0"
-            value={formData.floorNumber}
-            onChange={(e) => onChange("floorNumber", e.target.value)}
-            placeholder="e.g. 3"
-          />
+          <Input type="number" min="0" value={formData.floorNumber} onChange={(e) => onChange("floorNumber", e.target.value)} placeholder="e.g. 3" />
         </div>
         <div>
           <FieldLabel>Total Floors</FieldLabel>
-          <Input
-            type="number"
-            min="1"
-            value={formData.totalFloors}
-            onChange={(e) => onChange("totalFloors", e.target.value)}
-            placeholder="e.g. 10"
-          />
+          <Input type="number" min="1" value={formData.totalFloors} onChange={(e) => onChange("totalFloors", e.target.value)} placeholder="e.g. 10" />
         </div>
         <div>
           <FieldLabel>Parking Slots</FieldLabel>
-          <Select
-            value={formData.parkingSlots}
-            onChange={(e) => onChange("parkingSlots", e.target.value)}
-          >
-            {[0, 1, 2, 3, 4].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
+          <Select value={formData.parkingSlots} onChange={(e) => onChange("parkingSlots", e.target.value)}>
+            {[0, 1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
           </Select>
         </div>
         <div>
           <FieldLabel>Age of Property</FieldLabel>
-          <Select
-            value={formData.ageOfProperty}
-            onChange={(e) => onChange("ageOfProperty", e.target.value)}
-          >
+          <Select value={formData.ageOfProperty} onChange={(e) => onChange("ageOfProperty", e.target.value)}>
             <option value="">—</option>
-            {AGE_OPTIONS.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
+            {AGE_OPTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
           </Select>
         </div>
       </div>
 
-      {/* Possession */}
       <div>
         <FieldLabel>Possession Status</FieldLabel>
         <div className="flex gap-3">
@@ -378,7 +288,7 @@ function Step1({ formData, onChange }) {
   );
 }
 
-// ─── Step 2: Location ─────────────────────────────────────────────────────────
+// ─── Step 2 ───────────────────────────────────────────────────────────────────
 
 function Step2({ formData, onChange }) {
   const [states, setStates] = useState([]);
@@ -394,10 +304,7 @@ function Step2({ formData, onChange }) {
   }, []);
 
   useEffect(() => {
-    if (!formData.stateId) {
-      setCities([]);
-      return;
-    }
+    if (!formData.stateId) { setCities([]); return; }
     setLoadingCities(true);
     fetch(`/api/locations/cities?state_id=${formData.stateId}`)
       .then((r) => r.json())
@@ -406,10 +313,7 @@ function Step2({ formData, onChange }) {
   }, [formData.stateId]);
 
   useEffect(() => {
-    if (!formData.cityId) {
-      setLocalities([]);
-      return;
-    }
+    if (!formData.cityId) { setLocalities([]); return; }
     setLoadingLocalities(true);
     fetch(`/api/locations/localities?city_id=${formData.cityId}`)
       .then((r) => r.json())
@@ -426,38 +330,23 @@ function Step2({ formData, onChange }) {
           <FieldLabel required>State</FieldLabel>
           <Select
             value={formData.stateId}
-            onChange={(e) => {
-              onChange("stateId", e.target.value);
-              onChange("cityId", "");
-              onChange("localityId", "");
-            }}
+            onChange={(e) => { onChange("stateId", e.target.value); onChange("cityId", ""); onChange("localityId", ""); }}
           >
             <option value="">Select state</option>
-            {states.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
+            {states.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </Select>
         </div>
-
         <div>
           <FieldLabel required>City</FieldLabel>
           <Select
             value={formData.cityId}
-            onChange={(e) => {
-              onChange("cityId", e.target.value);
-              onChange("localityId", "");
-            }}
+            onChange={(e) => { onChange("cityId", e.target.value); onChange("localityId", ""); }}
             disabled={!formData.stateId || loadingCities}
           >
-            <option value="">
-              {loadingCities ? "Loading..." : "Select city"}
-            </option>
-            {cities.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
+            <option value="">{loadingCities ? "Loading..." : "Select city"}</option>
+            {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </Select>
         </div>
-
         <div>
           <FieldLabel required>Locality</FieldLabel>
           <Select
@@ -465,36 +354,20 @@ function Step2({ formData, onChange }) {
             onChange={(e) => onChange("localityId", e.target.value)}
             disabled={!formData.cityId || loadingLocalities}
           >
-            <option value="">
-              {loadingLocalities ? "Loading..." : "Select locality"}
-            </option>
-            {localities.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
+            <option value="">{loadingLocalities ? "Loading..." : "Select locality"}</option>
+            {localities.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </Select>
         </div>
       </div>
 
       <div>
         <FieldLabel required>Address Line 1</FieldLabel>
-        <Input
-          type="text"
-          value={formData.addressLine1}
-          onChange={(e) => onChange("addressLine1", e.target.value)}
-          placeholder="House / Flat / Building No., Street"
-        />
+        <Input type="text" value={formData.addressLine1} onChange={(e) => onChange("addressLine1", e.target.value)} placeholder="House / Flat / Building No., Street" />
       </div>
-
       <div>
         <FieldLabel>Address Line 2</FieldLabel>
-        <Input
-          type="text"
-          value={formData.addressLine2}
-          onChange={(e) => onChange("addressLine2", e.target.value)}
-          placeholder="Colony, Landmark (optional)"
-        />
+        <Input type="text" value={formData.addressLine2} onChange={(e) => onChange("addressLine2", e.target.value)} placeholder="Colony, Landmark (optional)" />
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <FieldLabel>Pincode</FieldLabel>
@@ -508,27 +381,19 @@ function Step2({ formData, onChange }) {
         </div>
         <div>
           <FieldLabel>Google Maps URL</FieldLabel>
-          <Input
-            type="url"
-            value={formData.googleMapsUrl}
-            onChange={(e) => onChange("googleMapsUrl", e.target.value)}
-            placeholder="Paste Google Maps link"
-          />
+          <Input type="url" value={formData.googleMapsUrl} onChange={(e) => onChange("googleMapsUrl", e.target.value)} placeholder="Paste Google Maps link" />
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Step 3: Details & Amenities ─────────────────────────────────────────────
+// ─── Step 3 ───────────────────────────────────────────────────────────────────
 
 function Step3({ formData, onChange }) {
   const toggleAmenity = (id) => {
     const current = formData.amenities;
-    onChange(
-      "amenities",
-      current.includes(id) ? current.filter((a) => a !== id) : [...current, id]
-    );
+    onChange("amenities", current.includes(id) ? current.filter((a) => a !== id) : [...current, id]);
   };
 
   return (
@@ -540,7 +405,7 @@ function Step3({ formData, onChange }) {
         <Textarea
           value={formData.description}
           onChange={(e) => onChange("description", e.target.value)}
-          placeholder="Describe the property — highlights, nearby areas, special features..."
+          placeholder="Describe the property..."
           rows={4}
         />
       </div>
@@ -548,43 +413,22 @@ function Step3({ formData, onChange }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <FieldLabel>Built-up Area (sq.ft)</FieldLabel>
-          <Input
-            type="number"
-            min="1"
-            value={formData.areaSqft}
-            onChange={(e) => onChange("areaSqft", e.target.value)}
-            placeholder="e.g. 1200"
-          />
+          <Input type="number" min="1" value={formData.areaSqft} onChange={(e) => onChange("areaSqft", e.target.value)} placeholder="e.g. 1200" />
         </div>
         <div>
           <FieldLabel>Carpet Area (sq.ft)</FieldLabel>
-          <Input
-            type="number"
-            min="1"
-            value={formData.carpetAreaSqft}
-            onChange={(e) => onChange("carpetAreaSqft", e.target.value)}
-            placeholder="e.g. 950"
-          />
+          <Input type="number" min="1" value={formData.carpetAreaSqft} onChange={(e) => onChange("carpetAreaSqft", e.target.value)} placeholder="e.g. 950" />
         </div>
         <div>
           <FieldLabel>Facing</FieldLabel>
-          <Select
-            value={formData.facing}
-            onChange={(e) => onChange("facing", e.target.value)}
-          >
+          <Select value={formData.facing} onChange={(e) => onChange("facing", e.target.value)}>
             <option value="">—</option>
-            {FACING_OPTIONS.map((f) => (
-              <option key={f} value={f}>{f}</option>
-            ))}
+            {FACING_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
           </Select>
         </div>
         <div>
           <FieldLabel>Available From</FieldLabel>
-          <Input
-            type="date"
-            value={formData.availableFrom}
-            onChange={(e) => onChange("availableFrom", e.target.value)}
-          />
+          <Input type="date" value={formData.availableFrom} onChange={(e) => onChange("availableFrom", e.target.value)} />
         </div>
       </div>
 
@@ -599,16 +443,10 @@ function Step3({ formData, onChange }) {
                 type="button"
                 onClick={() => toggleAmenity(a.id)}
                 className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${
-                  selected
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted hover:border-primary/50"
+                  selected ? "border-primary bg-primary/5 text-primary" : "border-border text-muted hover:border-primary/50"
                 }`}
               >
-                <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${
-                    selected ? "border-primary bg-primary" : "border-border bg-surface-subtle"
-                  }`}
-                >
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${selected ? "border-primary bg-primary" : "border-border bg-surface-subtle"}`}>
                   {selected && (
                     <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -625,7 +463,7 @@ function Step3({ formData, onChange }) {
   );
 }
 
-// ─── Step 4: Photos & Videos ──────────────────────────────────────────────────
+// ─── Step 4 ───────────────────────────────────────────────────────────────────
 
 function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
@@ -811,7 +649,7 @@ function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
   );
 }
 
-// ─── Step 5: Pricing & Review ─────────────────────────────────────────────────
+// ─── Step 5 ───────────────────────────────────────────────────────────────────
 
 function Step5({ formData, onChange, mediaItems }) {
   const isRent = formData.transactionType === "rent";
@@ -823,53 +661,28 @@ function Step5({ formData, onChange, mediaItems }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <FieldLabel required>{isRent ? "Monthly Rent (₹)" : "Sale Price (₹)"}</FieldLabel>
-          <Input
-            type="number"
-            min="1"
-            value={formData.price}
-            onChange={(e) => onChange("price", e.target.value)}
-            placeholder={isRent ? "e.g. 25000" : "e.g. 5000000"}
-          />
+          <Input type="number" min="1" value={formData.price} onChange={(e) => onChange("price", e.target.value)} placeholder={isRent ? "e.g. 25000" : "e.g. 5000000"} />
         </div>
         {isRent && (
           <div>
             <FieldLabel>Maintenance Charge (₹/mo)</FieldLabel>
-            <Input
-              type="number"
-              min="0"
-              value={formData.maintenanceCharge}
-              onChange={(e) => onChange("maintenanceCharge", e.target.value)}
-              placeholder="e.g. 2000"
-            />
+            <Input type="number" min="0" value={formData.maintenanceCharge} onChange={(e) => onChange("maintenanceCharge", e.target.value)} placeholder="e.g. 2000" />
           </div>
         )}
         {isRent && (
           <div>
             <FieldLabel>Security Deposit (₹)</FieldLabel>
-            <Input
-              type="number"
-              min="0"
-              value={formData.securityDeposit}
-              onChange={(e) => onChange("securityDeposit", e.target.value)}
-              placeholder="e.g. 75000"
-            />
+            <Input type="number" min="0" value={formData.securityDeposit} onChange={(e) => onChange("securityDeposit", e.target.value)} placeholder="e.g. 75000" />
           </div>
         )}
         {isRent && (
           <div>
             <FieldLabel>Advance Rent / Token (₹)</FieldLabel>
-            <Input
-              type="number"
-              min="0"
-              value={formData.rentDeposit}
-              onChange={(e) => onChange("rentDeposit", e.target.value)}
-              placeholder="e.g. 25000"
-            />
+            <Input type="number" min="0" value={formData.rentDeposit} onChange={(e) => onChange("rentDeposit", e.target.value)} placeholder="e.g. 25000" />
           </div>
         )}
       </div>
 
-      {/* Negotiable toggle */}
       <label className="flex cursor-pointer items-center gap-3">
         <div className="relative">
           <input
@@ -878,20 +691,13 @@ function Step5({ formData, onChange, mediaItems }) {
             onChange={(e) => onChange("priceNegotiable", e.target.checked)}
             className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-border bg-surface-subtle transition-all checked:border-primary checked:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-1"
           />
-          <svg
-            className="pointer-events-none absolute left-0.5 top-0.5 hidden h-4 w-4 text-white peer-checked:block"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={3}
-          >
+          <svg className="pointer-events-none absolute left-0.5 top-0.5 hidden h-4 w-4 text-white peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <span className="text-sm text-muted">Price is negotiable</span>
       </label>
 
-      {/* Mini summary */}
       <div className="rounded-2xl border border-border bg-surface-subtle p-5 space-y-3">
         <h3 className="text-sm font-semibold text-heading">Listing Summary</h3>
         <div className="grid grid-cols-2 gap-y-2 text-sm">
@@ -911,7 +717,7 @@ function Step5({ formData, onChange, mediaItems }) {
       </div>
 
       <div className="rounded-xl border border-accent/20 bg-accent-soft/50 p-4 text-sm text-muted">
-        Your listing will be reviewed by the DCDH team and go live within 24 hours.
+        Saving changes will resubmit your listing for review. It will go live again within 24 hours.
       </div>
     </div>
   );
@@ -925,33 +731,19 @@ function ProgressBar({ step }) {
       {STEPS.map((label, index) => (
         <div key={label} className="flex flex-1 items-center">
           <div className="flex flex-col items-center">
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                step > index + 1
-                  ? "bg-verified text-white"
-                  : step === index + 1
-                  ? "bg-primary text-white"
-                  : "bg-surface-subtle text-muted"
-              }`}
-            >
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
+              step > index + 1 ? "bg-verified text-white" : step === index + 1 ? "bg-primary text-white" : "bg-surface-subtle text-muted"
+            }`}>
               {step > index + 1 ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-              ) : (
-                index + 1
-              )}
+              ) : (index + 1)}
             </div>
-            <span className={`mt-1 hidden text-xs sm:block ${step >= index + 1 ? "text-heading" : "text-muted"}`}>
-              {label}
-            </span>
+            <span className={`mt-1 hidden text-xs sm:block ${step >= index + 1 ? "text-heading" : "text-muted"}`}>{label}</span>
           </div>
           {index < STEPS.length - 1 && (
-            <div
-              className={`mx-2 h-0.5 flex-1 transition-all ${
-                step > index + 1 ? "bg-verified" : "bg-border"
-              }`}
-            />
+            <div className={`mx-2 h-0.5 flex-1 transition-all ${step > index + 1 ? "bg-verified" : "bg-border"}`} />
           )}
         </div>
       ))}
@@ -961,18 +753,69 @@ function ProgressBar({ step }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function PostPropertyPage() {
+export default function EditPropertyPage({ params }) {
   const router = useRouter();
+  const [slug, setSlug] = useState(null);
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [formData, setFormData] = useState(null);
   const [mediaItems, setMediaItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const onChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  useEffect(() => {
+    params.then((p) => setSlug(p.slug));
+  }, [params]);
+
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/properties/mine/${slug}`)
+      .then((r) => r.json())
+      .then(({ property: p }) => {
+        if (!p) return;
+        const amenities = Array.isArray(p.amenities) ? p.amenities : JSON.parse(p.amenities || "[]");
+        setFormData({
+          title: p.title || "",
+          category: p.category || "residential",
+          transactionType: p.transaction_type || "rent",
+          propertyType: p.property_type || "",
+          bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
+          bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
+          balconies: p.balconies != null ? String(p.balconies) : "",
+          furnishing: p.furnishing || "",
+          floorNumber: p.floor_number != null ? String(p.floor_number) : "",
+          totalFloors: p.total_floors != null ? String(p.total_floors) : "",
+          parkingSlots: p.parking_slots != null ? String(p.parking_slots) : "0",
+          ageOfProperty: p.age_of_property || "",
+          possessionStatus: p.possession_status || "Ready to Move",
+          stateId: p.state_id || "",
+          cityId: p.city_id || "",
+          localityId: p.locality_id || "",
+          addressLine1: p.address_line1 || "",
+          addressLine2: p.address_line2 || "",
+          pincode: p.pincode || "",
+          googleMapsUrl: p.google_maps_url || "",
+          description: p.description || "",
+          areaSqft: p.area_sqft != null ? String(p.area_sqft) : "",
+          carpetAreaSqft: p.carpet_area_sqft != null ? String(p.carpet_area_sqft) : "",
+          facing: p.facing || "",
+          availableFrom: p.available_from ? p.available_from.split("T")[0] : "",
+          amenities,
+          price: p.price != null ? String(p.price) : "",
+          rentDeposit: p.rent_deposit != null ? String(p.rent_deposit) : "",
+          securityDeposit: p.security_deposit != null ? String(p.security_deposit) : "",
+          maintenanceCharge: p.maintenance_charge != null ? String(p.maintenance_charge) : "",
+          priceNegotiable: p.price_negotiable || false,
+        });
+        const media = p.media || [];
+        setMediaItems(media.map((m) => ({ url: m.media_url, isPrimary: m.is_primary, preview: m.media_url, mediaType: m.media_type || "image" })));
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, [slug]);
+
+  const onChange = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
 
   const validateStep = () => {
     setError("");
@@ -994,10 +837,7 @@ export default function PostPropertyPage() {
 
   const next = () => {
     const err = validateStep();
-    if (err) {
-      setError(err);
-      return;
-    }
+    if (err) { setError(err); return; }
     setStep((s) => Math.min(s + 1, 5));
   };
 
@@ -1005,17 +845,14 @@ export default function PostPropertyPage() {
 
   const handleSubmit = async () => {
     const err = validateStep();
-    if (err) {
-      setError(err);
-      return;
-    }
+    if (err) { setError(err); return; }
 
     setIsSubmitting(true);
     setError("");
 
     try {
-      const res = await fetch("/api/properties", {
-        method: "POST",
+      const res = await fetch(`/api/properties/mine/${slug}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -1024,13 +861,9 @@ export default function PostPropertyPage() {
       });
 
       const data = await res.json();
+      if (!res.ok) { setError(data.error || "Failed to save changes. Please try again."); return; }
 
-      if (!res.ok) {
-        setError(data.error || "Failed to post property. Please try again.");
-        return;
-      }
-
-      router.push(`/properties/${data.slug}`);
+      router.push(`/dashboard/owner/properties/${slug}`);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -1038,27 +871,40 @@ export default function PostPropertyPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-2xl space-y-4">
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-subtle" />
+          <div className="h-96 animate-pulse rounded-2xl border border-border bg-surface-white" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <div className="min-h-screen bg-surface px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-surface-white p-12 text-center">
+          <p className="text-sm text-muted">Property not found or you don&apos;t have permission to edit it.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-surface px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-2xl">
-        {/* Header */}
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5">
-            <span className="text-xs font-medium tracking-elegant text-primary-soft uppercase">
-              Post a Property
-            </span>
+            <span className="text-xs font-medium tracking-elegant text-primary-soft uppercase">Edit Property</span>
           </div>
-          <h1 className="mb-2 text-2xl font-semibold text-heading sm:text-3xl">
-            List your property
-          </h1>
-          <p className="text-sm text-muted">
-            Fill in the details to get your property in front of verified tenants.
-          </p>
+          <h1 className="mb-2 text-2xl font-semibold text-heading sm:text-3xl">Update your listing</h1>
+          <p className="text-sm text-muted">Changes will be reviewed and go live within 24 hours.</p>
         </div>
 
         <ProgressBar step={step} />
 
-        {/* Form Card */}
         <div className="rounded-2xl border border-border bg-surface-white p-6 shadow-soft sm:p-8">
           {step === 1 && <Step1 formData={formData} onChange={onChange} />}
           {step === 2 && <Step2 formData={formData} onChange={onChange} />}
@@ -1066,11 +912,8 @@ export default function PostPropertyPage() {
           {step === 4 && <Step4 mediaItems={mediaItems} setMediaItems={setMediaItems} onUploadingChange={setIsUploading} />}
           {step === 5 && <Step5 formData={formData} onChange={onChange} mediaItems={mediaItems} />}
 
-          {error && (
-            <p className="mt-4 text-xs text-red-500">{error}</p>
-          )}
+          {error && <p className="mt-4 text-xs text-red-500">{error}</p>}
 
-          {/* Navigation */}
           <div className={`mt-8 flex gap-3 ${step === 1 ? "justify-end" : "justify-between"}`}>
             {step > 1 && (
               <button
@@ -1106,10 +949,10 @@ export default function PostPropertyPage() {
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Posting...
+                    Saving...
                   </span>
                 ) : (
-                  "Post Property"
+                  "Save Changes"
                 )}
               </button>
             )}

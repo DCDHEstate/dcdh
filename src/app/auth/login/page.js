@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 function WhatsAppIcon({ className }) {
   return (
@@ -360,6 +361,7 @@ function OtpStep({ phone, onBack, onSuccess }) {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
 
@@ -368,7 +370,8 @@ function LoginContent() {
     setStep("otp");
   };
 
-  const handleSuccess = (redirectTo) => {
+  const handleSuccess = async (redirectTo) => {
+    await refreshUser();
     const redirect = searchParams.get("redirect");
     router.push(redirect || redirectTo);
   };
