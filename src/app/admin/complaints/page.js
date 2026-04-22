@@ -95,8 +95,66 @@ export default function AdminComplaintsPage() {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft">
+      {/* Mobile cards */}
+      <div className="sm:hidden">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-surface-white" />
+            ))}
+          </div>
+        ) : complaints.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-surface-white p-10 text-center text-sm text-muted">No complaints found.</div>
+        ) : (
+          <div className="space-y-3">
+            {complaints.map((c) => (
+              <div key={c.id} className="rounded-2xl border border-border bg-surface-white p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link href={`/admin/complaints/${c.id}`} className="block truncate font-medium text-accent hover:underline">
+                      {c.title}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-muted">{c.category.replace("_", " ")} · {new Date(c.created_at).toLocaleDateString("en-IN")}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_COLORS[c.status] || "bg-gray-100 text-gray-600"}`}>
+                    {c.status.replace("_", " ")}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-subtle">Property</p>
+                    <p className="truncate text-body">{c.property_title}</p>
+                  </div>
+                  <div>
+                    <p className="text-subtle">Priority</p>
+                    <span className={`font-semibold capitalize ${PRIORITY_COLORS[c.priority]}`}>{c.priority}</span>
+                  </div>
+                  <div>
+                    <p className="text-subtle">Tenant</p>
+                    <p className="text-body">{c.tenant_name}</p>
+                    <p className="text-muted">{c.tenant_phone}</p>
+                  </div>
+                </div>
+                <div className="mt-3 border-t border-border-light pt-3">
+                  <select
+                    defaultValue=""
+                    onChange={(e) => e.target.value && updateStatus(c.id, e.target.value)}
+                    className="w-full rounded-lg border border-border bg-surface-white px-3 py-2 text-xs outline-none focus:border-accent"
+                  >
+                    <option value="" disabled>Update status…</option>
+                    {STATUS_OPTIONS.filter((s) => s !== c.status).map((s) => (
+                      <option key={s} value={s}>{s.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-surface-subtle">

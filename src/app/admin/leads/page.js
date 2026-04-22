@@ -121,7 +121,7 @@ export default function AdminLeadsPage() {
           placeholder="Search name, phone, or property..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="rounded-xl border border-border bg-surface-white px-4 py-2 text-sm text-body placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent sm:w-72"
+          className="w-full rounded-xl border border-border bg-surface-white px-4 py-2 text-sm text-body placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent sm:w-72"
         />
       </div>
 

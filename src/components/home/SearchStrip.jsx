@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 const BUDGET_OPTIONS_RENT = [
@@ -44,12 +44,87 @@ const PROPERTY_TYPES = {
 };
 
 const POPULAR_TAGS = [
-  { label: '2 BHK', params: { bedrooms: '2' } },
-  { label: '3 BHK', params: { bedrooms: '3' } },
+  { label: '2 BHK in Jaipur', params: { bedrooms: '2' } },
+  { label: '3 BHK in Jaipur', params: { bedrooms: '3' } },
   { label: 'Villa', params: { propertyType: 'villa' } },
   { label: 'Furnished', params: { furnishing: 'furnished' } },
   { label: 'Under 15K', params: { transactionType: 'rent', priceMax: '15000' } },
 ];
+
+const PinIcon = () => (
+  <svg className="h-3 w-3 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 21s-7-6.75-7-11a7 7 0 1114 0c0 4.25-7 11-7 11z" />
+    <circle cx="12" cy="10" r="2" strokeWidth={1.8} />
+  </svg>
+);
+
+const SearchArrow = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  </svg>
+);
+
+function Dropdown({ label, value, options, onChange, placeholder, align = 'left' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const selected = options.find(o => (o.value ?? o.id) === value);
+  const displayLabel = selected ? (selected.label ?? selected.name) : placeholder;
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative flex min-w-0 flex-1 flex-col justify-center px-3 py-3 sm:px-5 sm:py-4">
+      <span className="mb-1 text-[10px] font-semibold tracking-widest text-subtle">{label}</span>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between gap-2 bg-transparent text-left focus:outline-none"
+      >
+        <span className="truncate text-sm font-medium text-body">{displayLabel}</span>
+        <svg
+          className={`h-3.5 w-3.5 shrink-0 text-subtle transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className={`absolute top-full z-50 mt-1 min-w-40 max-h-56 overflow-y-auto rounded-xl border border-gray-100 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)] ${align === 'right' ? 'right-0' : 'left-0'}`}>
+          {options.map(opt => {
+            const optValue = opt.value ?? opt.id;
+            const optLabel = opt.label ?? opt.name;
+            const isSelected = optValue === value;
+            return (
+              <button
+                key={optValue ?? optLabel}
+                type="button"
+                onClick={() => { onChange(optValue); setOpen(false); }}
+                className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors duration-150 ${
+                  isSelected
+                    ? 'bg-gray-50 font-semibold text-gray-900'
+                    : 'font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                {optLabel}
+                {isSelected && (
+                  <svg className="h-3.5 w-3.5 shrink-0 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SearchStrip({ embedded = false }) {
   const router = useRouter();
@@ -62,23 +137,19 @@ export default function SearchStrip({ embedded = false }) {
   const [cities, setCities] = useState([]);
   const [localities, setLocalities] = useState([]);
 
-  // Fetch states then cities on mount
   useEffect(() => {
     fetch('/api/locations/states')
       .then(r => r.json())
       .then(data => {
         const states = data.states || [];
         if (states.length === 0) return;
-        // Use first active state (Rajasthan)
-        const stateId = states[0].id;
-        return fetch(`/api/locations/cities?state_id=${stateId}`);
+        return fetch(`/api/locations/cities?state_id=${states[0].id}`);
       })
       .then(r => r?.json())
       .then(data => {
         if (!data) return;
         const list = data.cities || [];
         setCities(list);
-        // Default to Jaipur if available
         const jaipur = list.find(c => c.name?.toLowerCase() === 'jaipur');
         if (jaipur) setCityId(jaipur.id);
         else if (list.length > 0) setCityId(list[0].id);
@@ -86,202 +157,123 @@ export default function SearchStrip({ embedded = false }) {
       .catch(() => {});
   }, []);
 
-  // Fetch localities when city changes
   useEffect(() => {
-    if (!cityId) {
-      setLocalities([]);
-      setLocalityId('');
-      return;
-    }
+    if (!cityId) { setLocalities([]); setLocalityId(''); return; }
     fetch(`/api/locations/localities?city_id=${cityId}`)
       .then(r => r.json())
-      .then(data => {
-        setLocalities(data.localities || []);
-        setLocalityId('');
-      })
+      .then(data => { setLocalities(data.localities || []); setLocalityId(''); })
       .catch(() => {});
   }, [cityId]);
 
-  // Reset property type when tab changes
-  useEffect(() => {
-    setPropertyType('');
-    setBudgetIdx(0);
-  }, [searchType]);
+  useEffect(() => { setPropertyType(''); setBudgetIdx(0); }, [searchType]);
 
   const budgetOptions = searchType === 'buy' ? BUDGET_OPTIONS_BUY : BUDGET_OPTIONS_RENT;
   const propertyTypes = PROPERTY_TYPES[searchType] || PROPERTY_TYPES.rent;
 
   const buildSearchUrl = (extraParams = {}) => {
     const params = new URLSearchParams();
-
-    // Tab mapping
-    if (searchType === 'commercial') {
-      params.set('category', 'commercial');
-    } else {
-      params.set('transactionType', searchType);
-    }
-
+    if (searchType === 'commercial') params.set('category', 'commercial');
+    else params.set('transactionType', searchType);
     if (cityId) params.set('cityId', cityId);
     if (localityId) params.set('localityId', localityId);
     if (propertyType) params.set('propertyType', propertyType);
-
     const budget = budgetOptions[budgetIdx];
     if (budget?.min) params.set('priceMin', budget.min);
     if (budget?.max) params.set('priceMax', budget.max);
-
-    // Merge extra params (from popular tags)
-    Object.entries(extraParams).forEach(([k, v]) => {
-      if (v) params.set(k, v);
-    });
-
+    Object.entries(extraParams).forEach(([k, v]) => { if (v) params.set(k, v); });
     return `/search?${params.toString()}`;
   };
 
-  const handleSearch = () => {
-    router.push(buildSearchUrl());
-  };
+  const handleSearch = () => router.push(buildSearchUrl());
+  const handleTagClick = (tagParams) => router.push(buildSearchUrl(tagParams));
 
-  const handleTagClick = (tagParams) => {
-    router.push(buildSearchUrl(tagParams));
+  const TABS = [
+    { id: 'rent', label: 'RENT' },
+    { id: 'buy', label: 'BUY' },
+    { id: 'commercial', label: 'COMMERCIAL' },
+  ];
+
+  const budgetDropdownOptions = budgetOptions.map((opt, i) => ({ value: String(i), label: opt.label }));
+
+  const dropdownProps = {
+    city: { label: 'CITY', value: cityId, options: cities, onChange: setCityId, placeholder: 'Select City' },
+    locality: { label: 'LOCALITY', value: localityId, options: [{ id: '', name: 'All Localities' }, ...localities], onChange: setLocalityId, placeholder: 'All Localities' },
+    propertyType: { label: 'PROPERTY TYPE', value: propertyType, options: propertyTypes, onChange: setPropertyType, placeholder: 'All Types' },
+    budget: { label: 'BUDGET', value: String(budgetIdx), options: budgetDropdownOptions, onChange: (v) => setBudgetIdx(Number(v)), placeholder: 'Any Budget' },
   };
 
   return (
     <section className={`relative z-10 ${embedded ? 'pb-12 pt-4' : '-mt-32 pb-16'}`}>
       <div className={`mx-auto px-4 ${embedded ? 'max-w-6xl' : 'max-w-5xl'}`}>
-        <div className={`reveal-scale relative overflow-hidden rounded-2xl p-8 shadow-premium md:p-10 ${embedded ? 'bg-white/95 backdrop-blur-sm' : 'bg-white'}`}>
-          {/* Top accent line */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-accent/40 to-transparent rounded-full" />
 
-          {/* Tabs */}
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-full glass-badge p-1">
-              {[
-                { id: 'rent', label: 'Rent' },
-                { id: 'buy', label: 'Buy' },
-                { id: 'commercial', label: 'Commercial' },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSearchType(tab.id)}
-                  className={`rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 ${
-                    searchType === tab.id
-                      ? 'bg-primary text-white shadow-sm ring-2 ring-accent/20 ring-offset-2 ring-offset-surface-white'
-                      : 'text-muted hover:text-body'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        {/* Tabs */}
+        <div className="flex">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setSearchType(tab.id)}
+              className={`rounded-t-xl px-4 sm:px-7 py-2.5 text-[10px] font-semibold tracking-widest transition-colors duration-200 ${
+                searchType === tab.id
+                  ? 'bg-white text-gray-900 shadow-[0_-1px_4px_rgba(0,0,0,0.06)]'
+                  : 'bg-gray-300/80 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="reveal-scale overflow-visible rounded-b-2xl rounded-tr-2xl bg-white shadow-premium">
+
+          {/* Mobile layout: 1×4 stack + full-width search button */}
+          <div className="sm:hidden">
+            <div className="flex flex-col divide-y divide-border-light">
+              <Dropdown {...dropdownProps.city} align="left" />
+              <Dropdown {...dropdownProps.locality} align="left" />
+              <Dropdown {...dropdownProps.propertyType} align="left" />
+              <Dropdown {...dropdownProps.budget} align="left" />
             </div>
+            <button
+              onClick={handleSearch}
+              className="flex w-full items-center justify-center gap-2 border-t border-border-light py-4 text-sm font-semibold rounded-b-2xl transition-opacity duration-200 active:opacity-70"
+              style={{ backgroundColor: '#e8a87c', color: '#5a2d0c' }}
+            >
+              Search
+              <SearchArrow />
+            </button>
           </div>
 
-          {/* Search Fields */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            {/* City */}
-            <div>
-              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">CITY</label>
-              <div className="relative">
-                <select
-                  value={cityId}
-                  onChange={(e) => setCityId(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle"
-                >
-                  <option value="">Select City</option>
-                  {cities.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Locality */}
-            <div>
-              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">LOCALITY</label>
-              <div className="relative">
-                <select
-                  value={localityId}
-                  onChange={(e) => setLocalityId(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle"
-                >
-                  <option value="">All Localities</option>
-                  {localities.map(l => (
-                    <option key={l.id} value={l.id}>{l.name}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Property Type */}
-            <div>
-              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">PROPERTY TYPE</label>
-              <div className="relative">
-                <select
-                  value={propertyType}
-                  onChange={(e) => setPropertyType(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle"
-                >
-                  {propertyTypes.map(pt => (
-                    <option key={pt.value} value={pt.value}>{pt.label}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Budget */}
-            <div>
-              <label className="mb-2 block text-[11px] font-medium tracking-elegant text-subtle">BUDGET</label>
-              <div className="relative">
-                <select
-                  value={budgetIdx}
-                  onChange={(e) => setBudgetIdx(Number(e.target.value))}
-                  className="w-full appearance-none rounded-xl border border-border bg-surface-input px-4 py-3.5 text-sm text-body transition-all duration-300 focus:border-primary-muted focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-surface-subtle"
-                >
-                  {budgetOptions.map((opt, i) => (
-                    <option key={i} value={i}>{opt.label}</option>
-                  ))}
-                </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Search Button */}
-            <div className="flex items-end">
-              <button
-                onClick={handleSearch}
-                className="btn-premium flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-white shadow-premium transition-all duration-300 hover:bg-primary-hover"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Search
-              </button>
-            </div>
+          {/* Desktop layout: horizontal flex row */}
+          <div className="hidden sm:flex sm:items-stretch sm:divide-x sm:divide-border-light overflow-visible rounded-b-2xl rounded-tr-2xl">
+            <Dropdown {...dropdownProps.city} align="left" />
+            <Dropdown {...dropdownProps.locality} align="left" />
+            <Dropdown {...dropdownProps.propertyType} align="left" />
+            <Dropdown {...dropdownProps.budget} align="right" />
+            <button
+              onClick={handleSearch}
+              className="flex items-center gap-2 self-stretch rounded-br-2xl rounded-tr-2xl px-8 text-sm font-semibold transition-opacity duration-200 hover:opacity-80"
+              style={{ backgroundColor: '#e8a87c', color: '#5a2d0c' }}
+            >
+              Search
+              <SearchArrow />
+            </button>
           </div>
 
-          {/* Popular Tags */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-border-light pt-6">
-            <span className="text-xs font-medium text-subtle">Popular:</span>
+          {/* Popular tags row */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border-light bg-gray-50 px-4 sm:px-5 py-3 rounded-b-2xl">
+            <span className="text-[10px] font-semibold tracking-widest text-subtle">POPULAR:</span>
             {POPULAR_TAGS.map(tag => (
               <button
                 key={tag.label}
                 onClick={() => handleTagClick(tag.params)}
-                className="rounded-full border border-border bg-surface-white px-4 py-1.5 text-xs font-medium text-muted transition-all duration-300 hover:border-accent/30 hover:bg-accent-soft/30 hover:text-body"
+                className="flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-2 text-xs font-medium text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 hover:text-body"
               >
+                <PinIcon />
                 {tag.label}
               </button>
             ))}
           </div>
+
         </div>
       </div>
     </section>

@@ -55,6 +55,63 @@ export async function GET(request) {
   }
 }
 
+export async function POST(request) {
+  try {
+    const admin = await getSessionFromRequest(request);
+    if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (admin.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+    const body = await request.json();
+    const { fullName, phone, email, whatsappNumber, role, status = 'active' } = body;
+
+    if (!fullName?.trim()) return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
+    if (!phone?.trim()) return NextResponse.json({ error: 'Phone is required' }, { status: 400 });
+    if (!['owner', 'tenant', 'admin'].includes(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+    }
+
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length !== 10) {
+      return NextResponse.json({ error: 'Phone must be 10 digits' }, { status: 400 });
+    }
+
+    const existing = await sql`SELECT id FROM users WHERE phone = ${cleaned}`;
+    if (existing.length > 0) {
+      return NextResponse.json({ error: 'A user with this phone number already exists' }, { status: 409 });
+    }
+
+    const [newUser] = await sql`
+      INSERT INTO users (phone, full_name, email, whatsapp_number, role, status, is_phone_verified)
+      VALUES (
+        ${cleaned},
+        ${fullName.trim()},
+        ${email?.trim() || null},
+        ${whatsappNumber?.trim() || null},
+        ${role},
+        ${status},
+        TRUE
+      )
+      RETURNING id, phone, full_name, email, role, status
+    `;
+
+    if (role === 'owner') {
+      await sql`INSERT INTO owner_profiles (user_id) VALUES (${newUser.id}) ON CONFLICT DO NOTHING`;
+    } else if (role === 'tenant') {
+      await sql`INSERT INTO tenant_profiles (user_id) VALUES (${newUser.id}) ON CONFLICT DO NOTHING`;
+    }
+
+    await sql`
+      INSERT INTO admin_activity_log (admin_id, action, entity_type, entity_id, details)
+      VALUES (${admin.id}, 'create_user', 'user', ${newUser.id}, ${JSON.stringify({ role })})
+    `;
+
+    return NextResponse.json({ success: true, user: newUser }, { status: 201 });
+  } catch (err) {
+    console.error('[admin-users/POST]', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(request) {
   try {
     const user = await getSessionFromRequest(request);

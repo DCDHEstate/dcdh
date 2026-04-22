@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const ownerNav = [
   { name: "Dashboard", href: "/dashboard/owner", icon: GridIcon },
   { name: "My Properties", href: "/dashboard/owner/properties", icon: BuildingIcon },
+  { name: "Browse Properties", href: "/search", icon: SearchIcon },
   { name: "Post Property", href: "/dashboard/owner/post-property", icon: PlusIcon },
   { name: "Leads", href: "/dashboard/owner/leads", icon: InboxIcon },
   { name: "Tenancies", href: "/dashboard/owner/tenancies", icon: DocumentIcon },
@@ -56,7 +57,7 @@ export default function DashboardSidebar() {
       <div className="flex flex-1 flex-col px-4 py-6">
         {/* User info */}
         <div className="mb-6 flex items-center gap-3 rounded-xl bg-surface-subtle px-4 py-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-dark text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-accent to-accent-dark text-sm font-semibold text-white">
             {initials}
           </div>
           <div className="min-w-0 flex-1">

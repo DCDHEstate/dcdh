@@ -8,7 +8,9 @@
       "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/admin/properties/[slug])",
       "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/dashboard/owner/properties/[slug])",
       "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/admin/properties/[slug])",
-      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/properties/mine/[slug])"
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/properties/mine/[slug])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/admin/users/\\\\[id\\\\])",
+      "Bash(mkdir -p /Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/admin/users/\\\\[id\\\\])"
     ],
     "additionalDirectories": [
       "/Users/siddharth/Documents/Lancehawks/dcdh/dcdh-estate/src/app/api/complaints/[id]",

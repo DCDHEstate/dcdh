@@ -2,50 +2,121 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 
-const adminNav = [
-  { name: "Home", href: "/admin", icon: GridIcon },
+const allNav = [
+  { name: "Dashboard", href: "/admin", icon: GridIcon },
+  { name: "Properties", href: "/admin/properties", icon: BuildingIcon },
+  { name: "Users", href: "/admin/users", icon: UsersIcon },
+  { name: "Leads", href: "/admin/leads", icon: InboxIcon },
   { name: "Tenancies", href: "/admin/tenancies", icon: DocumentIcon },
   { name: "Rent", href: "/admin/rent-payments", icon: CurrencyIcon },
   { name: "Complaints", href: "/admin/complaints", icon: ExclamationIcon },
-  { name: "More", href: "/admin/settings", icon: MoreIcon },
+  { name: "Referrals", href: "/admin/referrals", icon: GiftIcon },
+  { name: "Settings", href: "/admin/settings", icon: CogIcon },
 ];
 
 export default function AdminBottomNav() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (href) => {
     if (href === "/admin") return pathname === href;
     return pathname.startsWith(href);
   };
 
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
+
+  const initials = user?.full_name
+    ? user.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.phone?.slice(-2) || "A";
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border-light bg-surface-white/95 backdrop-blur-xl lg:hidden">
-      <div className="flex items-center justify-around px-2 py-2">
-        {adminNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 transition-all ${
-              isActive(item.href) ? "text-accent-dark" : "text-muted"
-            }`}
-          >
-            <item.icon
-              className={`h-6 w-6 ${
-                isActive(item.href) ? "text-accent-dark" : ""
-              }`}
-            />
-            <span
-              className={`text-[10px] font-medium ${
-                isActive(item.href) ? "text-accent-dark" : ""
+    <>
+      {/* Backdrop */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+
+      {/* Slide-up drawer */}
+      <div
+        className={`fixed inset-x-0 bottom-15 z-50 rounded-t-2xl border-t border-border-light bg-surface-white shadow-premium transition-transform duration-300 ease-in-out lg:hidden ${
+          drawerOpen ? "translate-y-0 visible pointer-events-auto" : "translate-y-full invisible pointer-events-none"
+        }`}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="h-1 w-10 rounded-full bg-border" />
+        </div>
+
+        <nav className="px-4 pb-2 pt-1">
+          {allNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                isActive(item.href)
+                  ? "bg-accent-soft text-accent-dark"
+                  : "text-muted hover:bg-surface-subtle hover:text-heading"
               }`}
             >
+              <item.icon className="h-5 w-5 shrink-0" />
               {item.name}
-            </span>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="border-t border-border-light px-4 py-3">
+          <button
+            onClick={() => { setDrawerOpen(false); logout(); }}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted transition-all hover:bg-red-50 hover:text-red-500"
+          >
+            <LogoutIcon className="h-5 w-5" />
+            Sign Out
+          </button>
+        </div>
       </div>
-    </nav>
+
+      {/* Bottom bar */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border-light bg-surface-white lg:hidden" style={{ height: 60 }}>
+        <div className="flex h-full items-center justify-between px-4">
+          {/* User info */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-light to-primary text-sm font-semibold text-white">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-heading leading-tight">
+                {user?.full_name || "Admin"}
+              </p>
+              <p className="text-xs text-muted leading-tight">Admin Panel</p>
+            </div>
+          </div>
+
+          {/* Menu button */}
+          <button
+            onClick={() => setDrawerOpen((v) => !v)}
+            className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+              drawerOpen ? "bg-accent-soft text-accent-dark" : "text-muted hover:bg-surface-subtle"
+            }`}
+            aria-label="Open menu"
+          >
+            {drawerOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }
 
@@ -107,10 +178,10 @@ function ExclamationIcon({ className }) {
   );
 }
 
-function MoreIcon({ className }) {
+function GiftIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
     </svg>
   );
 }
@@ -120,6 +191,30 @@ function CogIcon({ className }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function MenuIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function LogoutIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
     </svg>
   );
 }

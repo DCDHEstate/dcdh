@@ -5,12 +5,8 @@ import { getSessionFromRequest } from '@/lib/session';
 export async function GET(request) {
   try {
     const user = await getSessionFromRequest(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -21,7 +17,6 @@ export async function GET(request) {
     const offset = (page - 1) * limit;
 
     const conditions = [sql`1=1`];
-
     if (status) conditions.push(sql`p.status = ${status}`);
     if (cityId) conditions.push(sql`p.city_id = ${cityId}::uuid`);
     if (q) conditions.push(sql`(p.title ILIKE ${'%' + q + '%'} OR p.description ILIKE ${'%' + q + '%'})`);
@@ -34,14 +29,20 @@ export async function GET(request) {
         p.price, p.status, p.bedrooms, p.area_sqft,
         p.created_at, p.view_count, p.inquiry_count,
         p.reviewed_by, p.reviewed_at, p.rejection_reason,
-        u.full_name as owner_name, u.phone as owner_phone,
-        c.name as city_name, l.name as locality_name,
-        pm.media_url as primary_image
+        p.sold_out_date, p.sold_to_user_id,
+        u.full_name  AS owner_name,
+        u.phone      AS owner_phone,
+        c.name       AS city_name,
+        l.name       AS locality_name,
+        pm.media_url AS primary_image,
+        buyer.full_name AS buyer_name,
+        buyer.phone     AS buyer_phone
       FROM properties p
-      JOIN users u ON u.id = p.owner_id
-      JOIN cities c ON c.id = p.city_id
-      JOIN localities l ON l.id = p.locality_id
+      JOIN users      u  ON u.id  = p.owner_id
+      JOIN cities     c  ON c.id  = p.city_id
+      JOIN localities l  ON l.id  = p.locality_id
       LEFT JOIN property_media pm ON pm.property_id = p.id AND pm.is_primary = true
+      LEFT JOIN users buyer ON buyer.id = p.sold_to_user_id
       WHERE ${where}
       ORDER BY
         CASE p.status WHEN 'pending_approval' THEN 0 ELSE 1 END,
@@ -49,18 +50,11 @@ export async function GET(request) {
       LIMIT ${limit} OFFSET ${offset}
     `;
 
-    const countResult = await sql`
-      SELECT COUNT(*)::int as total
-      FROM properties p
-      WHERE ${where}
+    const [{ total }] = await sql`
+      SELECT COUNT(*)::int AS total FROM properties p WHERE ${where}
     `;
 
-    return NextResponse.json({
-      properties,
-      total: countResult[0].total,
-      page,
-      limit,
-    });
+    return NextResponse.json({ properties, total, page, limit });
   } catch (err) {
     console.error('[admin-properties/GET]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -70,29 +64,25 @@ export async function GET(request) {
 export async function PATCH(request) {
   try {
     const user = await getSessionFromRequest(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json();
-    const { propertyId, action, rejectionReason } = body;
+    const { propertyId, action, rejectionReason, soldOutDate, buyerPhone } = body;
 
     if (!propertyId || !action) {
       return NextResponse.json({ error: 'propertyId and action are required' }, { status: 400 });
     }
 
-    if (!['approve', 'reject'].includes(action)) {
-      return NextResponse.json({ error: 'action must be approve or reject' }, { status: 400 });
+    const VALID_ACTIONS = ['approve', 'reject', 'deactivate', 'reactivate', 'mark_sold_out', 'archive'];
+    if (!VALID_ACTIONS.includes(action)) {
+      return NextResponse.json({ error: `action must be one of: ${VALID_ACTIONS.join(', ')}` }, { status: 400 });
     }
 
-    // Verify property exists
-    const property = await sql`SELECT id, status FROM properties WHERE id = ${propertyId}`;
-    if (property.length === 0) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
-    }
+    const [property] = await sql`SELECT id, status FROM properties WHERE id = ${propertyId}`;
+    if (!property) return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+
+    let logAction = action;
 
     if (action === 'approve') {
       await sql`
@@ -100,21 +90,67 @@ export async function PATCH(request) {
         SET status = 'active', reviewed_by = ${user.id}, reviewed_at = NOW()
         WHERE id = ${propertyId}
       `;
-    } else {
-      if (!rejectionReason) {
+
+    } else if (action === 'reject') {
+      if (!rejectionReason?.trim()) {
         return NextResponse.json({ error: 'rejectionReason is required for rejection' }, { status: 400 });
       }
       await sql`
         UPDATE properties
-        SET status = 'rejected', reviewed_by = ${user.id}, reviewed_at = NOW(), rejection_reason = ${rejectionReason}
+        SET status = 'rejected', reviewed_by = ${user.id}, reviewed_at = NOW(),
+            rejection_reason = ${rejectionReason}
+        WHERE id = ${propertyId}
+      `;
+
+    } else if (action === 'deactivate') {
+      await sql`
+        UPDATE properties
+        SET status = 'inactive', reviewed_by = ${user.id}, reviewed_at = NOW()
+        WHERE id = ${propertyId}
+      `;
+
+    } else if (action === 'reactivate') {
+      await sql`
+        UPDATE properties
+        SET status = 'active', reviewed_by = ${user.id}, reviewed_at = NOW()
+        WHERE id = ${propertyId}
+      `;
+
+    } else if (action === 'mark_sold_out') {
+      if (!soldOutDate) {
+        return NextResponse.json({ error: 'soldOutDate is required for mark_sold_out' }, { status: 400 });
+      }
+
+      let soldToUserId = null;
+      if (buyerPhone?.trim()) {
+        const [buyer] = await sql`SELECT id FROM users WHERE phone = ${buyerPhone.trim()}`;
+        if (!buyer) {
+          return NextResponse.json({ error: 'No user found with that phone number' }, { status: 404 });
+        }
+        soldToUserId = buyer.id;
+      }
+
+      await sql`
+        UPDATE properties
+        SET status = 'sold_out', sold_out_date = ${soldOutDate}, sold_to_user_id = ${soldToUserId},
+            reviewed_by = ${user.id}, reviewed_at = NOW()
+        WHERE id = ${propertyId}
+      `;
+
+    } else if (action === 'archive') {
+      await sql`
+        UPDATE properties
+        SET status = 'archived', reviewed_by = ${user.id}, reviewed_at = NOW()
         WHERE id = ${propertyId}
       `;
     }
 
-    // Log admin activity
     await sql`
       INSERT INTO admin_activity_log (admin_id, action, entity_type, entity_id, details)
-      VALUES (${user.id}, ${action === 'approve' ? 'approve_property' : 'reject_property'}, 'property', ${propertyId}, ${JSON.stringify({ rejectionReason: rejectionReason || null })})
+      VALUES (
+        ${user.id}, ${logAction}, 'property', ${propertyId},
+        ${JSON.stringify({ rejectionReason: rejectionReason || null, soldOutDate: soldOutDate || null })}
+      )
     `;
 
     return NextResponse.json({ success: true, action });

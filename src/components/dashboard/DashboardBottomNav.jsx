@@ -3,71 +3,154 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 
 const ownerNav = [
-  { name: "Home", href: "/dashboard/owner", icon: GridIcon },
-  { name: "Properties", href: "/dashboard/owner/properties", icon: BuildingIcon },
-  { name: "Post", href: "/dashboard/owner/post-property", icon: PlusCircleIcon, accent: true },
+  { name: "Dashboard", href: "/dashboard/owner", icon: GridIcon },
+  { name: "My Properties", href: "/dashboard/owner/properties", icon: BuildingIcon },
+  { name: "Post Property", href: "/dashboard/owner/post-property", icon: PlusIcon },
+  { name: "Browse Properties", href: "/search", icon: SearchIcon },
+  { name: "Leads", href: "/dashboard/owner/leads", icon: InboxIcon },
   { name: "Tenancies", href: "/dashboard/owner/tenancies", icon: DocumentIcon },
-  { name: "More", href: "/dashboard/owner/profile", icon: MoreIcon },
+  { name: "Rent", href: "/dashboard/owner/rent", icon: CurrencyIcon },
+  { name: "Complaints", href: "/dashboard/owner/complaints", icon: ExclamationIcon },
+  { name: "Refer & Earn", href: "/dashboard/owner/referrals", icon: GiftIcon },
+  { name: "Wallet", href: "/dashboard/owner/wallet", icon: WalletIcon },
+  { name: "Profile", href: "/dashboard/owner/profile", icon: UserIcon },
 ];
 
 const tenantNav = [
-  { name: "Home", href: "/dashboard/tenant", icon: GridIcon },
-  { name: "Tenancy", href: "/dashboard/tenant/tenancy", icon: DocumentIcon },
+  { name: "Dashboard", href: "/dashboard/tenant", icon: GridIcon },
+  { name: "Browse Properties", href: "/search", icon: SearchIcon },
+  { name: "Saved", href: "/dashboard/tenant/saved", icon: HeartIcon },
+  { name: "My Tenancy", href: "/dashboard/tenant/tenancy", icon: DocumentIcon },
   { name: "Rent", href: "/dashboard/tenant/rent", icon: CurrencyIcon },
   { name: "Complaints", href: "/dashboard/tenant/complaints", icon: ExclamationIcon },
+  { name: "Refer & Earn", href: "/dashboard/tenant/referrals", icon: GiftIcon },
+  { name: "Wallet", href: "/dashboard/tenant/wallet", icon: WalletIcon },
   { name: "Profile", href: "/dashboard/tenant/profile", icon: UserIcon },
 ];
 
 export default function DashboardBottomNav() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const navItems = user?.role === "owner" ? ownerNav : tenantNav;
 
   const isActive = (href) => {
-    if (href === "/dashboard/owner" || href === "/dashboard/tenant") {
-      return pathname === href;
-    }
+    if (href === "/dashboard/owner" || href === "/dashboard/tenant") return pathname === href;
     return pathname.startsWith(href);
   };
 
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
+
+  const initials = user?.full_name
+    ? user.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.phone?.slice(-2) || "U";
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border-light bg-surface-white/95 backdrop-blur-xl lg:hidden">
-      <div className="flex items-center justify-around px-2 py-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 transition-all ${
-              item.accent
-                ? "text-accent"
-                : isActive(item.href)
-                  ? "text-accent-dark"
-                  : "text-muted"
-            }`}
-          >
-            <item.icon
-              className={`h-6 w-6 ${
-                item.accent
-                  ? "text-accent"
-                  : isActive(item.href)
-                    ? "text-accent-dark"
-                    : ""
-              }`}
-            />
-            <span
-              className={`text-[10px] font-medium ${
-                isActive(item.href) ? "text-accent-dark" : ""
+    <>
+      {/* Backdrop */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+
+      {/* Slide-up drawer */}
+      <div
+        className={`fixed inset-x-0 bottom-15 z-50 rounded-t-2xl border-t border-border-light bg-surface-white shadow-premium transition-transform duration-300 ease-in-out lg:hidden ${
+          drawerOpen ? "translate-y-0 visible pointer-events-auto" : "translate-y-full invisible pointer-events-none"
+        }`}
+      >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="h-1 w-10 rounded-full bg-border" />
+        </div>
+
+        {/* Nav items */}
+        <nav className="max-h-[60vh] overflow-y-auto px-4 pb-2 pt-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                isActive(item.href)
+                  ? "bg-accent-soft text-accent-dark"
+                  : "text-muted hover:bg-surface-subtle hover:text-heading"
               }`}
             >
+              <item.icon className="h-5 w-5 shrink-0" />
               {item.name}
-            </span>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Support */}
+        <div className="mx-4 mb-2 rounded-xl border border-border-light bg-surface-subtle p-3">
+          <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-subtle">Need Help?</p>
+          <div className="flex flex-wrap gap-3">
+            <a href="tel:+919257533440" className="flex items-center gap-1.5 text-xs text-body hover:text-accent-dark">
+              <PhoneIcon className="h-3.5 w-3.5 text-muted" />
+              +91 92575 33440
+            </a>
+            <a href="https://wa.me/919257533440" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-body hover:text-green-600">
+              <WhatsAppIcon className="h-3.5 w-3.5 text-green-500" />
+              WhatsApp
+            </a>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="border-t border-border-light px-4 py-3">
+          <button
+            onClick={() => { setDrawerOpen(false); logout(); }}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted transition-all hover:bg-red-50 hover:text-red-500"
+          >
+            <LogoutIcon className="h-5 w-5" />
+            Sign Out
+          </button>
+        </div>
       </div>
-    </nav>
+
+      {/* Bottom bar */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border-light bg-surface-white lg:hidden" style={{ height: 60 }}>
+        <div className="flex h-full items-center justify-between px-4">
+          {/* User info */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-accent to-accent-dark text-sm font-semibold text-white">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-heading leading-tight">
+                {user?.full_name || "Welcome!"}
+              </p>
+              <p className="text-xs capitalize text-muted leading-tight">{user?.role}</p>
+            </div>
+          </div>
+
+          {/* Menu button */}
+          <button
+            onClick={() => setDrawerOpen((v) => !v)}
+            className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+              drawerOpen ? "bg-accent-soft text-accent-dark" : "text-muted hover:bg-surface-subtle"
+            }`}
+            aria-label="Open menu"
+          >
+            {drawerOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }
 
@@ -89,10 +172,10 @@ function BuildingIcon({ className }) {
   );
 }
 
-function PlusCircleIcon({ className }) {
+function PlusIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   );
 }
@@ -101,30 +184,6 @@ function InboxIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-17.5 0V6.75A2.25 2.25 0 014.5 4.5h15A2.25 2.25 0 0121.75 6.75v6.75m-17.5 0v4.5A2.25 2.25 0 006.75 19.5h10.5a2.25 2.25 0 002.25-2.25v-4.5" />
-    </svg>
-  );
-}
-
-function UserIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-    </svg>
-  );
-}
-
-function SearchIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </svg>
-  );
-}
-
-function HeartIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
     </svg>
   );
 }
@@ -153,10 +212,82 @@ function ExclamationIcon({ className }) {
   );
 }
 
-function MoreIcon({ className }) {
+function GiftIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+    </svg>
+  );
+}
+
+function WalletIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 110-6h5.25A2.25 2.25 0 0121 6v6zm0 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v6z" />
+    </svg>
+  );
+}
+
+function UserIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    </svg>
+  );
+}
+
+function HeartIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+    </svg>
+  );
+}
+
+function MenuIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function LogoutIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+    </svg>
+  );
+}
+
+function PhoneIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon({ className }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a47.6 47.6 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
     </svg>
   );
 }

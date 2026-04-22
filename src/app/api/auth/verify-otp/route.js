@@ -101,12 +101,12 @@ export async function POST(request) {
 
     // Determine post-login redirect
     let redirectTo;
-    if (isNewUser) {
+    if (user.role === 'admin') {
+      redirectTo = '/admin';
+    } else if (isNewUser) {
       redirectTo = '/auth/role-select';
     } else if (user.role === 'owner') {
       redirectTo = '/dashboard/owner';
-    } else if (user.role === 'admin') {
-      redirectTo = '/admin';
     } else {
       redirectTo = '/dashboard/tenant';
     }

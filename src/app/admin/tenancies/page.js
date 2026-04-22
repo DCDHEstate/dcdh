@@ -90,8 +90,55 @@ export default function AdminTenanciesPage() {
         />
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft">
+      {/* Mobile cards */}
+      <div className="sm:hidden">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-surface-white" />
+            ))}
+          </div>
+        ) : tenancies.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-surface-white p-10 text-center text-sm text-muted">No tenancies found.</div>
+        ) : (
+          <div className="space-y-3">
+            {tenancies.map((t) => (
+              <div key={t.id} className="rounded-2xl border border-border bg-surface-white p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-heading">{t.property_title}</p>
+                    <p className="text-xs text-muted">{t.owner_name}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_COLORS[t.status] || "bg-gray-100 text-gray-600"}`}>
+                    {t.status}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-subtle">Tenant</p>
+                    <p className="font-medium text-body">{t.tenant_name}</p>
+                    <p className="text-muted">{t.tenant_phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-subtle">Rent</p>
+                    <p className="font-semibold text-heading">₹{Number(t.monthly_rent).toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-subtle">Lease Period</p>
+                    <p className="text-muted">{new Date(t.lease_start_date).toLocaleDateString("en-IN")} — {new Date(t.lease_end_date).toLocaleDateString("en-IN")}</p>
+                  </div>
+                </div>
+                <div className="mt-3 border-t border-border-light pt-3">
+                  <StatusUpdater tenancy={t} onUpdate={fetchTenancies} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-surface-subtle">
@@ -278,7 +325,7 @@ function CreateTenancyForm({ onSuccess, onCancel }) {
         <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Property selector */}
         <div>
           <label className={labelClass}>Property *</label>

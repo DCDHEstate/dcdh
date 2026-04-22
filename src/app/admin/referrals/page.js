@@ -86,7 +86,7 @@ export default function AdminReferralsPage() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search by name, phone, location..."
-          className="w-64 rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent"
+          className="w-full rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent sm:w-64"
         />
         <select
           value={statusFilter}
@@ -109,8 +109,74 @@ export default function AdminReferralsPage() {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft">
+      {/* Mobile cards */}
+      <div className="sm:hidden">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-surface-white" />
+            ))}
+          </div>
+        ) : !data?.referrals?.length ? (
+          <div className="rounded-2xl border border-border bg-surface-white p-10 text-center text-sm text-muted">No referrals found.</div>
+        ) : (
+          <div className="space-y-3">
+            {data.referrals.map((r) => (
+              <div key={r.id} className="rounded-2xl border border-border bg-surface-white p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-heading">{r.referrer_name}</p>
+                    <p className="text-xs text-muted">{r.referrer_phone}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium capitalize text-body">
+                    {r.referral_type}
+                  </span>
+                </div>
+                <div className="mt-3 text-xs">
+                  <p className="text-subtle">Details</p>
+                  {r.referral_type === "friend" ? (
+                    <p className="text-body">{r.referred_user_name || r.referred_phone}</p>
+                  ) : (
+                    <p className="text-body">{r.property_location}{r.property_category && ` · ${r.property_category}`}</p>
+                  )}
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <div>
+                    {r.status === "rewarded" ? (
+                      <div>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS.rewarded}`}>Rewarded</span>
+                        <p className="mt-0.5 text-xs font-medium text-green-600">₹{Number(r.reward_amount).toLocaleString("en-IN")}</p>
+                      </div>
+                    ) : (
+                      <select
+                        value={r.status}
+                        onChange={(e) => updateStatus(r.id, e.target.value)}
+                        className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-medium outline-none ${STATUS_COLORS[r.status]}`}
+                      >
+                        {STATUSES.filter(s => s !== "rewarded").map((s) => (
+                          <option key={s} value={s}>{s.replace("_", " ")}</option>
+                        ))}
+                      </select>
+                    )}
+                    <p className="mt-1 text-xs text-muted">{new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  </div>
+                  {r.status !== "rewarded" && r.status !== "expired" && (
+                    <button
+                      onClick={() => { setRewardModal(r); setRewardAmount(""); }}
+                      className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+                    >
+                      Reward
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface-white shadow-soft sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-surface-subtle">

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import sql from "@/lib/db";
+import PropertyGallery from "@/components/PropertyGallery";
+import SavePropertyButton from "@/components/SavePropertyButton";
 
 async function getProperty(slug) {
   const [property] = await sql`
@@ -88,8 +90,7 @@ export default async function PropertyDetailPage({ params }) {
   const isDraft = property.status === "draft";
   const isRejected = property.status === "rejected";
 
-  const primaryMedia = property.media.find((m) => m.is_primary) || property.media[0];
-  const otherMedia = property.media.filter((m) => !m.is_primary).slice(0, 5);
+  const sortedMedia = [...property.media].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
 
   const whatsappContact = property.whatsapp_number || property.owner_phone;
   const whatsappMessage = encodeURIComponent(
@@ -147,38 +148,7 @@ export default async function PropertyDetailPage({ params }) {
           <div className="space-y-6 lg:col-span-2">
 
             {/* Photo Gallery */}
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface-subtle">
-              {primaryMedia ? (
-                <div className="relative aspect-video w-full overflow-hidden bg-surface-subtle">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={primaryMedia.media_url}
-                    alt={property.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-video w-full items-center justify-center bg-surface-subtle">
-                  <svg className="h-16 w-16 text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              )}
-
-              {otherMedia.length > 0 && (
-                <div className="grid grid-cols-5 gap-1 p-1">
-                  {otherMedia.map((m, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={m.media_url}
-                      alt={`Photo ${i + 2}`}
-                      className="aspect-square w-full rounded-lg object-cover"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <PropertyGallery media={sortedMedia} title={property.title} />
 
             {/* Title + price */}
             <div className="rounded-2xl border border-border bg-surface-white p-6 shadow-soft">
@@ -327,7 +297,13 @@ export default async function PropertyDetailPage({ params }) {
           {/* Right column — contact card */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 rounded-2xl border border-border bg-surface-white p-6 shadow-soft">
-              <h2 className="mb-4 text-base font-semibold text-heading">Contact Owner</h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-base font-semibold text-heading">Contact Owner</h2>
+                <SavePropertyButton
+                  propertyId={property.id}
+                  className="h-9 w-9 border border-border bg-surface-subtle text-muted hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                />
+              </div>
 
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
