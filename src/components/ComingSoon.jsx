@@ -21,7 +21,7 @@ export default function ComingSoon({
             <span className="text-xl font-bold text-accent-light">D</span>
           </div>
           <div>
-            <span className="text-xl font-semibold text-heading-on-dark">DCDH Estate</span>
+            <span className="text-xl font-semibold text-heading-on-dark">DCDH Empire</span>
             <div className="text-[10px] font-medium tracking-elegant text-muted-on-dark">PREMIUM PROPERTIES</div>
           </div>
         </Link> */}

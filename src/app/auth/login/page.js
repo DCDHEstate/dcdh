@@ -62,7 +62,7 @@ function PhoneStep({ onOtpSent }) {
           </span>
         </div>
         <h1 className="mb-2 text-2xl font-semibold text-heading">
-          Sign in to DCDH Estate
+          Sign in to DCDH Empire
         </h1>
         <p className="text-sm text-muted">
           We&apos;ll send a 6-digit OTP to your WhatsApp
@@ -120,7 +120,9 @@ function PhoneStep({ onOtpSent }) {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-surface-white px-4 text-subtle">No password needed</span>
+            <span className="bg-surface-white px-4 text-subtle">
+              No password needed
+            </span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
@@ -130,7 +132,10 @@ function PhoneStep({ onOtpSent }) {
             "WhatsApp-first experience",
             "Referral rewards",
           ].map((benefit) => (
-            <div key={benefit} className="flex items-center gap-2 text-xs text-muted">
+            <div
+              key={benefit}
+              className="flex items-center gap-2 text-xs text-muted"
+            >
               <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-verified/10">
                 <svg
                   className="h-2.5 w-2.5 text-verified"
@@ -139,7 +144,11 @@ function PhoneStep({ onOtpSent }) {
                   stroke="currentColor"
                   strokeWidth={3}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               {benefit}
@@ -192,7 +201,10 @@ function OtpStep({ phone, onBack, onSuccess }) {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (pasted.length === 6) {
       setOtp(pasted.split(""));
       inputRefs.current[5]?.focus();
@@ -271,8 +283,7 @@ function OtpStep({ phone, onBack, onSuccess }) {
         </div>
         <h1 className="mb-2 text-2xl font-semibold text-heading">Enter OTP</h1>
         <p className="text-sm text-muted">
-          Sent to{" "}
-          <span className="font-medium text-body">{maskedPhone}</span>{" "}
+          Sent to <span className="font-medium text-body">{maskedPhone}</span>{" "}
           via WhatsApp
         </p>
       </div>
@@ -334,7 +345,11 @@ function OtpStep({ phone, onBack, onSuccess }) {
             stroke="currentColor"
             strokeWidth={2}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Change number
         </button>
@@ -393,7 +408,12 @@ function LoginContent() {
       {/* Trust badges */}
       <div className="mt-6 flex items-center justify-center gap-6">
         <div className="flex items-center gap-2 text-xs text-subtle">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

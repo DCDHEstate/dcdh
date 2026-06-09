@@ -86,8 +86,8 @@ const contactMethods = [
     ),
     title: "Email",
     description: "Send us an email",
-    value: "support@dcdhestate.com",
-    href: "mailto:support@dcdhestate.com",
+    value: "support@dcdhempire.com",
+    href: "mailto:support@dcdhempire.com",
     colorClass: "accent",
     badge: null,
   },
@@ -102,7 +102,7 @@ const faqs = [
   {
     question: "Is there any brokerage fee for tenants?",
     answer:
-      "No! DCDH Estate operates on a zero-brokerage model for tenants. You only pay your rent and security deposit directly to the owner.",
+      "No! DCDH Empire operates on a zero-brokerage model for tenants. You only pay your rent and security deposit directly to the owner.",
   },
   {
     question: "How do I list my property with DCDH?",

@@ -1,8 +1,9 @@
-import ComingSoon from '@/components/ComingSoon';
+import ComingSoon from "@/components/ComingSoon";
 
 export const metadata = {
-  title: 'Referral Program | DCDH Estate',
-  description: 'Earn rewards by referring friends and properties to DCDH Estate. Join our referral program today.',
+  title: "Referral Program | DCDH Empire",
+  description:
+    "Earn rewards by referring friends and properties to DCDH Empire. Join our referral program today.",
 };
 
 export default function ReferralPage() {

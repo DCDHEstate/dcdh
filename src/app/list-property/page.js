@@ -1,8 +1,9 @@
-import ComingSoon from '@/components/ComingSoon';
+import ComingSoon from "@/components/ComingSoon";
 
 export const metadata = {
-  title: 'List Your Property | DCDH Estate',
-  description: 'List your property with DCDH Estate for free. Get verified buyers and tenants with zero brokerage.',
+  title: "List Your Property | DCDH Empire",
+  description:
+    "List your property with DCDH Empire for free. Get verified buyers and tenants with zero brokerage.",
 };
 
 export default function ListPropertyPage() {

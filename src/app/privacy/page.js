@@ -1,8 +1,9 @@
-import ComingSoon from '@/components/ComingSoon';
+import ComingSoon from "@/components/ComingSoon";
 
 export const metadata = {
-  title: 'Privacy Policy | DCDH Estate',
-  description: 'Learn how DCDH Estate protects your privacy and handles your data.',
+  title: "Privacy Policy | DCDH Empire",
+  description:
+    "Learn how DCDH Empire protects your privacy and handles your data.",
 };
 
 export default function PrivacyPage() {

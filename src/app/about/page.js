@@ -35,7 +35,7 @@ const founders = [
   {
     name: "Dileep Parmar",
     role: "Founder & CEO",
-    bio: "With 5+ years of real estate expertise in Jaipur, Dileep founded DCDH Estate to bring transparency and trust to property transactions. He leads strategy, sales operations, and ensures every client receives personalized attention.",
+    bio: "With 5+ years of real estate expertise in Jaipur, Dileep founded DCDH Empire to bring transparency and trust to property transactions. He leads strategy, sales operations, and ensures every client receives personalized attention.",
     image: "/images/founders/Dileep.jpg",
     linkedin: "https://www.linkedin.com/in/dileep-parmar-03a790321/",
   },
@@ -49,7 +49,7 @@ const founders = [
   {
     name: "Rudrakshi Kumari",
     role: "Director - Marketing",
-    bio: "Rudrakshi drives DCDH Estate's brand presence and growth strategy. With a keen eye for communication and market trends, she leads all marketing initiatives to connect the right properties with the right people.",
+    bio: "Rudrakshi drives DCDH Empire's brand presence and growth strategy. With a keen eye for communication and market trends, she leads all marketing initiatives to connect the right properties with the right people.",
     image: "/images/founders/Rudrakshi.jpeg",
     linkedin: null,
   },
@@ -154,7 +154,7 @@ export default function AboutPage() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-accent"></span>
                 </span>
                 <span className="tracking-elegant text-xs font-medium uppercase text-body-on-dark">
-                  About DCDH Estate
+                  About DCDH Empire
                 </span>
               </div>
 
@@ -257,7 +257,7 @@ export default function AboutPage() {
 
                 <div className="space-y-6 text-body">
                   <p className="text-lg leading-relaxed">
-                    Founded in 2019, DCDH Estate started as a focused brokerage
+                    Founded in 2019, DCDH Empire started as a focused brokerage
                     serving tenants and owners in Jaipur with a simple promise:{" "}
                     <strong className="text-heading">
                       genuine listings and honest advice.
@@ -572,7 +572,7 @@ export default function AboutPage() {
                 Leadership Team
               </h2>
               <p className="mx-auto max-w-2xl text-body">
-                Meet the people driving DCDH Estate&apos;s mission to transform
+                Meet the people driving DCDH Empire&apos;s mission to transform
                 real estate in India.
               </p>
               <div className="divider-elegant mx-auto mt-6 max-w-xs" />
@@ -655,7 +655,7 @@ export default function AboutPage() {
                 </h2>
                 <p className="mx-auto mb-10 max-w-2xl text-lg text-body-on-dark">
                   Join thousands of happy families who found their perfect home
-                  with DCDH Estate. Zero brokerage, 100% verified properties.
+                  with DCDH Empire. Zero brokerage, 100% verified properties.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   <Link

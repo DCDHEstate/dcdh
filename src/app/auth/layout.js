@@ -2,7 +2,8 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Sign In",
-  description: "Sign in to DCDH Estate to access your personalized real estate experience.",
+  description:
+    "Sign in to DCDH Empire to access your personalized real estate experience.",
 };
 
 export default function AuthLayout({ children }) {
@@ -39,13 +40,20 @@ export default function AuthLayout({ children }) {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
             <p className="text-sm text-muted">
-              &copy; {new Date().getFullYear()} DCDH Estate. All rights reserved.
+              &copy; {new Date().getFullYear()} DCDH Empire. All rights
+              reserved.
             </p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="text-sm text-muted hover:text-heading">
+              <Link
+                href="/privacy"
+                className="text-sm text-muted hover:text-heading"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm text-muted hover:text-heading">
+              <Link
+                href="/terms"
+                className="text-sm text-muted hover:text-heading"
+              >
                 Terms of Service
               </Link>
             </div>

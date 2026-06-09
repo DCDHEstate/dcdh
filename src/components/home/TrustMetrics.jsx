@@ -55,7 +55,7 @@ export default function TrustMetrics() {
           <h2 className="mb-5 text-4xl font-semibold tracking-tight text-heading-on-dark md:text-5xl">
             Why Trust{" "}
             <span className="bg-gradient-to-r from-accent-light to-accent bg-clip-text text-transparent">
-              DCDH Estate
+              DCDH Empire
             </span>
           </h2>
           <p className="mx-auto max-w-xl text-base leading-relaxed text-body-on-dark">

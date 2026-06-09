@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function NotFound() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -14,8 +14,8 @@ export default function NotFound() {
       });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   return (
@@ -27,18 +27,22 @@ export default function NotFound() {
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: `linear-gradient(rgba(212,165,116,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(212,165,116,0.3) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
+            backgroundSize: "60px 60px",
           }}
         />
 
         {/* Floating orbs */}
         <div
           className="absolute left-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px] transition-transform duration-1000 ease-out"
-          style={{ transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)` }}
+          style={{
+            transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
+          }}
         />
         <div
           className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-accent-light/8 blur-[100px] transition-transform duration-1000 ease-out"
-          style={{ transform: `translate(${-mousePosition.x}px, ${-mousePosition.y}px)` }}
+          style={{
+            transform: `translate(${-mousePosition.x}px, ${-mousePosition.y}px)`,
+          }}
         />
 
         {/* Decorative elements */}
@@ -55,7 +59,9 @@ export default function NotFound() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
           </span>
-          <span className="text-xs font-medium tracking-elegant text-accent-light">COMING SOON</span>
+          <span className="text-xs font-medium tracking-elegant text-accent-light">
+            COMING SOON
+          </span>
         </div>
 
         {/* Main content */}
@@ -63,11 +69,20 @@ export default function NotFound() {
           <span className="inline-block animate-pulse-slow">4</span>
           <span className="relative mx-2 inline-block">
             <span className="text-gradient-gold">0</span>
-            <svg className="absolute -bottom-2 left-1/2 h-8 w-8 -translate-x-1/2 text-accent/40" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            <svg
+              className="absolute -bottom-2 left-1/2 h-8 w-8 -translate-x-1/2 text-accent/40"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </span>
-          <span className="inline-block animate-pulse-slow" style={{ animationDelay: '0.5s' }}>4</span>
+          <span
+            className="inline-block animate-pulse-slow"
+            style={{ animationDelay: "0.5s" }}
+          >
+            4
+          </span>
         </h1>
 
         <h2 className="mb-4 text-2xl font-semibold text-heading-on-dark md:text-3xl">
@@ -75,7 +90,8 @@ export default function NotFound() {
         </h2>
 
         <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-body-on-dark">
-          We're crafting something special for you. This section of DCDH Estate is currently being built with care.
+          We're crafting something special for you. This section of DCDH Empire
+          is currently being built with care.
         </p>
 
         {/* Progress indicator */}
@@ -87,7 +103,7 @@ export default function NotFound() {
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light transition-all duration-1000"
-              style={{ width: '75%' }}
+              style={{ width: "75%" }}
             />
           </div>
         </div>
@@ -95,9 +111,18 @@ export default function NotFound() {
         {/* Features coming */}
         <div className="mx-auto mb-12 grid max-w-lg grid-cols-3 gap-4">
           {[
-            { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', label: 'Portals' },
-            { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', label: 'Dashboard' },
-            { icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Wallet' },
+            {
+              icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+              label: "Portals",
+            },
+            {
+              icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
+              label: "Dashboard",
+            },
+            {
+              icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+              label: "Wallet",
+            },
           ].map((item, i) => (
             <div
               key={i}
@@ -105,12 +130,24 @@ export default function NotFound() {
             >
               <div className="mb-2 flex justify-center">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 transition-colors group-hover:bg-accent/20">
-                  <svg className="h-5 w-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                  <svg
+                    className="h-5 w-5 text-accent"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d={item.icon}
+                    />
                   </svg>
                 </div>
               </div>
-              <p className="text-xs font-medium text-muted-on-dark">{item.label}</p>
+              <p className="text-xs font-medium text-muted-on-dark">
+                {item.label}
+              </p>
             </div>
           ))}
         </div>
@@ -121,8 +158,18 @@ export default function NotFound() {
             href="/"
             className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-accent to-accent-dark px-8 py-4 text-sm font-medium text-surface-dark shadow-lg transition-all duration-300 hover:shadow-accent/25"
           >
-            <svg className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg
+              className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             Back to Home
           </Link>
@@ -141,7 +188,20 @@ export default function NotFound() {
 
         {/* Bottom text */}
         <p className="mt-12 text-xs text-subtle-on-dark">
-          Meanwhile, explore our <Link href="/search" className="text-accent-light underline-offset-2 hover:underline">available properties</Link> or <Link href="/contact" className="text-accent-light underline-offset-2 hover:underline">get in touch</Link>
+          Meanwhile, explore our{" "}
+          <Link
+            href="/search"
+            className="text-accent-light underline-offset-2 hover:underline"
+          >
+            available properties
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/contact"
+            className="text-accent-light underline-offset-2 hover:underline"
+          >
+            get in touch
+          </Link>
         </p>
       </div>
 

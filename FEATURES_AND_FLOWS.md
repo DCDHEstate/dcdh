@@ -1,4 +1,4 @@
-# DCDH Estate - Features & Flows (MVP)
+# DCDH Empire - Features & Flows (MVP)
 
 > Zero-brokerage real estate platform for Jaipur with WhatsApp-first experience.
 >

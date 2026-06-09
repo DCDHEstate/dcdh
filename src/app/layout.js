@@ -17,13 +17,14 @@ export const viewport = {
 };
 
 export const metadata = {
-  metadataBase: new URL("https://dcdhestate.com"),
+  metadataBase: new URL("https://dcdhempire.com"),
   title: {
-    default: "DCDH Estate - Zero Brokerage Real Estate Platform in Jaipur | Buy, Rent & Refer Properties",
-    template: "%s | DCDH Estate",
+    default:
+      "DCDH Empire - Zero Brokerage Real Estate Platform in Jaipur | Buy, Rent & Refer Properties",
+    template: "%s | DCDH Empire",
   },
   description:
-    "Find verified properties in Jaipur with zero brokerage. DCDH Estate offers transparent real estate services for tenants, owners & partners. WhatsApp-first experience with verified listings.",
+    "Find verified properties in Jaipur with zero brokerage. DCDH Empire offers transparent real estate services for tenants, owners & partners. WhatsApp-first experience with verified listings.",
   keywords: [
     "real estate Jaipur",
     "property in Jaipur",
@@ -31,7 +32,7 @@ export const metadata = {
     "buy property Jaipur",
     "zero brokerage",
     "verified properties",
-    "DCDH Estate",
+    "DCDH Empire",
     "flat for rent Jaipur",
     "commercial property Jaipur",
     "residential property Jaipur",
@@ -40,9 +41,9 @@ export const metadata = {
     "owner portal",
     "WhatsApp real estate",
   ],
-  authors: [{ name: "DCDH Estate" }],
-  creator: "DCDH Estate",
-  publisher: "DCDH Estate",
+  authors: [{ name: "DCDH Empire" }],
+  creator: "DCDH Empire",
+  publisher: "DCDH Empire",
   formatDetection: {
     email: false,
     address: false,
@@ -51,9 +52,9 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://dcdhestate.com",
-    siteName: "DCDH Estate",
-    title: "DCDH Estate - Zero Brokerage Real Estate Platform in Jaipur",
+    url: "https://dcdhempire.com",
+    siteName: "DCDH Empire",
+    title: "DCDH Empire - Zero Brokerage Real Estate Platform in Jaipur",
     description:
       "Find verified properties in Jaipur with zero brokerage. Transparent real estate for tenants, owners & partners.",
     images: [
@@ -61,13 +62,13 @@ export const metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "DCDH Estate - Real Estate Platform",
+        alt: "DCDH Empire - Real Estate Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DCDH Estate - Zero Brokerage Real Estate in Jaipur",
+    title: "DCDH Empire - Zero Brokerage Real Estate in Jaipur",
     description:
       "Find verified properties with zero brokerage. WhatsApp-first real estate experience.",
     images: ["/og-image.jpg"],
@@ -87,7 +88,7 @@ export const metadata = {
     google: "your-google-verification-code",
   },
   alternates: {
-    canonical: "https://dcdhestate.com",
+    canonical: "https://dcdhempire.com",
   },
 };
 

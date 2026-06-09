@@ -1,5 +1,5 @@
 -- ============================================================================
--- DCDH Estate - PostgreSQL Database Schema
+-- DCDH Empire - PostgreSQL Database Schema
 -- Phase 0 MVP
 -- ============================================================================
 -- Auth: Google Sign-In + Role-based access control

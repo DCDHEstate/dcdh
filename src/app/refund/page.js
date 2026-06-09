@@ -1,8 +1,8 @@
-import ComingSoon from '@/components/ComingSoon';
+import ComingSoon from "@/components/ComingSoon";
 
 export const metadata = {
-  title: 'Refund Policy | DCDH Estate',
-  description: 'Understand our refund policy for DCDH Estate services.',
+  title: "Refund Policy | DCDH Empire",
+  description: "Understand our refund policy for DCDH Empire services.",
 };
 
 export default function RefundPage() {
