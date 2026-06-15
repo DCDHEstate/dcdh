@@ -59,6 +59,35 @@ const AGE_OPTIONS = [
 
 const FACING_OPTIONS = ["North", "South", "East", "West", "North-East", "North-West", "South-East", "South-West"];
 
+const UAE_AREAS = {
+  "Dubai": [
+    "Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay",
+    "DIFC (Financial Centre)", "JBR (Jumeirah Beach Residence)",
+    "JLT (Jumeirah Lakes Towers)", "JVC (Jumeirah Village Circle)",
+    "JVT (Jumeirah Village Triangle)", "Al Barsha", "Mirdif", "Deira",
+    "Bur Dubai", "Karama", "Dubai Creek Harbour", "Arabian Ranches",
+    "Dubai Hills Estate", "The Springs", "The Meadows", "The Lakes",
+    "The Greens", "Silicon Oasis (DSO)", "Al Furjan", "Motor City",
+    "Sports City", "Discovery Gardens", "Town Square", "Damac Hills",
+    "Bluewaters Island", "International City", "Al Nahda", "Jumeirah",
+    "Umm Suqeim", "Al Satwa", "Rashidiya", "Sheikh Zayed Road", "Arjan",
+    "Dubai South", "Emaar Beachfront", "Remraam", "Port De La Mer",
+  ],
+  "Abu Dhabi": [
+    "Al Reem Island", "Yas Island", "Saadiyat Island", "Al Khalidiyah",
+    "Corniche Area", "Al Raha Beach", "Khalifa City",
+    "Mohammed Bin Zayed City", "Al Mushrif", "Al Nahyan", "Masdar City", "Al Reef",
+  ],
+  "Sharjah": [
+    "Al Majaz", "Al Nahda", "Al Khan", "Muwaileh",
+    "Al Taawun", "Al Qasimia", "Corniche Sharjah",
+  ],
+  "Ajman": ["Al Nuaimia", "Al Rashidiya", "Ajman Downtown", "Al Jurf"],
+  "Ras Al Khaimah": ["Al Nakheel", "Al Hamra Village", "Mina Al Arab", "Marjan Island"],
+  "Fujairah": ["Fujairah City", "Dibba Al Fujairah"],
+  "Umm Al Quwain": ["UAQ Marina", "Al Salamah"],
+};
+
 // ─── Initial form state ───────────────────────────────────────────────────────
 
 const INITIAL_FORM = {
@@ -77,9 +106,12 @@ const INITIAL_FORM = {
   ageOfProperty: "",
   possessionStatus: "Ready to Move",
   // Step 2
+  country: "India",
   stateId: "",
   cityId: "",
   localityId: "",
+  uaeEmirate: "",
+  uaeArea: "",
   addressLine1: "",
   addressLine2: "",
   pincode: "",
@@ -381,6 +413,9 @@ function Step1({ formData, onChange }) {
 // ─── Step 2: Location ─────────────────────────────────────────────────────────
 
 function Step2({ formData, onChange }) {
+  const isUAE = formData.country === "UAE";
+
+  // India location state
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [localities, setLocalities] = useState([]);
@@ -388,134 +423,233 @@ function Step2({ formData, onChange }) {
   const [loadingLocalities, setLoadingLocalities] = useState(false);
 
   useEffect(() => {
+    if (isUAE) return;
     fetch("/api/locations/states")
       .then((r) => r.json())
-      .then((d) => setStates(d.states || []));
-  }, []);
+      .then((d) => setStates((d.states || []).filter((s) => s.code !== "UAE")));
+  }, [isUAE]);
 
   useEffect(() => {
-    if (!formData.stateId) {
-      setCities([]);
-      return;
-    }
+    if (isUAE || !formData.stateId) { setCities([]); return; }
     setLoadingCities(true);
     fetch(`/api/locations/cities?state_id=${formData.stateId}`)
       .then((r) => r.json())
       .then((d) => setCities(d.cities || []))
       .finally(() => setLoadingCities(false));
-  }, [formData.stateId]);
+  }, [isUAE, formData.stateId]);
 
   useEffect(() => {
-    if (!formData.cityId) {
-      setLocalities([]);
-      return;
-    }
+    if (isUAE || !formData.cityId) { setLocalities([]); return; }
     setLoadingLocalities(true);
     fetch(`/api/locations/localities?city_id=${formData.cityId}`)
       .then((r) => r.json())
       .then((d) => setLocalities(d.localities || []))
       .finally(() => setLoadingLocalities(false));
-  }, [formData.cityId]);
+  }, [isUAE, formData.cityId]);
+
+  const handleCountryChange = (country) => {
+    onChange("country", country);
+    // Clear location fields on country switch
+    onChange("stateId", ""); onChange("cityId", ""); onChange("localityId", "");
+    onChange("uaeEmirate", ""); onChange("uaeArea", "");
+    onChange("pincode", "");
+  };
+
+  const uaeAreas = UAE_AREAS[formData.uaeEmirate] || [];
 
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-heading">Location</h2>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <FieldLabel required>State</FieldLabel>
-          <Select
-            value={formData.stateId}
-            onChange={(e) => {
-              onChange("stateId", e.target.value);
-              onChange("cityId", "");
-              onChange("localityId", "");
-            }}
-          >
-            <option value="">Select state</option>
-            {states.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </Select>
-        </div>
-
-        <div>
-          <FieldLabel required>City</FieldLabel>
-          <Select
-            value={formData.cityId}
-            onChange={(e) => {
-              onChange("cityId", e.target.value);
-              onChange("localityId", "");
-            }}
-            disabled={!formData.stateId || loadingCities}
-          >
-            <option value="">
-              {loadingCities ? "Loading..." : "Select city"}
-            </option>
-            {cities.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </Select>
-        </div>
-
-        <div>
-          <FieldLabel required>Locality</FieldLabel>
-          <Select
-            value={formData.localityId}
-            onChange={(e) => onChange("localityId", e.target.value)}
-            disabled={!formData.cityId || loadingLocalities}
-          >
-            <option value="">
-              {loadingLocalities ? "Loading..." : "Select locality"}
-            </option>
-            {localities.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
-          </Select>
-        </div>
-      </div>
-
+      {/* Country toggle */}
       <div>
-        <FieldLabel required>Address Line 1</FieldLabel>
-        <Input
-          type="text"
-          value={formData.addressLine1}
-          onChange={(e) => onChange("addressLine1", e.target.value)}
-          placeholder="House / Flat / Building No., Street"
-        />
-      </div>
-
-      <div>
-        <FieldLabel>Address Line 2</FieldLabel>
-        <Input
-          type="text"
-          value={formData.addressLine2}
-          onChange={(e) => onChange("addressLine2", e.target.value)}
-          placeholder="Colony, Landmark (optional)"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <FieldLabel>Pincode</FieldLabel>
-          <Input
-            type="text"
-            value={formData.pincode}
-            onChange={(e) => onChange("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder="6-digit pincode"
-            maxLength={6}
-          />
-        </div>
-        <div>
-          <FieldLabel>Google Maps URL</FieldLabel>
-          <Input
-            type="url"
-            value={formData.googleMapsUrl}
-            onChange={(e) => onChange("googleMapsUrl", e.target.value)}
-            placeholder="Paste Google Maps link"
-          />
+        <FieldLabel required>Country</FieldLabel>
+        <div className="flex gap-3">
+          {[
+            { id: "India", label: "🇮🇳  India" },
+            { id: "UAE",   label: "🇦🇪  UAE / Dubai" },
+          ].map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => handleCountryChange(c.id)}
+              className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                formData.country === c.id
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border text-muted hover:border-primary/50"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* ── UAE Location fields ── */}
+      {isUAE && (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <FieldLabel required>Emirate</FieldLabel>
+              <Select
+                value={formData.uaeEmirate}
+                onChange={(e) => {
+                  onChange("uaeEmirate", e.target.value);
+                  onChange("uaeArea", "");
+                }}
+              >
+                <option value="">Select emirate</option>
+                {Object.keys(UAE_AREAS).map((em) => (
+                  <option key={em} value={em}>{em}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <FieldLabel required>Area / Community</FieldLabel>
+              <Select
+                value={formData.uaeArea}
+                onChange={(e) => onChange("uaeArea", e.target.value)}
+                disabled={!formData.uaeEmirate}
+              >
+                <option value="">
+                  {formData.uaeEmirate ? "Select area" : "Select emirate first"}
+                </option>
+                {uaeAreas.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <FieldLabel required>Address Line 1</FieldLabel>
+            <Input
+              type="text"
+              value={formData.addressLine1}
+              onChange={(e) => onChange("addressLine1", e.target.value)}
+              placeholder="Building name, unit number, street"
+            />
+          </div>
+
+          <div>
+            <FieldLabel>Address Line 2</FieldLabel>
+            <Input
+              type="text"
+              value={formData.addressLine2}
+              onChange={(e) => onChange("addressLine2", e.target.value)}
+              placeholder="Landmark, tower name (optional)"
+            />
+          </div>
+
+          <div>
+            <FieldLabel>Google Maps URL</FieldLabel>
+            <Input
+              type="url"
+              value={formData.googleMapsUrl}
+              onChange={(e) => onChange("googleMapsUrl", e.target.value)}
+              placeholder="Paste Google Maps link"
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── India Location fields ── */}
+      {!isUAE && (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <FieldLabel required>State</FieldLabel>
+              <Select
+                value={formData.stateId}
+                onChange={(e) => {
+                  onChange("stateId", e.target.value);
+                  onChange("cityId", "");
+                  onChange("localityId", "");
+                }}
+              >
+                <option value="">Select state</option>
+                {states.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <FieldLabel required>City</FieldLabel>
+              <Select
+                value={formData.cityId}
+                onChange={(e) => {
+                  onChange("cityId", e.target.value);
+                  onChange("localityId", "");
+                }}
+                disabled={!formData.stateId || loadingCities}
+              >
+                <option value="">{loadingCities ? "Loading..." : "Select city"}</option>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <FieldLabel required>Locality</FieldLabel>
+              <Select
+                value={formData.localityId}
+                onChange={(e) => onChange("localityId", e.target.value)}
+                disabled={!formData.cityId || loadingLocalities}
+              >
+                <option value="">{loadingLocalities ? "Loading..." : "Select locality"}</option>
+                {localities.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <FieldLabel required>Address Line 1</FieldLabel>
+            <Input
+              type="text"
+              value={formData.addressLine1}
+              onChange={(e) => onChange("addressLine1", e.target.value)}
+              placeholder="House / Flat / Building No., Street"
+            />
+          </div>
+
+          <div>
+            <FieldLabel>Address Line 2</FieldLabel>
+            <Input
+              type="text"
+              value={formData.addressLine2}
+              onChange={(e) => onChange("addressLine2", e.target.value)}
+              placeholder="Colony, Landmark (optional)"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <FieldLabel>Pincode</FieldLabel>
+              <Input
+                type="text"
+                value={formData.pincode}
+                onChange={(e) => onChange("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="6-digit pincode"
+                maxLength={6}
+              />
+            </div>
+            <div>
+              <FieldLabel>Google Maps URL</FieldLabel>
+              <Input
+                type="url"
+                value={formData.googleMapsUrl}
+                onChange={(e) => onChange("googleMapsUrl", e.target.value)}
+                placeholder="Paste Google Maps link"
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -815,47 +949,60 @@ function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
 
 function Step5({ formData, onChange, mediaItems }) {
   const isRent = formData.transactionType === "rent";
+  const isUAE = formData.country === "UAE";
+  const curr = isUAE ? "AED" : "₹";
 
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-heading">Pricing</h2>
 
+      {isUAE && (
+        <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+          <span>🇦🇪</span>
+          <span>Prices for UAE properties are in <strong>AED (Dirhams)</strong>.</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <FieldLabel required>{isRent ? "Monthly Rent (₹)" : "Sale Price (₹)"}</FieldLabel>
+          <FieldLabel required>
+            {isRent
+              ? `${isUAE ? "Annual Rent" : "Monthly Rent"} (${curr})`
+              : `Sale Price (${curr})`}
+          </FieldLabel>
           <Input
             type="number"
             min="1"
             value={formData.price}
             onChange={(e) => onChange("price", e.target.value)}
-            placeholder={isRent ? "e.g. 25000" : "e.g. 5000000"}
+            placeholder={isRent ? (isUAE ? "e.g. 80000" : "e.g. 25000") : (isUAE ? "e.g. 1500000" : "e.g. 5000000")}
           />
         </div>
         {isRent && (
           <div>
-            <FieldLabel>Maintenance Charge (₹/mo)</FieldLabel>
+            <FieldLabel>Maintenance Charge ({curr}/mo)</FieldLabel>
             <Input
               type="number"
               min="0"
               value={formData.maintenanceCharge}
               onChange={(e) => onChange("maintenanceCharge", e.target.value)}
-              placeholder="e.g. 2000"
+              placeholder={isUAE ? "e.g. 500" : "e.g. 2000"}
             />
           </div>
         )}
         {isRent && (
           <div>
-            <FieldLabel>Security Deposit (₹)</FieldLabel>
+            <FieldLabel>Security Deposit ({curr})</FieldLabel>
             <Input
               type="number"
               min="0"
               value={formData.securityDeposit}
               onChange={(e) => onChange("securityDeposit", e.target.value)}
-              placeholder="e.g. 75000"
+              placeholder={isUAE ? "e.g. 80000" : "e.g. 75000"}
             />
           </div>
         )}
-        {isRent && (
+        {isRent && !isUAE && (
           <div>
             <FieldLabel>Advance Rent / Token (₹)</FieldLabel>
             <Input
@@ -981,9 +1128,14 @@ export default function PostPropertyPage() {
       if (!formData.propertyType) return "Please select a property type.";
     }
     if (step === 2) {
-      if (!formData.stateId) return "Please select a state.";
-      if (!formData.cityId) return "Please select a city.";
-      if (!formData.localityId) return "Please select a locality.";
+      if (formData.country === "UAE") {
+        if (!formData.uaeEmirate) return "Please select an emirate.";
+        if (!formData.uaeArea) return "Please select an area / community.";
+      } else {
+        if (!formData.stateId) return "Please select a state.";
+        if (!formData.cityId) return "Please select a city.";
+        if (!formData.localityId) return "Please select a locality.";
+      }
       if (!formData.addressLine1.trim()) return "Please enter the address.";
     }
     if (step === 5) {
@@ -1014,11 +1166,13 @@ export default function PostPropertyPage() {
     setError("");
 
     try {
+      const currency = formData.country === "UAE" ? "AED" : "INR";
       const res = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          currency,
           mediaUrls: mediaItems.map((m) => ({ url: m.url, isPrimary: m.isPrimary, mediaType: m.mediaType || "image" })),
         }),
       });

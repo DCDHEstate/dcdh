@@ -74,7 +74,7 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'propertyId and action are required' }, { status: 400 });
     }
 
-    const VALID_ACTIONS = ['approve', 'reject', 'deactivate', 'reactivate', 'mark_sold_out', 'archive'];
+    const VALID_ACTIONS = ['approve', 'reject', 'deactivate', 'reactivate', 'mark_sold_out', 'archive', 'toggle_featured'];
     if (!VALID_ACTIONS.includes(action)) {
       return NextResponse.json({ error: `action must be one of: ${VALID_ACTIONS.join(', ')}` }, { status: 400 });
     }
@@ -141,6 +141,13 @@ export async function PATCH(request) {
       await sql`
         UPDATE properties
         SET status = 'archived', reviewed_by = ${user.id}, reviewed_at = NOW()
+        WHERE id = ${propertyId}
+      `;
+
+    } else if (action === 'toggle_featured') {
+      await sql`
+        UPDATE properties
+        SET is_featured = NOT is_featured
         WHERE id = ${propertyId}
       `;
     }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import SavePropertyButton from "@/components/SavePropertyButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PROPERTY_TYPES = {
   residential: [
@@ -568,11 +569,21 @@ function FilterPanel({ filters, updateFilter, clearFilters, cities, localities, 
 // ── Property Card ──
 
 function PropertyCard({ property: p }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const transactionLabel = p.transaction_type === "rent" ? "Rent" : "Buy";
   const priceLabel =
     p.transaction_type === "rent"
       ? `${formatPrice(p.price)}/mo`
       : formatPrice(p.price);
+
+  const handleEnquire = (e) => {
+    if (isLoading) { e.preventDefault(); return; }
+    if (!isAuthenticated) {
+      e.preventDefault();
+      router.push(`/auth/login?redirect=${encodeURIComponent(`/properties/${p.slug}`)}`);
+    }
+  };
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border bg-surface-white shadow-soft transition-all hover:border-accent/20 hover:shadow-elevated">
@@ -646,11 +657,12 @@ function PropertyCard({ property: p }) {
           )}
         </div>
 
-        {/* WhatsApp CTA */}
+        {/* Enquire CTA */}
         <a
           href={`https://wa.me/919257533440?text=${encodeURIComponent(`Hi, I'm interested in "${p.title}" at ${p.locality_name}, ${p.city_name}. (Ref: ${p.slug})`)}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleEnquire}
           className="relative z-10 mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-hover"
         >
           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

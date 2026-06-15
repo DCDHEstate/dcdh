@@ -1,33 +1,77 @@
+"use client";
+
 const services = [
   {
-    title: "Architects",
-    desc: "Residential & commercial projects",
-    icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+    title: "Pro Flow",
+    desc: "Smart properties management",
+    icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+    wa: "Hi, I want to know more about Prop Flow — Smart Property Discovery",
   },
   {
-    title: "Interior Designers",
-    desc: "Home and office design",
-    icon: "M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z",
+    title: "My Stay",
+    desc: "Short-term stays & hotels",
+    icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+    wa: "Hi, I want to know more about My Stay — Short-term Stays & Hotels",
+  },
+  {
+    title: "Dubai Properties",
+    desc: "International listings",
+    icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    wa: "Hi, I want to know more about Dubai Properties — International Listings",
+  },
+  {
+    title: "Prop AI",
+    desc: "AI-powered recommendations",
+    icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    wa: "Hi, I want to know more about Prop AI — AI-powered Property Recommendations",
+  },
+  {
+    title: "Resorts",
+    desc: "Leisure & weekend getaways",
+    icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+    wa: "Hi, I want to know more about Resorts — Leisure & Weekend Getaways",
+  },
+  {
+    title: "Co-working Space",
+    desc: "Flexible workspaces",
+    icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    wa: "Hi, I want to know more about Co-working Spaces — Flexible Workspaces",
   },
   {
     title: "Book a PG",
     desc: "Hourly, weekly, monthly",
     icon: "M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z",
+    wa: "Hi, I want to book a PG — Hourly, Weekly or Monthly",
   },
   {
-    title: "Farmhouses & Resorts",
-    desc: "Daily, weekly bookings",
-    icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+    title: "Book a Library",
+    desc: "Study & reading spaces",
+    icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+    wa: "Hi, I want to book a Library — Study & Reading Spaces",
   },
   {
-    title: "Co-working Spaces",
-    desc: "Flexible plans",
-    icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    title: "Vastu Consultant",
+    desc: "Harmony in your space",
+    icon: "M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7",
+    wa: "Hi, I want to consult a Vastu Expert — Harmony in my Space",
   },
   {
-    title: "More Services",
-    desc: "Coming soon",
-    icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
+    title: "Interior Designer",
+    desc: "Transform your interiors",
+    icon: "M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z",
+    wa: "Hi, I want to hire an Interior Designer — Transform my Interiors",
+  },
+  {
+    title: "Architect",
+    desc: "Residential & commercial projects",
+    icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+    wa: "Hi, I want to hire an Architect — Residential & Commercial Projects",
+  },
+  {
+    title: "Home Loan Assistant",
+    desc: "Easy home financing",
+    icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z",
+    wa: "Hi, I want to know more about Home Loan Assistance — Easy Home Financing",
   },
 ];
 
@@ -51,16 +95,19 @@ export default function UpcomingFeatures() {
         </div>
 
         {/* Services Grid */}
-        <div className="mb-16 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {services.map((s, i) => (
-            <div
+            <a
               key={i}
-              className="card-hover border-gradient-hover group cursor-pointer rounded-2xl glass-card p-6 text-center transition-all duration-400 reveal-stagger glass-hover"
-              style={{ "--stagger": `${i * 80}ms` }}
+              href={`https://wa.me/919257533440?text=${encodeURIComponent(s.wa)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-hover border-gradient-hover group cursor-pointer rounded-2xl glass-card p-5 text-center transition-all duration-400 reveal-stagger glass-hover no-underline"
+              style={{ "--stagger": `${i * 60}ms` }}
             >
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-surface-subtle text-muted transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:shadow-soft">
+              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-surface-subtle text-muted transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:shadow-soft">
                 <svg
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -73,11 +120,11 @@ export default function UpcomingFeatures() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-1 text-sm font-semibold text-heading">
+              <h3 className="mb-1 text-xs font-semibold leading-tight text-heading">
                 {s.title}
               </h3>
-              <p className="text-xs text-subtle">{s.desc}</p>
-            </div>
+              <p className="text-[11px] leading-snug text-subtle">{s.desc}</p>
+            </a>
           ))}
         </div>
 

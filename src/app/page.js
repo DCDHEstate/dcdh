@@ -5,6 +5,7 @@ import Portals from "@/components/home/Portals";
 import ReferralProgram from "@/components/home/ReferralProgram";
 import UpcomingFeatures from "@/components/home/UpcomingFeatures";
 import TrustMetrics from "@/components/home/TrustMetrics";
+import IStartRecognition from "@/components/home/IStartRecognition";
 import ScrollRevealProvider from "@/components/ScrollRevealProvider";
 
 export default function Home() {
@@ -68,6 +69,9 @@ export default function Home() {
       {/* Hero Section */}
       <Hero />
 
+      {/* Upcoming Services */}
+      <UpcomingFeatures />
+
       {/* Featured Properties */}
       <FeaturedProperties />
 
@@ -86,11 +90,11 @@ export default function Home() {
       {/* Referral Program */}
       <ReferralProgram />
 
-      {/* Upcoming Features */}
-      <UpcomingFeatures />
-
       {/* Trust Metrics */}
       <TrustMetrics />
+
+      {/* iStart Rajasthan Recognition */}
+      <IStartRecognition />
     </ScrollRevealProvider>
   );
 }

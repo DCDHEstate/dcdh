@@ -51,8 +51,11 @@ export default function Header() {
 
   // Close mobile menu on route change
   useEffect(() => {
-    setMobileOpen(false);
-    setDropdownOpen(false);
+    const frameId = window.requestAnimationFrame(() => {
+      setMobileOpen(false);
+      setDropdownOpen(false);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [pathname]);
 
   const isDashboard =
@@ -136,14 +139,14 @@ export default function Header() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3.5">
-          <div className="relative">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary-light to-primary shadow-sm transition-all duration-500 ${isScrolled || isDashboard ? "ring-1 ring-accent/10" : ""}`}
-            >
-              <span className="text-lg font-semibold tracking-tight text-accent-light">
-                D
-              </span>
-            </div>
+          <div
+            className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-500 ${isScrolled || isDashboard ? "ring-1 ring-accent/10" : "ring-1 ring-white/20"}`}
+          >
+            <span
+              aria-hidden="true"
+              className="block h-full w-full bg-cover bg-center"
+              style={{ backgroundImage: "url('/logo.jpg')" }}
+            />
           </div>
           <div>
             <div

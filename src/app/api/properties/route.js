@@ -120,9 +120,13 @@ export async function POST(request) {
     parkingSlots,
     ageOfProperty,
     possessionStatus,
-    stateId,
-    cityId,
-    localityId,
+    country = "India",
+    currency = "INR",
+    stateId: rawStateId,
+    cityId: rawCityId,
+    localityId: rawLocalityId,
+    uaeEmirate,
+    uaeArea,
     addressLine1,
     addressLine2,
     pincode,
@@ -148,11 +152,41 @@ export async function POST(request) {
       { status: 400 }
     );
   }
-  if (!stateId || !cityId || !localityId || !addressLine1) {
-    return Response.json(
-      { error: "stateId, cityId, localityId, and addressLine1 are required" },
-      { status: 400 }
-    );
+  if (!addressLine1) {
+    return Response.json({ error: "addressLine1 is required" }, { status: 400 });
+  }
+
+  // Resolve location IDs
+  let stateId = rawStateId;
+  let cityId = rawCityId;
+  let localityId = rawLocalityId;
+
+  if (country === "UAE") {
+    if (!uaeEmirate || !uaeArea) {
+      return Response.json({ error: "uaeEmirate and uaeArea are required for UAE properties" }, { status: 400 });
+    }
+    const [uaeState] = await sql`SELECT id FROM states WHERE code = 'UAE'`;
+    if (!uaeState) {
+      return Response.json({ error: "UAE locations not set up. Please run database migration 002." }, { status: 500 });
+    }
+    const [emirateCity] = await sql`SELECT id FROM cities WHERE state_id = ${uaeState.id} AND name = ${uaeEmirate}`;
+    if (!emirateCity) {
+      return Response.json({ error: "Invalid UAE emirate" }, { status: 400 });
+    }
+    const [areaLocality] = await sql`SELECT id FROM localities WHERE city_id = ${emirateCity.id} AND name = ${uaeArea}`;
+    if (!areaLocality) {
+      return Response.json({ error: "Invalid UAE area" }, { status: 400 });
+    }
+    stateId = uaeState.id;
+    cityId = emirateCity.id;
+    localityId = areaLocality.id;
+  } else {
+    if (!stateId || !cityId || !localityId) {
+      return Response.json(
+        { error: "stateId, cityId, and localityId are required for India properties" },
+        { status: 400 }
+      );
+    }
   }
 
   // Fetch city name for slug generation
@@ -199,7 +233,9 @@ export async function POST(request) {
         google_maps_url,
         amenities,
         available_from,
-        possession_status
+        possession_status,
+        country,
+        currency
       )
       VALUES (
         ${session.id},
@@ -235,7 +271,9 @@ export async function POST(request) {
         ${googleMapsUrl || null},
         ${JSON.stringify(amenities || [])},
         ${availableFrom || null},
-        ${possessionStatus || null}
+        ${possessionStatus || null},
+        ${country},
+        ${currency}
       )
       RETURNING id, slug
     `;

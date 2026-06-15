@@ -1,0 +1,16 @@
+{
+  "name": "DCDH Empire",
+  "short_name": "DCDH",
+  "description": "Zero brokerage real estate platform in Jaipur.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1c1917",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "954x954",
+      "type": "image/jpeg"
+    }
+  ]
+}
