@@ -546,6 +546,72 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Startup India Recognition */}
+        <section className="relative overflow-hidden bg-surface-white py-16 texture-dots md:py-20">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-accent/25 to-transparent" />
+
+          <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+            <div className="reveal-left">
+              <p className="mb-4 text-xs font-medium tracking-elegant text-accent">
+                STARTUP RECOGNITION
+              </p>
+              <h2 className="mb-5 text-3xl font-semibold tracking-tight text-heading md:text-4xl">
+                Recognised by{" "}
+                <span className="text-[#15489E]">Startup India (DPIIT)</span>
+              </h2>
+              <p className="max-w-xl text-base leading-relaxed text-muted">
+                DCDH Estate Private Limited is an officially recognised startup
+                under the Department for Promotion of Industry and Internal Trade
+                (DPIIT), Government of India — reinforcing our commitment to
+                verified, transparent and technology-led real estate services.
+              </p>
+
+              <div className="mt-6 inline-flex items-center gap-2 rounded-lg border border-[#15489E]/20 bg-[#15489E]/5 px-4 py-2.5 text-sm font-medium text-heading">
+                <svg
+                  className="h-4 w-4 text-[#15489E]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Certificate No: DIPP268709
+              </div>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  "Government recognised",
+                  "DPIIT certified",
+                  "Trusted & verified",
+                ].map((label) => (
+                  <div
+                    key={label}
+                    className="flex min-h-20 items-center justify-center rounded-xl border border-border-light bg-surface px-4 py-3 text-center text-sm font-medium leading-snug text-body shadow-sm"
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="reveal-scale">
+              <div className="overflow-hidden rounded-2xl border border-[#15489E]/20 bg-white shadow-elevated">
+                <div
+                  role="img"
+                  aria-label="Startup India DPIIT certificate of recognition for DCDH Estate Private Limited"
+                  className="aspect-[3/2] w-full bg-contain bg-center bg-no-repeat"
+                  style={{ backgroundImage: "url('/startup-india.png')" }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Leadership Team */}
         <section className="section-premium bg-surface texture-dots relative">
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
