@@ -43,6 +43,15 @@ export default function OwnerProfilePage() {
     setError("");
   };
 
+  const handlePincodeChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      pincode: e.target.value.replace(/\D/g, "").slice(0, 6),
+    }));
+    setSuccess("");
+    setError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -173,6 +182,22 @@ export default function OwnerProfilePage() {
             onChange={handleChange}
             rows={3}
             className="w-full resize-none rounded-xl border border-border bg-surface-subtle px-4 py-3.5 text-sm text-body placeholder-subtle transition-all duration-300 focus:border-primary focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-heading">
+            Pincode
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            name="pincode"
+            value={formData.pincode}
+            onChange={handlePincodeChange}
+            placeholder="6-digit pincode"
+            maxLength={6}
+            className="w-full rounded-xl border border-border bg-surface-subtle px-4 py-3.5 text-sm text-body placeholder-subtle transition-all duration-300 focus:border-primary focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 

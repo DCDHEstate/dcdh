@@ -64,6 +64,16 @@ export async function POST(request) {
       hasPets,
       referralCode,
     } = body;
+    const hasTenantProfileFields = [
+      'occupation',
+      'companyName',
+      'preferredPropertyType',
+      'preferredBhk',
+      'budgetMin',
+      'budgetMax',
+      'familySize',
+      'hasPets',
+    ].some((field) => Object.prototype.hasOwnProperty.call(body, field));
 
     if (!fullName?.trim()) {
       return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
@@ -73,34 +83,36 @@ export async function POST(request) {
     await sql`
       UPDATE users
       SET full_name = ${fullName.trim()},
-          whatsapp_number = ${whatsappNumber || null}
+          whatsapp_number = ${whatsappNumber || user.phone || null}
       WHERE id = ${user.id}
     `;
 
-    // Upsert tenant profile
-    await sql`
-      INSERT INTO tenant_profiles (user_id, occupation, company_name, preferred_property_type, preferred_bhk, preferred_budget_min, preferred_budget_max, family_size, has_pets)
-      VALUES (
-        ${user.id},
-        ${occupation || null},
-        ${companyName || null},
-        ${preferredPropertyType || null},
-        ${preferredBhk ? Number(preferredBhk) : null},
-        ${budgetMin ? Number(budgetMin) : null},
-        ${budgetMax ? Number(budgetMax) : null},
-        ${familySize ? Number(familySize) : null},
-        ${hasPets ?? false}
-      )
-      ON CONFLICT (user_id) DO UPDATE SET
-        occupation = EXCLUDED.occupation,
-        company_name = EXCLUDED.company_name,
-        preferred_property_type = EXCLUDED.preferred_property_type,
-        preferred_bhk = EXCLUDED.preferred_bhk,
-        preferred_budget_min = EXCLUDED.preferred_budget_min,
-        preferred_budget_max = EXCLUDED.preferred_budget_max,
-        family_size = EXCLUDED.family_size,
-        has_pets = EXCLUDED.has_pets
-    `;
+    if (hasTenantProfileFields) {
+      // Upsert tenant profile
+      await sql`
+        INSERT INTO tenant_profiles (user_id, occupation, company_name, preferred_property_type, preferred_bhk, preferred_budget_min, preferred_budget_max, family_size, has_pets)
+        VALUES (
+          ${user.id},
+          ${occupation || null},
+          ${companyName || null},
+          ${preferredPropertyType || null},
+          ${preferredBhk ? Number(preferredBhk) : null},
+          ${budgetMin ? Number(budgetMin) : null},
+          ${budgetMax ? Number(budgetMax) : null},
+          ${familySize ? Number(familySize) : null},
+          ${hasPets ?? false}
+        )
+        ON CONFLICT (user_id) DO UPDATE SET
+          occupation = EXCLUDED.occupation,
+          company_name = EXCLUDED.company_name,
+          preferred_property_type = EXCLUDED.preferred_property_type,
+          preferred_bhk = EXCLUDED.preferred_bhk,
+          preferred_budget_min = EXCLUDED.preferred_budget_min,
+          preferred_budget_max = EXCLUDED.preferred_budget_max,
+          family_size = EXCLUDED.family_size,
+          has_pets = EXCLUDED.has_pets
+      `;
+    }
 
     // Handle referral code — link this user to the referrer
     if (referralCode?.trim()) {

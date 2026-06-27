@@ -388,7 +388,7 @@ function LoginContent() {
   const handleSuccess = async (redirectTo) => {
     await refreshUser();
     const redirect = searchParams.get("redirect");
-    router.push(redirect || redirectTo);
+    router.push(redirectTo === "/auth/role-select" ? redirectTo : redirect || redirectTo);
   };
 
   return (

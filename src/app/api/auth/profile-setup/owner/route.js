@@ -57,7 +57,6 @@ export async function POST(request) {
       companyName,
       address,
       pincode,
-      propertyCategories,
       preferredPayoutMethod,
       upiId,
       bankAccountName,
@@ -66,6 +65,17 @@ export async function POST(request) {
       bankName,
       referralCode,
     } = body;
+    const hasOwnerProfileFields = [
+      'companyName',
+      'address',
+      'pincode',
+      'preferredPayoutMethod',
+      'upiId',
+      'bankAccountName',
+      'bankAccountNumber',
+      'bankIfscCode',
+      'bankName',
+    ].some((field) => Object.prototype.hasOwnProperty.call(body, field));
 
     if (!fullName?.trim()) {
       return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
@@ -75,36 +85,38 @@ export async function POST(request) {
     await sql`
       UPDATE users
       SET full_name = ${fullName.trim()},
-          whatsapp_number = ${whatsappNumber || null}
+          whatsapp_number = ${whatsappNumber || user.phone || null}
       WHERE id = ${user.id}
     `;
 
-    // Upsert owner profile
-    await sql`
-      INSERT INTO owner_profiles (user_id, company_name, address, pincode, preferred_payout_method, upi_id, bank_account_name, bank_account_number, bank_ifsc_code, bank_name)
-      VALUES (
-        ${user.id},
-        ${companyName || null},
-        ${address || null},
-        ${pincode || null},
-        ${preferredPayoutMethod || null},
-        ${upiId || null},
-        ${bankAccountName || null},
-        ${bankAccountNumber || null},
-        ${bankIfscCode || null},
-        ${bankName || null}
-      )
-      ON CONFLICT (user_id) DO UPDATE SET
-        company_name = EXCLUDED.company_name,
-        address = EXCLUDED.address,
-        pincode = EXCLUDED.pincode,
-        preferred_payout_method = EXCLUDED.preferred_payout_method,
-        upi_id = EXCLUDED.upi_id,
-        bank_account_name = EXCLUDED.bank_account_name,
-        bank_account_number = EXCLUDED.bank_account_number,
-        bank_ifsc_code = EXCLUDED.bank_ifsc_code,
-        bank_name = EXCLUDED.bank_name
-    `;
+    if (hasOwnerProfileFields) {
+      // Upsert owner profile
+      await sql`
+        INSERT INTO owner_profiles (user_id, company_name, address, pincode, preferred_payout_method, upi_id, bank_account_name, bank_account_number, bank_ifsc_code, bank_name)
+        VALUES (
+          ${user.id},
+          ${companyName || null},
+          ${address || null},
+          ${pincode || null},
+          ${preferredPayoutMethod || null},
+          ${upiId || null},
+          ${bankAccountName || null},
+          ${bankAccountNumber || null},
+          ${bankIfscCode || null},
+          ${bankName || null}
+        )
+        ON CONFLICT (user_id) DO UPDATE SET
+          company_name = EXCLUDED.company_name,
+          address = EXCLUDED.address,
+          pincode = EXCLUDED.pincode,
+          preferred_payout_method = EXCLUDED.preferred_payout_method,
+          upi_id = EXCLUDED.upi_id,
+          bank_account_name = EXCLUDED.bank_account_name,
+          bank_account_number = EXCLUDED.bank_account_number,
+          bank_ifsc_code = EXCLUDED.bank_ifsc_code,
+          bank_name = EXCLUDED.bank_name
+      `;
+    }
 
     // Handle referral code — link this user to the referrer
     if (referralCode?.trim()) {
