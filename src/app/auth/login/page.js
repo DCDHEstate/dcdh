@@ -184,13 +184,42 @@ function OtpStep({ phone, onBack, onSuccess }) {
 
   const otpValue = otp.join("");
 
-  const handleChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
-    const next = [...otp];
-    next[index] = value;
-    setOtp(next);
+  const fillOtpDigits = (value, startIndex = 0) => {
+    const digits = value.replace(/\D/g, "").slice(0, 6);
+    if (!digits) return;
+
+    const fillFrom = digits.length === 6 ? 0 : startIndex;
+
+    setOtp((prev) => {
+      const next = [...prev];
+      digits.split("").forEach((digit, offset) => {
+        const targetIndex = fillFrom + offset;
+        if (targetIndex < 6) next[targetIndex] = digit;
+      });
+      return next;
+    });
     setError("");
-    if (value && index < 5) inputRefs.current[index + 1]?.focus();
+
+    const focusIndex = Math.min(fillFrom + digits.length, 5);
+    window.requestAnimationFrame(() => {
+      inputRefs.current[focusIndex]?.focus();
+    });
+  };
+
+  const handleChange = (index, value) => {
+    const digits = value.replace(/\D/g, "");
+
+    if (!digits) {
+      setOtp((prev) => {
+        const next = [...prev];
+        next[index] = "";
+        return next;
+      });
+      setError("");
+      return;
+    }
+
+    fillOtpDigits(digits, index);
   };
 
   const handleKeyDown = (index, e) => {
@@ -199,15 +228,16 @@ function OtpStep({ phone, onBack, onSuccess }) {
     }
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (index, e) => {
     e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    if (pasted.length === 6) {
-      setOtp(pasted.split(""));
-      inputRefs.current[5]?.focus();
+    const pasted = e.clipboardData.getData("text");
+    fillOtpDigits(pasted, index);
+  };
+
+  const handleBeforeInput = (index, e) => {
+    if (e.data && e.data.replace(/\D/g, "").length > 1) {
+      e.preventDefault();
+      fillOtpDigits(e.data, index);
     }
   };
 
@@ -291,17 +321,20 @@ function OtpStep({ phone, onBack, onSuccess }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 6-box OTP input */}
         <div>
-          <div className="flex justify-center gap-2.5" onPaste={handlePaste}>
+          <div className="flex justify-center gap-2.5">
             {otp.map((digit, i) => (
               <input
                 key={i}
                 ref={(el) => (inputRefs.current[i] = el)}
                 type="text"
                 inputMode="numeric"
-                maxLength={1}
+                autoComplete={i === 0 ? "one-time-code" : "off"}
+                maxLength={6}
                 value={digit}
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
+                onPaste={(e) => handlePaste(i, e)}
+                onBeforeInput={(e) => handleBeforeInput(i, e)}
                 className={`h-14 w-12 rounded-xl border text-center text-xl font-semibold text-heading transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                   digit
                     ? "border-primary bg-primary/5 text-primary"

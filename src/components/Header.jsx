@@ -128,11 +128,15 @@ export default function Header() {
     await logout();
   };
 
+  const hasSolidHeader = isScrolled || isDashboard || mobileOpen;
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-700 ${
-        isScrolled || isDashboard
-          ? "bg-surface-white/95 backdrop-blur-2xl shadow-soft"
+        mobileOpen
+          ? "bg-surface-white shadow-soft"
+          : isScrolled || isDashboard
+            ? "bg-surface-white/95 backdrop-blur-2xl shadow-soft"
           : "bg-gradient-to-b from-black/40 to-transparent"
       }`}
     >
@@ -140,7 +144,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3.5">
           <div
-            className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-500 ${isScrolled || isDashboard ? "ring-1 ring-accent/10" : "ring-1 ring-white/20"}`}
+            className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-500 ${hasSolidHeader ? "ring-1 ring-accent/10" : "ring-1 ring-white/20"}`}
           >
             <span
               aria-hidden="true"
@@ -150,12 +154,12 @@ export default function Header() {
           </div>
           <div>
             <div
-              className={`text-lg font-semibold tracking-tight transition-colors duration-700 ${isScrolled || isDashboard ? "text-heading" : "text-white"}`}
+              className={`text-lg font-semibold tracking-tight transition-colors duration-700 ${hasSolidHeader ? "text-heading" : "text-white"}`}
             >
               DCDH EMPIRE
             </div>
             <div
-              className={`text-[10px] font-medium tracking-elegant transition-colors duration-700 ${isScrolled || isDashboard ? "text-subtle" : "text-faint"}`}
+              className={`text-[10px] font-medium tracking-elegant transition-colors duration-700 ${hasSolidHeader ? "text-subtle" : "text-faint"}`}
             >
               PREMIUM PROPERTIES
             </div>
@@ -303,10 +307,10 @@ export default function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className={`rounded-lg p-2.5 lg:hidden ${isScrolled || isDashboard ? "hover:bg-surface-subtle" : "hover:bg-white/10"}`}
+          className={`rounded-lg p-2.5 lg:hidden ${hasSolidHeader ? "hover:bg-surface-subtle" : "hover:bg-white/10"}`}
         >
           <svg
-            className={`h-5 w-5 transition-colors duration-300 ${isScrolled || isDashboard ? "text-body" : "text-white"}`}
+            className={`h-5 w-5 transition-colors duration-300 ${hasSolidHeader ? "text-body" : "text-white"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -332,7 +336,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="absolute inset-x-0 top-20 mx-4 glass rounded-2xl p-5 shadow-premium lg:hidden">
+        <div className="absolute inset-x-0 top-20 mx-4 rounded-2xl border border-border bg-surface-white p-5 shadow-premium lg:hidden">
           {/* User info (if authenticated) */}
           {isAuthenticated && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-surface-subtle px-4 py-3">
