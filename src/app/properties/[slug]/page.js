@@ -229,7 +229,7 @@ export default async function PropertyDetailPage({ params }) {
                     : "For Sale"}
                 </span>
                 <span className="rounded-full border border-border bg-surface-subtle px-3 py-1 text-xs capitalize text-body">
-                  {property.property_type?.replace("_", " ")}
+                  {property.property_type === "1rk" ? "1 RK" : property.property_type?.replace("_", " ")}
                 </span>
                 {property.furnishing && (
                   <span className="rounded-full border border-border bg-surface-subtle px-3 py-1 text-xs capitalize text-body">
@@ -481,6 +481,6 @@ export async function generateMetadata({ params }) {
     title: `${property.title} — DCDH Empire`,
     description:
       property.description?.slice(0, 155) ||
-      `${property.property_type?.replace("_", " ")} in ${property.city_name}`,
+      `${property.property_type === "1rk" ? "1 RK" : property.property_type?.replace("_", " ")} in ${property.city_name}`,
   };
 }

@@ -15,6 +15,7 @@ const PROPERTY_TYPES = {
     { id: "builder_floor", label: "Builder Floor" },
     { id: "penthouse", label: "Penthouse" },
     { id: "studio", label: "Studio" },
+    { id: "1rk", label: "1 RK" },
   ],
   commercial: [
     { id: "office", label: "Office" },

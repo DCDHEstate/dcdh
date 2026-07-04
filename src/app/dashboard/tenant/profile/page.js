@@ -9,6 +9,7 @@ const propertyTypes = [
   { id: "independent_house", label: "Independent House" },
   { id: "builder_floor", label: "Builder Floor" },
   { id: "studio", label: "Studio" },
+  { id: "1rk", label: "1 RK" },
 ];
 
 const bhkOptions = [

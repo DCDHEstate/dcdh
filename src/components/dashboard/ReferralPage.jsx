@@ -22,6 +22,7 @@ const PROPERTY_TYPES = [
   { value: "apartment", label: "Apartment" },
   { value: "independent_house", label: "Independent House" },
   { value: "villa", label: "Villa" },
+  { value: "1rk", label: "1 RK" },
   { value: "plot", label: "Plot" },
   { value: "shop", label: "Shop" },
   { value: "office", label: "Office" },

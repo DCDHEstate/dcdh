@@ -22,7 +22,7 @@ CREATE TYPE property_category AS ENUM ('residential', 'commercial', 'land');
 CREATE TYPE property_transaction_type AS ENUM ('buy', 'rent');
 CREATE TYPE property_type AS ENUM (
   'apartment', 'villa', 'independent_house', 'builder_floor',
-  'penthouse', 'studio',
+  'penthouse', 'studio', '1rk',
   'office', 'shop', 'showroom', 'warehouse', 'coworking',
   'plot', 'agricultural_land', 'farm_house'
 );

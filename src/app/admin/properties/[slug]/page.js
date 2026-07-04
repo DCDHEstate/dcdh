@@ -241,7 +241,7 @@ export default function AdminPropertyDetailPage({ params }) {
                 {property.transaction_type === "rent" ? "For Rent" : "For Sale"}
               </span>
               <span className="rounded-full border border-border bg-surface-subtle px-3 py-1 text-xs capitalize text-body">
-                {property.property_type?.replace("_", " ")}
+                {property.property_type === "1rk" ? "1 RK" : property.property_type?.replace("_", " ")}
               </span>
               {property.furnishing && (
                 <span className="rounded-full border border-border bg-surface-subtle px-3 py-1 text-xs capitalize text-body">
