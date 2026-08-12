@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
     }
 
     const media = await sql`
-      SELECT media_url, is_primary, sort_order
+      SELECT media_url, media_type, is_primary, sort_order
       FROM property_media
       WHERE property_id = ${property.id}
       ORDER BY is_primary DESC, sort_order ASC

@@ -12,7 +12,9 @@ const s3 = new S3Client({
 });
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+// MP4 only — .mov / QuickTime uploads frequently carry HEVC, which Chrome and
+// Firefox can't decode, so they'd upload fine and then fail to play for buyers.
+const VIDEO_TYPES = ["video/mp4"];
 const ALLOWED_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;    // 5 MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024;  // 100 MB
@@ -44,7 +46,7 @@ export async function POST(request) {
 
   if (!ALLOWED_TYPES.includes(fileType)) {
     return Response.json(
-      { error: "Only JPEG, PNG, WebP images and MP4, WebM, MOV videos are allowed" },
+      { error: "Only JPEG, PNG, WebP images and MP4 videos are allowed" },
       { status: 400 }
     );
   }
@@ -60,7 +62,7 @@ export async function POST(request) {
 
   const EXT_MAP = {
     "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
-    "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov",
+    "video/mp4": "mp4",
   };
   const ext = EXT_MAP[fileType] || "bin";
   const key = `properties/${session.id}/${randomUUID()}.${ext}`;

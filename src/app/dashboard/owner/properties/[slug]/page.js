@@ -80,7 +80,7 @@ export default function OwnerPropertyDetailPage({ params }) {
   const amenities = Array.isArray(property.amenities) ? property.amenities : JSON.parse(property.amenities || "[]");
   const media = property.media || [];
   const primaryMedia = media.find((m) => m.is_primary) || media[0];
-  const otherMedia = media.filter((m) => !m.is_primary).slice(0, 5);
+  const otherMedia = media.filter((m) => !m.is_primary);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -148,7 +148,11 @@ export default function OwnerPropertyDetailPage({ params }) {
           <div className="overflow-hidden rounded-2xl border border-border bg-surface-subtle">
             {primaryMedia ? (
               <div className="relative aspect-video w-full overflow-hidden">
-                <img src={primaryMedia.media_url} alt={property.title} className="h-full w-full object-cover" />
+                {primaryMedia.media_type === "video" ? (
+                  <video src={primaryMedia.media_url} className="h-full w-full bg-black object-contain" controls playsInline preload="metadata" />
+                ) : (
+                  <img src={primaryMedia.media_url} alt={property.title} className="h-full w-full object-cover" />
+                )}
               </div>
             ) : (
               <div className="flex aspect-video w-full items-center justify-center bg-surface-subtle">
@@ -159,9 +163,20 @@ export default function OwnerPropertyDetailPage({ params }) {
             )}
             {otherMedia.length > 0 && (
               <div className="grid grid-cols-5 gap-1 p-1">
-                {otherMedia.map((m, i) => (
-                  <img key={i} src={m.media_url} alt={`Photo ${i + 2}`} className="aspect-square w-full rounded-lg object-cover" />
-                ))}
+                {otherMedia.map((m, i) =>
+                  m.media_type === "video" ? (
+                    <div key={i} className="relative aspect-square w-full overflow-hidden rounded-lg bg-black">
+                      <video src={m.media_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <svg className="h-6 w-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    </div>
+                  ) : (
+                    <img key={i} src={m.media_url} alt={`Photo ${i + 2}`} className="aspect-square w-full rounded-lg object-cover" />
+                  ),
+                )}
               </div>
             )}
           </div>

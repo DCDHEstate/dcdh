@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { uploadFilesToS3, partitionAllowedFiles, rejectionMessage, ACCEPT_ATTR } from "@/lib/propertyMedia";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -764,6 +765,7 @@ function Step3({ formData, onChange }) {
 
 function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(null);
   const [error, setError] = useState("");
 
   const coverItem = mediaItems.find((m) => m.isPrimary) || null;
@@ -774,41 +776,24 @@ function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
     onUploadingChange?.(val);
   };
 
-  const uploadFiles = async (files, isPrimary) => {
+  const uploadFiles = async (files, isPrimary, baseError = "") => {
     setUploadState(true);
-    setError("");
-    const results = [];
+    setError(baseError);
+    setProgress({ done: 0, total: files.length });
     try {
-      for (const file of files) {
-        try {
-          const res = await fetch("/api/properties/upload-url", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fileName: file.name, fileType: file.type, fileSize: file.size }),
-          });
-          if (!res.ok) { const d = await res.json(); setError(d.error || "Upload failed"); continue; }
-          const { uploadUrl, uploadFields, publicUrl } = await res.json();
-          const fd = new FormData();
-          Object.entries(uploadFields).forEach(([k, v]) => fd.append(k, v));
-          fd.append("file", file);
-          const uploadRes = await fetch(uploadUrl, { method: "POST", body: fd });
-          if (!uploadRes.ok && uploadRes.status !== 0 && uploadRes.status !== 204) {
-            throw new Error(`Upload failed: ${uploadRes.status}`);
-          }
-          results.push({
-            url: publicUrl,
-            isPrimary,
-            preview: URL.createObjectURL(file),
-            mediaType: file.type.startsWith("video/") ? "video" : "image",
-          });
-        } catch {
-          setError("Failed to upload one or more files. Please try again.");
-        }
+      const results = await uploadFilesToS3(files, isPrimary, () =>
+        setProgress((p) => (p ? { ...p, done: p.done + 1 } : p)),
+      );
+      const failed = files.length - results.length;
+      if (failed > 0) {
+        const msg = `${failed} of ${files.length} file(s) failed to upload. Please try again.`;
+        setError(baseError ? `${baseError} ${msg}` : msg);
       }
+      return results;
     } finally {
       setUploadState(false);
+      setProgress(null);
     }
-    return results;
   };
 
   const handleCoverSelect = async (e) => {
@@ -822,15 +807,12 @@ function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
   };
 
   const handleOtherSelect = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    if (otherItems.length + files.length > 9) {
-      setError("You can add at most 9 additional photos / videos.");
-      return;
-    }
-    const results = await uploadFiles(files, false);
-    setMediaItems((prev) => [...prev, ...results]);
+    const { accepted, rejected } = partitionAllowedFiles(e.target.files || []);
     e.target.value = "";
+    if (rejected.length > 0) setError(rejectionMessage(rejected));
+    if (!accepted.length) return;
+    const results = await uploadFiles(accepted, false, rejectionMessage(rejected));
+    setMediaItems((prev) => [...prev, ...results]);
   };
 
   const removeCover = () => setMediaItems((prev) => prev.filter((m) => !m.isPrimary));
@@ -889,24 +871,24 @@ function Step4({ mediaItems, setMediaItems, onUploadingChange }) {
       {/* ── Other Photos & Videos ── */}
       <div>
         <h3 className="mb-1 text-sm font-semibold text-heading">Other Photos & Videos</h3>
-        <p className="mb-3 text-xs text-muted">Add up to 9 additional images or a walkthrough video.</p>
+        <p className="mb-3 text-xs text-muted">Add as many images and walkthrough videos as you like.</p>
 
-        {otherItems.length < 9 && (
-          <label className={`mb-4 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-surface-subtle p-6 transition-all hover:border-primary/50 hover:bg-primary/5 ${uploading ? "pointer-events-none opacity-50" : ""}`}>
-            {uploading ? (
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-            ) : (
-              <svg className="h-7 w-7 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-            )}
-            <div className="text-center">
-              <span className="text-sm font-medium text-primary">Add photos or videos</span>
-              <p className="mt-0.5 text-xs text-muted">Images: JPEG, PNG, WebP · max 5 MB &nbsp;|&nbsp; Videos: MP4, WebM, MOV · max 100 MB</p>
-            </div>
-            <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple className="hidden" onChange={handleOtherSelect} disabled={uploading} />
-          </label>
-        )}
+        <label className={`mb-4 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-surface-subtle p-6 transition-all hover:border-primary/50 hover:bg-primary/5 ${uploading ? "pointer-events-none opacity-50" : ""}`}>
+          {uploading ? (
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          ) : (
+            <svg className="h-7 w-7 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          )}
+          <div className="text-center">
+            <span className="text-sm font-medium text-primary">
+              {uploading && progress ? `Uploading ${progress.done} of ${progress.total}…` : "Add photos or videos"}
+            </span>
+            <p className="mt-0.5 text-xs text-muted">Images: JPEG, PNG, WebP · max 5 MB &nbsp;|&nbsp; Videos: MP4 only · max 100 MB</p>
+          </div>
+          <input type="file" accept={ACCEPT_ATTR} multiple className="hidden" onChange={handleOtherSelect} disabled={uploading} />
+        </label>
 
         {error && <p className="mb-3 text-xs text-red-500">{error}</p>}
 
