@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatPrice } from "@/lib/propertyOptions";
 
 const STATUS_COLORS = {
   active: "border-green-200 bg-green-50 text-green-700",
@@ -24,13 +25,6 @@ const TENANCY_STATUS_COLORS = {
   terminated: "bg-red-100 text-red-700",
   pending: "bg-yellow-100 text-yellow-700",
 };
-
-function formatPrice(price) {
-  const n = Number(price);
-  if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
-  if (n >= 100000) return `₹${(n / 100000).toFixed(1)} L`;
-  return `₹${n.toLocaleString("en-IN")}`;
-}
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";

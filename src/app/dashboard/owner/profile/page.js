@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import ReferralCodeCard from "@/components/referral/ReferralCodeCard";
 
 export default function OwnerProfilePage() {
   const { refreshUser, logout } = useAuth();
@@ -282,6 +283,10 @@ export default function OwnerProfilePage() {
           )}
         </button>
       </form>
+
+      <div className="mt-6">
+        <ReferralCodeCard />
+      </div>
 
       <button
         onClick={logout}

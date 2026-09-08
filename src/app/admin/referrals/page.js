@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import {
+  PURPOSE_LABELS,
+  REFERRAL_TYPE_LABELS,
+  MEDIA_CATEGORY_LABELS,
+} from "@/lib/referralOptions";
 
 const STATUS_COLORS = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -12,6 +17,47 @@ const STATUS_COLORS = {
 
 const STATUSES = ["pending", "registered", "deal_closed", "rewarded", "expired"];
 
+// The three flows share one table, so the "Details" column has to say
+// something sensible for each: who was referred, or which owner + property.
+function subjectOf(r) {
+  if (r.referral_type === "property") {
+    return {
+      title: r.owner_name || r.property_location || "Property referral",
+      sub: [
+        r.owner_contact_number,
+        r.property_location,
+        r.property_category,
+        r.property_type?.replace("_", " "),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    };
+  }
+  return {
+    title: r.referred_name || r.referred_user_name || r.referred_phone || "—",
+    sub: [r.referred_phone, r.referred_user_name && "signed up"]
+      .filter(Boolean)
+      .join(" · "),
+  };
+}
+
+function TypeBadge({ type }) {
+  return (
+    <span className="whitespace-nowrap rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium text-body">
+      {REFERRAL_TYPE_LABELS[type] || type}
+    </span>
+  );
+}
+
+function PurposeBadge({ purpose }) {
+  if (!purpose) return null;
+  return (
+    <span className="whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+      {PURPOSE_LABELS[purpose] || purpose}
+    </span>
+  );
+}
+
 export default function AdminReferralsPage() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +66,9 @@ export default function AdminReferralsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rewardModal, setRewardModal] = useState(null);
+  const [detailModal, setDetailModal] = useState(null);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [notesSaving, setNotesSaving] = useState(false);
   const [rewardAmount, setRewardAmount] = useState("");
   const [rewardLoading, setRewardLoading] = useState(false);
 
@@ -40,6 +89,10 @@ export default function AdminReferralsPage() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    setNotesDraft(detailModal?.admin_notes || "");
+  }, [detailModal]);
+
   const updateStatus = async (referralId, newStatus) => {
     await fetch("/api/admin/referrals", {
       method: "PATCH",
@@ -47,6 +100,23 @@ export default function AdminReferralsPage() {
       body: JSON.stringify({ referralId, status: newStatus }),
     });
     fetchData();
+  };
+
+  const saveNotes = async (referralId, adminNotes) => {
+    setNotesSaving(true);
+    try {
+      await fetch("/api/admin/referrals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referralId, adminNotes }),
+      });
+      setDetailModal((d) => (d ? { ...d, admin_notes: adminNotes } : d));
+      fetchData();
+    } catch {
+      // ignore
+    } finally {
+      setNotesSaving(false);
+    }
   };
 
   const submitReward = async () => {
@@ -104,8 +174,9 @@ export default function AdminReferralsPage() {
           className="rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent"
         >
           <option value="">All Types</option>
-          <option value="friend">Friend</option>
-          <option value="property">Property</option>
+          <option value="signup">Link Signup</option>
+          <option value="friend">Person Referral</option>
+          <option value="property">Property Referral</option>
         </select>
       </div>
 
@@ -128,16 +199,22 @@ export default function AdminReferralsPage() {
                     <p className="font-medium text-heading">{r.referrer_name}</p>
                     <p className="text-xs text-muted">{r.referrer_phone}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium capitalize text-body">
-                    {r.referral_type}
-                  </span>
+                  <div className="flex shrink-0 flex-wrap justify-end gap-1">
+                    <TypeBadge type={r.referral_type} />
+                    <PurposeBadge purpose={r.purpose} />
+                  </div>
                 </div>
                 <div className="mt-3 text-xs">
                   <p className="text-subtle">Details</p>
-                  {r.referral_type === "friend" ? (
-                    <p className="text-body">{r.referred_user_name || r.referred_phone}</p>
-                  ) : (
-                    <p className="text-body">{r.property_location}{r.property_category && ` · ${r.property_category}`}</p>
+                  <p className="text-body">{subjectOf(r).title}</p>
+                  {subjectOf(r).sub && <p className="text-muted">{subjectOf(r).sub}</p>}
+                  {r.media?.length > 0 && (
+                    <button
+                      onClick={() => setDetailModal(r)}
+                      className="mt-1 font-medium text-accent-dark underline-offset-2 hover:underline"
+                    >
+                      View {r.media.length} photo/video
+                    </button>
                   )}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
@@ -209,24 +286,23 @@ export default function AdminReferralsPage() {
                     <p className="text-xs text-muted">{r.referrer_phone}</p>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium capitalize text-body">
-                      {r.referral_type}
-                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      <TypeBadge type={r.referral_type} />
+                      <PurposeBadge purpose={r.purpose} />
+                    </div>
                   </td>
                   <td className="px-5 py-4">
-                    {r.referral_type === "friend" ? (
-                      <div>
-                        <p className="text-sm text-body">{r.referred_user_name || r.referred_phone}</p>
-                        {r.referred_user_name && <p className="text-xs text-muted">{r.referred_phone}</p>}
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm text-body">{r.property_location}</p>
-                        <p className="text-xs text-muted">
-                          {r.property_category && <span className="capitalize">{r.property_category}</span>}
-                          {r.owner_contact_number && <span> · {r.owner_contact_number}</span>}
-                        </p>
-                      </div>
+                    <p className="text-sm text-body">{subjectOf(r).title}</p>
+                    {subjectOf(r).sub && (
+                      <p className="text-xs text-muted">{subjectOf(r).sub}</p>
+                    )}
+                    {r.media?.length > 0 && (
+                      <button
+                        onClick={() => setDetailModal(r)}
+                        className="mt-1 text-xs font-medium text-accent-dark underline-offset-2 hover:underline"
+                      >
+                        {r.media.length} photo/video
+                      </button>
                     )}
                   </td>
                   <td className="px-5 py-4">
@@ -253,14 +329,22 @@ export default function AdminReferralsPage() {
                     {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-5 py-4">
-                    {r.status !== "rewarded" && r.status !== "expired" && (
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => { setRewardModal(r); setRewardAmount(""); }}
-                        className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+                        onClick={() => setDetailModal(r)}
+                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-body transition hover:bg-surface-subtle"
                       >
-                        Reward
+                        View
                       </button>
-                    )}
+                      {r.status !== "rewarded" && r.status !== "expired" && (
+                        <button
+                          onClick={() => { setRewardModal(r); setRewardAmount(""); }}
+                          className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+                        >
+                          Reward
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -280,13 +364,175 @@ export default function AdminReferralsPage() {
         </div>
       )}
 
+      {/* Detail Modal */}
+      {detailModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm"
+          onClick={() => setDetailModal(null)}
+        >
+          <div
+            className="my-8 w-full max-w-2xl rounded-2xl border border-border bg-surface-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-heading">
+                  {subjectOf(detailModal).title}
+                </h3>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <TypeBadge type={detailModal.referral_type} />
+                  <PurposeBadge purpose={detailModal.purpose} />
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[detailModal.status]}`}
+                  >
+                    {detailModal.status.replace("_", " ")}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailModal(null)}
+                aria-label="Close"
+                className="text-2xl leading-none text-muted hover:text-body"
+              >
+                &times;
+              </button>
+            </div>
+
+            <dl className="mt-5 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-xs text-subtle">Referred by</dt>
+                <dd className="text-body">
+                  {detailModal.referrer_name || "—"}
+                  <span className="block text-xs text-muted">
+                    {detailModal.referrer_phone}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-subtle">Submitted</dt>
+                <dd className="text-body">
+                  {new Date(detailModal.created_at).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </dd>
+              </div>
+
+              {detailModal.referral_type === "property" ? (
+                <>
+                  <div>
+                    <dt className="text-xs text-subtle">Owner</dt>
+                    <dd className="text-body">
+                      {detailModal.owner_name || "—"}
+                      <span className="block text-xs text-muted">
+                        {detailModal.owner_contact_number}
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-subtle">Property</dt>
+                    <dd className="text-body">
+                      {[detailModal.property_category, detailModal.property_type?.replace("_", " ")]
+                        .filter(Boolean)
+                        .join(" · ") || "—"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs text-subtle">Location</dt>
+                    <dd className="text-body">{detailModal.property_location || "—"}</dd>
+                  </div>
+                  {detailModal.property_notes && (
+                    <div className="sm:col-span-2">
+                      <dt className="text-xs text-subtle">Notes from referrer</dt>
+                      <dd className="whitespace-pre-wrap text-body">
+                        {detailModal.property_notes}
+                      </dd>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="sm:col-span-2">
+                  <dt className="text-xs text-subtle">Contact</dt>
+                  <dd className="text-body">
+                    {detailModal.referred_name || "—"}
+                    <span className="block text-xs text-muted">
+                      {detailModal.referred_phone}
+                      {detailModal.referred_user_name && " · already registered"}
+                    </span>
+                  </dd>
+                </div>
+              )}
+            </dl>
+
+            {detailModal.media?.length > 0 && (
+              <div className="mt-6">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                  Photos &amp; Videos ({detailModal.media.length})
+                </p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {detailModal.media.map((m) => (
+                    <a
+                      key={m.id}
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block overflow-hidden rounded-xl border border-border bg-surface-subtle"
+                    >
+                      {m.mediaType === "video" ? (
+                        <video
+                          src={m.url}
+                          className="h-28 w-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={m.url} alt="" className="h-28 w-full object-cover" />
+                      )}
+                      <span className="absolute inset-x-0 bottom-0 truncate bg-black/55 px-1.5 py-0.5 text-[10px] text-white">
+                        {MEDIA_CATEGORY_LABELS[m.category] || "Other"}
+                        {m.mediaType === "video" && " · video"}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+                Internal notes
+              </label>
+              <textarea
+                value={notesDraft}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                rows={3}
+                placeholder="Call outcome, next step, why this was rejected..."
+                className="w-full resize-y rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent"
+              />
+              <button
+                onClick={() => saveNotes(detailModal.id, notesDraft)}
+                disabled={notesSaving || notesDraft === (detailModal.admin_notes || "")}
+                className="mt-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-body transition hover:bg-surface-subtle disabled:opacity-50"
+              >
+                {notesSaving ? "Saving..." : "Save notes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reward Modal */}
       {rewardModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setRewardModal(null)}>
           <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-surface-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-heading">Reward Referral</h3>
             <p className="mt-1 text-xs text-muted">
-              {rewardModal.referrer_name} · {rewardModal.referral_type === "friend" ? (rewardModal.referred_user_name || rewardModal.referred_phone) : rewardModal.property_location}
+              {rewardModal.referrer_name} · {subjectOf(rewardModal).title}
             </p>
 
             <div className="mt-5">

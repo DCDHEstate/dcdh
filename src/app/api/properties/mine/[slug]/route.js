@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
+import { normalizeFurnishings } from '@/lib/propertyOptions';
 
 export async function PATCH(request, { params }) {
   try {
@@ -23,7 +24,7 @@ export async function PATCH(request, { params }) {
       bedrooms, bathrooms, balconies, furnishing,
       floorNumber, totalFloors, parkingSlots, ageOfProperty, possessionStatus,
       stateId, cityId, localityId, addressLine1, addressLine2, pincode, googleMapsUrl,
-      description, areaSqft, carpetAreaSqft, facing, availableFrom, amenities,
+      description, areaSqft, carpetAreaSqft, facing, availableFrom, amenities, furnishings,
       price, rentDeposit, securityDeposit, maintenanceCharge, priceNegotiable,
       mediaUrls,
     } = body;
@@ -62,7 +63,8 @@ export async function PATCH(request, { params }) {
         carpet_area_sqft = ${carpetAreaSqft || null},
         facing = ${facing || null},
         available_from = ${availableFrom || null},
-        amenities = ${JSON.stringify(amenities || [])},
+        amenities = ${sql.json(amenities || [])},
+        furnishings = ${sql.json(normalizeFurnishings(furnishing, furnishings))},
         price = ${price},
         rent_deposit = ${rentDeposit || null},
         security_deposit = ${securityDeposit || null},

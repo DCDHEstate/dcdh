@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
+import { attachReferralCode, ensureReferralCode } from '@/lib/referral';
 
 export async function GET(request) {
   try {
@@ -114,21 +115,14 @@ export async function POST(request) {
       `;
     }
 
-    // Handle referral code — link this user to the referrer
+    // Handle referral code — link this user to the referrer. A bad code is not
+    // worth failing profile setup over; the user can retry from their profile.
     if (referralCode?.trim()) {
-      const code = referralCode.trim().toUpperCase();
-      const referrer = await sql`SELECT id, phone FROM users WHERE referral_code = ${code} AND id != ${user.id}`;
-      if (referrer.length > 0) {
-        // Check if referral already exists
-        const existing = await sql`
-          SELECT id FROM referrals WHERE referrer_id = ${referrer[0].id} AND referred_user_id = ${user.id}
-        `;
-        if (existing.length === 0) {
-          await sql`
-            INSERT INTO referrals (referrer_id, referral_type, referred_phone, referred_user_id, status)
-            VALUES (${referrer[0].id}, 'friend', ${user.phone}, ${user.id}, 'registered')
-          `;
-        }
+      try {
+        const myCode = await ensureReferralCode(user.id, user.referral_code);
+        await attachReferralCode({ ...user, referral_code: myCode }, referralCode);
+      } catch (refErr) {
+        console.error('[profile-setup] referral attach failed', refErr);
       }
     }
 

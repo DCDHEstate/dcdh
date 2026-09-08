@@ -4,13 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PropertyGallery from "@/components/PropertyGallery";
-
-function formatPrice(price) {
-  const n = Number(price);
-  if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
-  if (n >= 100000)   return `₹${(n / 100000).toFixed(1)} L`;
-  return `₹${n.toLocaleString("en-IN")}`;
-}
+import {
+  AMENITY_LABELS,
+  formatPrice,
+  groupFurnishings,
+  toArray,
+} from "@/lib/propertyOptions";
 
 const STATUS_COLORS = {
   pending_approval: "border-yellow-200 bg-yellow-50 text-yellow-700",
@@ -30,15 +29,6 @@ const STATUS_LABELS = {
   rejected:         "Rejected",
   draft:            "Draft",
   archived:         "Archived",
-};
-
-const AMENITY_LABELS = {
-  power_backup: "Power Backup", lift: "Lift / Elevator", gym: "Gym",
-  swimming_pool: "Swimming Pool", security: "24x7 Security", cctv: "CCTV",
-  garden: "Garden", club_house: "Club House", parking: "Parking",
-  visitor_parking: "Visitor Parking", intercom: "Intercom",
-  fire_safety: "Fire Safety", rainwater_harvesting: "Rainwater Harvesting",
-  solar_panels: "Solar Panels", gated_society: "Gated Society",
 };
 
 export default function AdminPropertyDetailPage({ params }) {
@@ -130,13 +120,13 @@ export default function AdminPropertyDetailPage({ params }) {
     );
   }
 
-  const amenities = Array.isArray(property.amenities)
-    ? property.amenities
-    : JSON.parse(property.amenities || "[]");
+  const amenities = toArray(property.amenities);
+  const furnishingGroups = groupFurnishings(toArray(property.furnishings));
 
   const media = [...(property.media || [])].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
 
   const status = property.status;
+  const currency = property.currency || "INR";
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -232,7 +222,11 @@ export default function AdminPropertyDetailPage({ params }) {
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-2xl font-bold text-primary">{formatPrice(property.price)}</p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatPrice(property.price, currency, {
+                    compact: property.transaction_type !== "rent",
+                  })}
+                </p>
                 {property.transaction_type === "rent" && <p className="text-xs text-muted">/month</p>}
               </div>
             </div>
@@ -262,7 +256,7 @@ export default function AdminPropertyDetailPage({ params }) {
                 { label: "Built-up Area",value: property.area_sqft     ? `${property.area_sqft} sq.ft`              : null },
                 { label: "Carpet Area",  value: property.carpet_area_sqft ? `${property.carpet_area_sqft} sq.ft`   : null },
                 { label: "Floor",        value: property.floor_number != null ? `${property.floor_number} / ${property.total_floors || "?"}` : null },
-                { label: "Parking",      value: property.parking_slots != null ? `${property.parking_slots} slots` : null },
+                { label: "Parking",      value: property.parking_slots ? `${property.parking_slots} ${property.parking_slots === 1 ? "slot" : "slots"}` : null },
                 { label: "Facing",       value: property.facing },
                 { label: "Age",          value: property.age_of_property },
               ].filter(s => s.value != null).map(s => (
@@ -282,10 +276,37 @@ export default function AdminPropertyDetailPage({ params }) {
             </div>
           )}
 
+          {/* Furnishings */}
+          {furnishingGroups.length > 0 && (
+            <div className="rounded-2xl border border-border bg-surface-white p-6 shadow-soft">
+              <div className="mb-4 flex items-baseline justify-between gap-3">
+                <h3 className="text-base font-semibold text-heading">What&apos;s Included</h3>
+                <span className="text-xs capitalize text-muted">{property.furnishing?.replace("_", " ")}</span>
+              </div>
+              <div className="space-y-4">
+                {furnishingGroups.map(g => (
+                  <div key={g.group}>
+                    <p className="mb-2 text-xs font-medium uppercase tracking-elegant text-subtle">{g.group}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {g.items.map(item => (
+                        <span key={item.id} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-subtle px-3 py-1.5 text-xs font-medium text-body">
+                          <svg className="h-3.5 w-3.5 text-verified" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Amenities */}
           {amenities.length > 0 && (
             <div className="rounded-2xl border border-border bg-surface-white p-6 shadow-soft">
-              <h3 className="mb-4 text-base font-semibold text-heading">Amenities</h3>
+              <h3 className="mb-4 text-base font-semibold text-heading">Society Amenities</h3>
               <div className="flex flex-wrap gap-2">
                 {amenities.map(a => (
                   <span key={a} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-subtle px-3 py-1.5 text-xs font-medium text-body">

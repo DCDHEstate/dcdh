@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import ReferralCodeCard from "@/components/referral/ReferralCodeCard";
 
 const propertyTypes = [
   { id: "apartment", label: "Apartment" },
@@ -334,6 +335,10 @@ export default function TenantProfilePage() {
           )}
         </button>
       </form>
+
+      <div className="mt-6">
+        <ReferralCodeCard />
+      </div>
 
       <button
         onClick={logout}

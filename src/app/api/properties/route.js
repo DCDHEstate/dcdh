@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import sql from "@/lib/db";
 import { getSessionFromRequest } from "@/lib/session";
+import { normalizeFurnishings } from "@/lib/propertyOptions";
 
 // Public GET — browse/search properties
 export async function GET(request) {
@@ -46,7 +47,7 @@ export async function GET(request) {
     const properties = await sql`
       SELECT
         p.id, p.slug, p.title, p.category, p.transaction_type, p.property_type,
-        p.price, p.bedrooms, p.bathrooms, p.area_sqft, p.furnishing,
+        p.price, p.currency, p.bedrooms, p.bathrooms, p.area_sqft, p.furnishing,
         p.created_at, p.view_count,
         c.name as city_name, l.name as locality_name,
         pm.media_url as primary_image
@@ -137,6 +138,7 @@ export async function POST(request) {
     facing,
     availableFrom,
     amenities,
+    furnishings,
     price,
     rentDeposit,
     securityDeposit,
@@ -232,6 +234,7 @@ export async function POST(request) {
         pincode,
         google_maps_url,
         amenities,
+        furnishings,
         available_from,
         possession_status,
         country,
@@ -269,7 +272,8 @@ export async function POST(request) {
         ${stateId},
         ${pincode || null},
         ${googleMapsUrl || null},
-        ${JSON.stringify(amenities || [])},
+        ${sql.json(amenities || [])},
+        ${sql.json(normalizeFurnishings(furnishing, furnishings))},
         ${availableFrom || null},
         ${possessionStatus || null},
         ${country},

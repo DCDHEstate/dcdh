@@ -32,8 +32,9 @@ CREATE TYPE property_furnishing AS ENUM ('furnished', 'semi_furnished', 'unfurni
 CREATE TYPE lead_status AS ENUM ('new', 'contacted', 'interested', 'visit_scheduled', 'visited', 'negotiation', 'closed_won', 'closed_lost');
 CREATE TYPE lead_source AS ENUM ('website_inquiry', 'referral', 'whatsapp', 'direct');
 
-CREATE TYPE referral_type AS ENUM ('friend', 'property');
+CREATE TYPE referral_type AS ENUM ('friend', 'property', 'signup');
 CREATE TYPE referral_status AS ENUM ('pending', 'registered', 'deal_closed', 'rewarded', 'expired');
+CREATE TYPE referral_purpose AS ENUM ('sell_purchase', 'rent', 'lease', 'other');
 
 CREATE TYPE wallet_transaction_type AS ENUM ('credit', 'debit');
 CREATE TYPE wallet_transaction_reason AS ENUM ('referral_reward', 'signup_bonus', 'withdrawal', 'adjustment');
@@ -67,6 +68,9 @@ CREATE TABLE users (
   status user_status NOT NULL DEFAULT 'active',
   is_phone_verified BOOLEAN DEFAULT FALSE,
   referral_code VARCHAR(10) UNIQUE, -- auto-generated shareable code
+  referred_by_user_id UUID REFERENCES users(id), -- who invited them (link signup or code entered later)
+  referred_by_code VARCHAR(10),    -- the code actually used, kept even if the referrer is deleted
+  referred_at TIMESTAMPTZ,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -331,6 +335,8 @@ CREATE TABLE property_media (
   property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
   media_url TEXT NOT NULL,
   media_type VARCHAR(20) NOT NULL DEFAULT 'image', -- 'image', 'video'
+  category VARCHAR(30), -- exterior | living_room | bedroom | kitchen | bathroom | balcony | other
+  sort_order SMALLINT NOT NULL DEFAULT 0,
   file_name VARCHAR(255),
   file_size INTEGER, -- in bytes
   sort_order SMALLINT DEFAULT 0,
@@ -388,16 +394,24 @@ CREATE TABLE referrals (
   referral_type referral_type NOT NULL,
   status referral_status NOT NULL DEFAULT 'pending',
 
-  -- Refer a Friend
+  -- What the referred party wants to do — applies to person and property referrals
+  purpose referral_purpose,
+
+  -- Refer a Person ('friend') / link signup ('signup')
+  referred_name VARCHAR(255),
   referred_phone VARCHAR(20), -- WhatsApp number of referred person
   referred_user_id UUID REFERENCES users(id), -- linked once they register
 
   -- Refer a Property
   property_category property_category,
   property_type property_type,
+  owner_name VARCHAR(255),
   owner_contact_number VARCHAR(20),
   property_location TEXT,
   property_notes TEXT,
+
+  -- Admin working notes, not visible to the referrer
+  admin_notes TEXT,
 
   -- Reward tracking
   reward_amount NUMERIC(10, 2),
@@ -415,6 +429,8 @@ CREATE TABLE referral_media (
   referral_id UUID NOT NULL REFERENCES referrals(id) ON DELETE CASCADE,
   media_url TEXT NOT NULL,
   media_type VARCHAR(20) NOT NULL DEFAULT 'image', -- 'image', 'video'
+  category VARCHAR(30), -- exterior | living_room | bedroom | kitchen | bathroom | balcony | other
+  sort_order SMALLINT NOT NULL DEFAULT 0,
   file_name VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -752,6 +768,8 @@ CREATE INDEX idx_referrals_referrer_id ON referrals(referrer_id);
 CREATE INDEX idx_referrals_referred_user_id ON referrals(referred_user_id);
 CREATE INDEX idx_referrals_status ON referrals(status);
 CREATE INDEX idx_referrals_type ON referrals(referral_type);
+CREATE INDEX idx_referral_media_referral ON referral_media(referral_id);
+CREATE INDEX idx_users_referred_by ON users(referred_by_user_id);
 
 -- Wallets
 CREATE INDEX idx_wallets_user_id ON wallets(user_id);

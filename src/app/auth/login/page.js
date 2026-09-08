@@ -162,7 +162,7 @@ function PhoneStep({ onOtpSent }) {
 
 // ── Step 2: OTP verification ─────────────────────────────────────────────────
 
-function OtpStep({ phone, onBack, onSuccess }) {
+function OtpStep({ phone, referralCode, onBack, onSuccess }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -251,7 +251,9 @@ function OtpStep({ phone, onBack, onSuccess }) {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp: otpValue }),
+        // referralCode is a belt-and-braces copy of the cookie middleware set
+        // from ?ref= — cookies can be blocked, the query param can't.
+        body: JSON.stringify({ phone, otp: otpValue, referralCode }),
       });
       const data = await res.json();
 
@@ -412,6 +414,10 @@ function LoginContent() {
   const { refreshUser } = useAuth();
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
+  const referralCode = (searchParams.get("ref") || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 10);
 
   const handleOtpSent = (cleanedPhone) => {
     setPhone(cleanedPhone);
@@ -426,12 +432,21 @@ function LoginContent() {
 
   return (
     <div className="w-full max-w-md">
+      {referralCode && (
+        <div className="mb-4 rounded-xl border border-[#25d366]/30 bg-[#25d366]/10 px-4 py-3 text-sm text-body">
+          You&apos;ve been invited with referral code{" "}
+          <span className="font-semibold tracking-widest">{referralCode}</span>.
+          It will be applied when you sign up.
+        </div>
+      )}
+
       <div className="rounded-2xl border border-border bg-surface-white p-8 shadow-soft">
         {step === "phone" ? (
           <PhoneStep onOtpSent={handleOtpSent} />
         ) : (
           <OtpStep
             phone={phone}
+            referralCode={referralCode}
             onBack={() => setStep("phone")}
             onSuccess={handleSuccess}
           />

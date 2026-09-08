@@ -3,6 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { uploadFilesToS3, partitionAllowedFiles, rejectionMessage, ACCEPT_ATTR } from "@/lib/propertyMedia";
+import {
+  AMENITY_LIST,
+  AGE_OPTIONS,
+  FACING_OPTIONS,
+  FURNISHING_LEVELS,
+  FURNISHING_GROUPS,
+  FURNISHED_LEVELS,
+} from "@/lib/propertyOptions";
+import CheckGrid from "@/components/property/CheckGrid";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -31,35 +40,6 @@ const PROPERTY_TYPES = {
     { id: "farm_house", label: "Farm House" },
   ],
 };
-
-const AMENITY_LIST = [
-  { id: "power_backup", label: "Power Backup" },
-  { id: "lift", label: "Lift / Elevator" },
-  { id: "gym", label: "Gym" },
-  { id: "swimming_pool", label: "Swimming Pool" },
-  { id: "security", label: "24x7 Security" },
-  { id: "cctv", label: "CCTV" },
-  { id: "garden", label: "Garden" },
-  { id: "club_house", label: "Club House" },
-  { id: "parking", label: "Parking" },
-  { id: "visitor_parking", label: "Visitor Parking" },
-  { id: "intercom", label: "Intercom" },
-  { id: "fire_safety", label: "Fire Safety" },
-  { id: "rainwater_harvesting", label: "Rainwater Harvesting" },
-  { id: "solar_panels", label: "Solar Panels" },
-  { id: "gated_society", label: "Gated Society" },
-];
-
-const AGE_OPTIONS = [
-  "Under Construction",
-  "0-1 years",
-  "1-3 years",
-  "3-5 years",
-  "5-10 years",
-  "10+ years",
-];
-
-const FACING_OPTIONS = ["North", "South", "East", "West", "North-East", "North-West", "South-East", "South-West"];
 
 const UAE_AREAS = {
   "Dubai": [
@@ -102,6 +82,7 @@ const INITIAL_FORM = {
   bathrooms: "",
   balconies: "",
   furnishing: "",
+  furnishings: [],
   floorNumber: "",
   totalFloors: "",
   parkingSlots: "0",
@@ -182,6 +163,12 @@ function Step1({ formData, onChange }) {
   const handleCategory = (cat) => {
     onChange("category", cat);
     onChange("propertyType", "");
+  };
+
+  // Dropping to unfurnished clears any itemised list picked earlier.
+  const handleFurnishing = (level) => {
+    onChange("furnishing", level);
+    if (!FURNISHED_LEVELS.includes(level)) onChange("furnishings", []);
   };
 
   return (
@@ -320,15 +307,11 @@ function Step1({ formData, onChange }) {
       <div>
         <FieldLabel>Furnishing</FieldLabel>
         <div className="flex gap-3">
-          {[
-            { id: "furnished", label: "Furnished" },
-            { id: "semi_furnished", label: "Semi-Furnished" },
-            { id: "unfurnished", label: "Unfurnished" },
-          ].map((f) => (
+          {FURNISHING_LEVELS.map((f) => (
             <button
               key={f.id}
               type="button"
-              onClick={() => onChange("furnishing", f.id)}
+              onClick={() => handleFurnishing(f.id)}
               className={`flex-1 rounded-xl border px-2 py-2.5 text-xs font-medium transition-all sm:text-sm ${
                 formData.furnishing === f.id
                   ? "border-primary bg-primary/5 text-primary"
@@ -659,13 +642,17 @@ function Step2({ formData, onChange }) {
 // ─── Step 3: Details & Amenities ─────────────────────────────────────────────
 
 function Step3({ formData, onChange }) {
-  const toggleAmenity = (id) => {
-    const current = formData.amenities;
+  const toggle = (field, id) => {
+    const current = formData[field];
     onChange(
-      "amenities",
+      field,
       current.includes(id) ? current.filter((a) => a !== id) : [...current, id]
     );
   };
+
+  // Land has nothing to furnish; unfurnished units have nothing to list.
+  const showFurnishings =
+    formData.category !== "land" && FURNISHED_LEVELS.includes(formData.furnishing);
 
   return (
     <div className="space-y-6">
@@ -724,38 +711,40 @@ function Step3({ formData, onChange }) {
         </div>
       </div>
 
+      {showFurnishings && (
+        <div>
+          <FieldLabel>What&apos;s Included</FieldLabel>
+          <p className="-mt-1 mb-3 text-xs text-muted">
+            Select everything that stays with the property. Listings that spell this
+            out get far fewer &quot;what does semi-furnished mean?&quot; enquiries.
+          </p>
+          <div className="space-y-4">
+            {FURNISHING_GROUPS.map((g) => (
+              <div key={g.group}>
+                <p className="mb-2 text-xs font-medium uppercase tracking-elegant text-subtle">
+                  {g.group}
+                </p>
+                <CheckGrid
+                  options={g.items}
+                  selected={formData.furnishings}
+                  onToggle={(id) => toggle("furnishings", id)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <FieldLabel>Amenities</FieldLabel>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {AMENITY_LIST.map((a) => {
-            const selected = formData.amenities.includes(a.id);
-            return (
-              <button
-                key={a.id}
-                type="button"
-                onClick={() => toggleAmenity(a.id)}
-                className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${
-                  selected
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted hover:border-primary/50"
-                }`}
-              >
-                <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${
-                    selected ? "border-primary bg-primary" : "border-border bg-surface-subtle"
-                  }`}
-                >
-                  {selected && (
-                    <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </span>
-                {a.label}
-              </button>
-            );
-          })}
-        </div>
+        <p className="-mt-1 mb-3 text-xs text-muted">
+          Shared facilities in the building or society.
+        </p>
+        <CheckGrid
+          options={AMENITY_LIST}
+          selected={formData.amenities}
+          onToggle={(id) => toggle("amenities", id)}
+        />
       </div>
     </div>
   );
@@ -1033,6 +1022,12 @@ function Step5({ formData, onChange, mediaItems }) {
           <span className="text-body capitalize">{formData.transactionType}</span>
           <span className="text-muted">Furnishing</span>
           <span className="text-body capitalize">{formData.furnishing?.replace("_", " ") || "—"}</span>
+          {formData.furnishings.length > 0 && (
+            <>
+              <span className="text-muted">Items included</span>
+              <span className="text-body">{formData.furnishings.length} listed</span>
+            </>
+          )}
           <span className="text-muted">Photos</span>
           <span className="text-body">{mediaItems.length} uploaded</span>
           <span className="text-muted">Amenities</span>

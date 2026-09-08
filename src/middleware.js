@@ -3,6 +3,30 @@ export const runtime = 'nodejs'; // postgres.js uses Node.js TCP sockets, not Ed
 import { NextResponse } from 'next/server';
 import { getSession, SESSION_COOKIE_NAME } from '@/lib/session';
 
+// A shared referral link (`/?ref=CODE`) has to survive the whole OTP round
+// trip — page load, phone entry, WhatsApp, coming back to type the code — so
+// the code is parked in a cookie the moment it is seen, on whatever page it
+// lands on. verify-otp reads it back and clears it.
+const REF_COOKIE_NAME = 'dcdh_ref';
+const REF_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+
+function captureReferralCode(request, response) {
+  const raw = request.nextUrl.searchParams.get('ref');
+  if (!raw) return response;
+
+  const code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+  if (!code) return response;
+
+  response.cookies.set(REF_COOKIE_NAME, code, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: REF_COOKIE_MAX_AGE,
+    path: '/',
+  });
+  return response;
+}
+
 // Routes that require authentication, with optional role enforcement
 const PROTECTED_ROUTES = [
   { pattern: /^\/dashboard\/owner(\/.*)?$/, role: 'owner' },
@@ -27,14 +51,21 @@ export async function middleware(request) {
         admin: '/admin',
       };
       const dest = dashboardMap[user.role];
-      if (dest) return NextResponse.redirect(new URL(dest, request.url));
+      // An already-signed-in visitor following someone's link keeps the code in
+      // the cookie — they can still apply it from their profile page.
+      if (dest) {
+        return captureReferralCode(
+          request,
+          NextResponse.redirect(new URL(dest, request.url)),
+        );
+      }
     }
-    return NextResponse.next();
+    return captureReferralCode(request, NextResponse.next());
   }
 
   // Find matching protected route — if none, allow through
   const protectedRoute = PROTECTED_ROUTES.find((r) => r.pattern.test(pathname));
-  if (!protectedRoute) return NextResponse.next();
+  if (!protectedRoute) return captureReferralCode(request, NextResponse.next());
 
   // Validate session from cookie
   const cookie = request.cookies.get(SESSION_COOKIE_NAME);
@@ -45,7 +76,7 @@ export async function middleware(request) {
   if (!user) {
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+    return captureReferralCode(request, NextResponse.redirect(loginUrl));
   }
 
   // Suspended account → clear cookie and send to login
@@ -67,7 +98,7 @@ export async function middleware(request) {
     );
   }
 
-  return NextResponse.next();
+  return captureReferralCode(request, NextResponse.next());
 }
 
 export const config = {

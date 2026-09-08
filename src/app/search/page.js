@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import SavePropertyButton from "@/components/SavePropertyButton";
+import { formatPrice } from "@/lib/propertyOptions";
 
 const PROPERTY_TYPES = {
   residential: [
@@ -42,13 +43,6 @@ const SORT_OPTIONS = [
   { value: "popular", label: "Most Popular" },
 ];
 
-function formatPrice(price) {
-  const num = Number(price);
-  if (num >= 10000000) return `${(num / 10000000).toFixed(1)} Cr`;
-  if (num >= 100000) return `${(num / 100000).toFixed(1)} L`;
-  if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
-  return num.toLocaleString("en-IN");
-}
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -572,8 +566,8 @@ function PropertyCard({ property: p }) {
   const transactionLabel = p.transaction_type === "rent" ? "Rent" : "Buy";
   const priceLabel =
     p.transaction_type === "rent"
-      ? `${formatPrice(p.price)}/mo`
-      : formatPrice(p.price);
+      ? `${formatPrice(p.price, p.currency, { compact: false })}/mo`
+      : formatPrice(p.price, p.currency);
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border bg-surface-white shadow-soft transition-all hover:border-accent/20 hover:shadow-elevated">

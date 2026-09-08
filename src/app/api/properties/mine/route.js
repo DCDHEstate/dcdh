@@ -21,7 +21,7 @@ export async function GET(request) {
     const properties = await sql`
       SELECT
         p.id, p.slug, p.title, p.category, p.transaction_type, p.property_type,
-        p.status, p.price, p.bedrooms, p.bathrooms, p.area_sqft, p.furnishing,
+        p.status, p.price, p.currency, p.bedrooms, p.bathrooms, p.area_sqft, p.furnishing,
         p.created_at, p.view_count, p.inquiry_count,
         c.name as city_name, l.name as locality_name,
         pm.media_url as primary_image

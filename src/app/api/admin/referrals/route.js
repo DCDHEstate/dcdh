@@ -23,9 +23,12 @@ export async function GET(request) {
     if (type) conditions.push(sql`r.referral_type = ${type}`);
     if (q) conditions.push(sql`(
       u.full_name ILIKE ${'%' + q + '%'} OR
+      u.phone ILIKE ${'%' + q + '%'} OR
+      r.referred_name ILIKE ${'%' + q + '%'} OR
       r.referred_phone ILIKE ${'%' + q + '%'} OR
-      r.property_location ILIKE ${'%' + q + '%'} OR
-      r.owner_contact_number ILIKE ${'%' + q + '%'}
+      r.owner_name ILIKE ${'%' + q + '%'} OR
+      r.owner_contact_number ILIKE ${'%' + q + '%'} OR
+      r.property_location ILIKE ${'%' + q + '%'}
     )`);
 
     const where = conditions.reduce((acc, cond, i) => (i === 0 ? cond : sql`${acc} AND ${cond}`));
@@ -35,7 +38,15 @@ export async function GET(request) {
         SELECT
           r.*,
           u.full_name as referrer_name, u.phone as referrer_phone,
-          ru.full_name as referred_user_name
+          ru.full_name as referred_user_name,
+          COALESCE(
+            (SELECT json_agg(json_build_object(
+                'id', m.id, 'url', m.media_url, 'mediaType', m.media_type,
+                'category', m.category, 'fileName', m.file_name
+              ) ORDER BY m.sort_order, m.created_at)
+             FROM referral_media m WHERE m.referral_id = r.id),
+            '[]'::json
+          ) AS media
         FROM referrals r
         JOIN users u ON r.referrer_id = u.id
         LEFT JOIN users ru ON r.referred_user_id = ru.id
@@ -74,7 +85,7 @@ export async function PATCH(request) {
     }
 
     const body = await request.json();
-    const { referralId, status, rewardAmount, linkedPropertyId, referredUserId } = body;
+    const { referralId, status, rewardAmount, linkedPropertyId, referredUserId, adminNotes } = body;
 
     if (!referralId) {
       return NextResponse.json({ error: 'referralId is required' }, { status: 400 });
@@ -89,6 +100,8 @@ export async function PATCH(request) {
     if (status) updates.push(sql`status = ${status}`);
     if (referredUserId) updates.push(sql`referred_user_id = ${referredUserId}`);
     if (linkedPropertyId) updates.push(sql`linked_property_id = ${linkedPropertyId}`);
+    // Sent as '' to clear a note, so check for presence rather than truthiness.
+    if (adminNotes !== undefined) updates.push(sql`admin_notes = ${adminNotes || null}`);
 
     // If rewarding, credit the wallet
     if (status === 'rewarded' && rewardAmount && rewardAmount > 0) {

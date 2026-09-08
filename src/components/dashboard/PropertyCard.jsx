@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatPrice } from "@/lib/propertyOptions";
 
 const statusColors = {
   active: "bg-verified/10 text-verified",
@@ -15,13 +16,6 @@ const statusLabels = {
   draft: "Draft",
   archived: "Archived",
 };
-
-function formatPrice(price) {
-  const num = Number(price);
-  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(1)} L`;
-  return `₹${num.toLocaleString("en-IN")}`;
-}
 
 export default function PropertyCard({ property, actions }) {
   return (
@@ -77,7 +71,7 @@ export default function PropertyCard({ property, actions }) {
           {property.city_name ? `, ${property.city_name}` : ""}
         </p>
         <p className="mt-2 text-lg font-semibold text-heading">
-          {formatPrice(property.price)}
+          {formatPrice(property.price, property.currency)}
           {property.transaction_type === "rent" && (
             <span className="text-xs font-normal text-muted">/mo</span>
           )}
