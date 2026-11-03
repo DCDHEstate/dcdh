@@ -38,6 +38,7 @@ CREATE TYPE referral_purpose AS ENUM ('sell_purchase', 'rent', 'lease', 'other')
 
 CREATE TYPE wallet_transaction_type AS ENUM ('credit', 'debit');
 CREATE TYPE wallet_transaction_reason AS ENUM ('referral_reward', 'signup_bonus', 'withdrawal', 'adjustment');
+CREATE TYPE withdrawal_status AS ENUM ('pending', 'paid', 'rejected');
 
 CREATE TYPE document_type AS ENUM ('aadhaar', 'pan', 'property_deed', 'electricity_bill', 'tax_receipt', 'other');
 CREATE TYPE document_status AS ENUM ('pending', 'approved', 'rejected');
@@ -335,8 +336,6 @@ CREATE TABLE property_media (
   property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
   media_url TEXT NOT NULL,
   media_type VARCHAR(20) NOT NULL DEFAULT 'image', -- 'image', 'video'
-  category VARCHAR(30), -- exterior | living_room | bedroom | kitchen | bathroom | balcony | other
-  sort_order SMALLINT NOT NULL DEFAULT 0,
   file_name VARCHAR(255),
   file_size INTEGER, -- in bytes
   sort_order SMALLINT DEFAULT 0,
@@ -435,6 +434,21 @@ CREATE TABLE referral_media (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Every presigned referral upload. A referral may only attach files from here
+-- that belong to the submitter and aren't claimed yet; unclaimed rows older than
+-- a day are abandoned uploads that the admin cleanup sweeps from S3.
+CREATE TABLE referral_uploads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  s3_key TEXT NOT NULL UNIQUE,
+  public_url TEXT NOT NULL,
+  media_type VARCHAR(20) NOT NULL, -- 'image' | 'video'
+  file_name VARCHAR(255),
+  file_size BIGINT NOT NULL,
+  referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ============================================================================
 -- 6. TENANT WALLET
 -- ============================================================================
@@ -444,7 +458,8 @@ CREATE TABLE wallets (
   user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   balance NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT wallets_balance_non_negative CHECK (balance >= 0)
 );
 
 CREATE TABLE wallet_transactions (
@@ -457,6 +472,28 @@ CREATE TABLE wallet_transactions (
   reference_id UUID, -- could point to a referral or other entity
   balance_after NUMERIC(10, 2) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Payout requests. The amount is debited when requested (so it can't be
+-- requested twice) and credited back if an admin rejects it.
+CREATE TABLE wallet_withdrawals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
+  amount NUMERIC(10, 2) NOT NULL CHECK (amount > 0),
+  payout_method payment_method NOT NULL, -- 'upi' | 'bank_transfer'
+  upi_id VARCHAR(100),
+  bank_account_name VARCHAR(255),
+  bank_account_number VARCHAR(50),
+  bank_ifsc_code VARCHAR(20),
+  bank_name VARCHAR(255),
+  status withdrawal_status NOT NULL DEFAULT 'pending',
+  payout_reference VARCHAR(100), -- UTR / transaction id once paid
+  admin_notes TEXT,
+  processed_by UUID REFERENCES users(id),
+  processed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================================
@@ -770,6 +807,18 @@ CREATE INDEX idx_referrals_status ON referrals(status);
 CREATE INDEX idx_referrals_type ON referrals(referral_type);
 CREATE INDEX idx_referral_media_referral ON referral_media(referral_id);
 CREATE INDEX idx_users_referred_by ON users(referred_by_user_id);
+-- A person is credited to at most one referrer.
+CREATE UNIQUE INDEX uq_referrals_referred_user ON referrals(referred_user_id)
+  WHERE referred_user_id IS NOT NULL AND referral_type IN ('signup', 'friend');
+CREATE INDEX idx_referral_uploads_user_created ON referral_uploads(user_id, created_at);
+CREATE INDEX idx_referral_uploads_unclaimed ON referral_uploads(created_at) WHERE referral_id IS NULL;
+
+-- Wallets: a referral is credited exactly once; one open payout request per user.
+CREATE UNIQUE INDEX uq_wallet_tx_referral_reward ON wallet_transactions(reference_id)
+  WHERE reason = 'referral_reward';
+CREATE UNIQUE INDEX uq_wallet_withdrawals_one_pending ON wallet_withdrawals(user_id)
+  WHERE status = 'pending';
+CREATE INDEX idx_wallet_withdrawals_status ON wallet_withdrawals(status, created_at);
 
 -- Wallets
 CREATE INDEX idx_wallets_user_id ON wallets(user_id);

@@ -4,27 +4,19 @@ import { getSessionFromRequest } from '@/lib/session';
 import {
   ensureReferralCode,
   referralLink,
+  checkReferablePhone,
+  lockPhone,
   isValidPurpose,
   isValidMediaCategory,
-  findReferralClaim,
+  isValidPropertyCategory,
+  isValidPropertyType,
+  isValidPhone,
+  maskPhone,
+  normalizePhone,
 } from '@/lib/referral';
 
 const MAX_MEDIA_PER_REFERRAL = 30;
-
-/**
- * A phone number can only be referred once. Whether the earlier claim was the
- * caller's own or someone else's changes the wording — but not the outcome, so
- * neither can be submitted twice.
- *
- * The "another user" message stays deliberately vague: naming the earlier
- * referrer would leak who is talking to whom.
- */
-function duplicateMessage(claim, userId, label) {
-  if (claim.referrer_id === userId) {
-    return `You have already submitted a referral for this ${label}'s number.`;
-  }
-  return `This number has already been referred by another user, so it can't be submitted again. If you think this is a mistake, please contact our team.`;
-}
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // GET — my referral code + link, my referrals, and my earnings summary
 export async function GET(request) {
@@ -41,7 +33,7 @@ export async function GET(request) {
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
     const offset = (page - 1) * limit;
 
-    const [referrals, countResult, summary, wallet, referredBy] = await Promise.all([
+    const [referrals, summary, wallet, referredBy] = await Promise.all([
       sql`
         SELECT
           r.id, r.referral_type, r.status, r.purpose,
@@ -64,7 +56,6 @@ export async function GET(request) {
         ORDER BY r.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `,
-      sql`SELECT COUNT(*)::int AS total FROM referrals WHERE referrer_id = ${user.id}`,
       sql`
         SELECT
           COUNT(*)::int AS total_referrals,
@@ -82,18 +73,28 @@ export async function GET(request) {
       `,
     ]);
 
+    // A link signup's number is the new member's own — the referrer may have
+    // posted the link in a group and never had it. Numbers the referrer typed
+    // in themselves are shown as entered.
+    const visible = referrals.map((r) =>
+      r.referral_type === 'signup' ? { ...r, referred_phone: maskPhone(r.referred_phone) } : r,
+    );
+
+    const total = summary[0].total_referrals;
+
     return NextResponse.json({
       referralCode,
       referralLink: referralLink(referralCode),
       referredBy: referredBy[0]?.referred_by_code
         ? { name: referredBy[0].full_name, code: referredBy[0].referred_by_code }
         : null,
-      referrals,
-      total: countResult[0].total,
+      referrals: visible,
+      total,
       page,
       limit,
+      hasMore: offset + referrals.length < total,
       summary: {
-        totalReferrals: summary[0].total_referrals,
+        totalReferrals: total,
         rewardedCount: summary[0].rewarded_count,
         totalEarned: summary[0].total_earned,
         walletBalance: wallet.length > 0 ? wallet[0].balance : 0,
@@ -105,6 +106,11 @@ export async function GET(request) {
   }
 }
 
+const trimTo = (value, max) => {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return text ? text.slice(0, max) : null;
+};
+
 // POST — submit a person ('friend') or property referral
 export async function POST(request) {
   try {
@@ -113,153 +119,164 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { referralType } = body;
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
 
+    const { referralType, purpose } = body;
     if (!['friend', 'property'].includes(referralType)) {
       return NextResponse.json({ error: 'Invalid referral type' }, { status: 400 });
     }
-
-    const purpose = body.purpose;
     if (!isValidPurpose(purpose)) {
       return NextResponse.json({ error: 'Select a valid purpose' }, { status: 400 });
     }
 
-    // ── Person referral ─────────────────────────────────────────────────────
-    if (referralType === 'friend') {
-      const referredName = body.referredName?.trim();
-      const referredPhone = normalizePhone(body.referredPhone);
-
-      if (!referredName) {
-        return NextResponse.json({ error: 'Client name is required' }, { status: 400 });
-      }
-      if (!isValidPhone(referredPhone)) {
-        return NextResponse.json({ error: 'Enter a valid phone number' }, { status: 400 });
-      }
-      if (isSameNumber(referredPhone, user.phone) || isSameNumber(referredPhone, user.whatsapp_number)) {
-        return NextResponse.json({ error: 'You cannot refer yourself' }, { status: 400 });
-      }
-
-      const claim = await findReferralClaim(referredPhone);
-      if (claim) {
-        return NextResponse.json(
-          { error: duplicateMessage(claim, user.id, 'client') },
-          { status: 409 },
-        );
-      }
-
-      // If they're already on the platform, the referral starts at 'registered'
-      // so admins don't chase a signup that already happened.
-      const [existingUser] = await sql`SELECT id FROM users WHERE phone = ${referredPhone}`;
-
-      const [referral] = await sql`
-        INSERT INTO referrals (
-          referrer_id, referral_type, purpose,
-          referred_name, referred_phone, referred_user_id, status
-        ) VALUES (
-          ${user.id}, 'friend', ${purpose},
-          ${referredName}, ${referredPhone}, ${existingUser?.id ?? null},
-          ${existingUser ? 'registered' : 'pending'}
-        )
-        RETURNING id, status
-      `;
-
-      return NextResponse.json({ referral }, { status: 201 });
-    }
-
-    // ── Property referral ───────────────────────────────────────────────────
-    const ownerName = body.ownerName?.trim();
-    const ownerContactNumber = normalizePhone(body.ownerContactNumber);
-    const media = Array.isArray(body.media) ? body.media : [];
-
-    if (!ownerName) {
-      return NextResponse.json({ error: "Owner's name is required" }, { status: 400 });
-    }
-    if (!isValidPhone(ownerContactNumber)) {
-      return NextResponse.json({ error: "Enter a valid owner's phone number" }, { status: 400 });
-    }
-    if (isSameNumber(ownerContactNumber, user.phone) || isSameNumber(ownerContactNumber, user.whatsapp_number)) {
-      return NextResponse.json({ error: 'You cannot refer yourself' }, { status: 400 });
-    }
-
-    // Checked before the media rows go in, so a rejected duplicate never leaves
-    // uploaded files pointing at a referral that was never created.
-    const ownerClaim = await findReferralClaim(ownerContactNumber);
-    if (ownerClaim) {
+    const isProperty = referralType === 'property';
+    const name = trimTo(isProperty ? body.ownerName : body.referredName, 255);
+    if (!name) {
       return NextResponse.json(
-        { error: duplicateMessage(ownerClaim, user.id, 'owner') },
-        { status: 409 },
-      );
-    }
-
-    if (media.length > MAX_MEDIA_PER_REFERRAL) {
-      return NextResponse.json(
-        { error: `Attach at most ${MAX_MEDIA_PER_REFERRAL} files` },
+        { error: isProperty ? "Owner's name is required" : 'Client name is required' },
         { status: 400 },
       );
     }
 
-    const [referral] = await sql`
-      INSERT INTO referrals (
-        referrer_id, referral_type, purpose,
-        owner_name, owner_contact_number,
-        property_category, property_type, property_location, property_notes
-      ) VALUES (
-        ${user.id}, 'property', ${purpose},
-        ${ownerName}, ${ownerContactNumber},
-        ${body.propertyCategory || null}, ${body.propertyType || null},
-        ${body.propertyLocation?.trim() || null}, ${body.propertyNotes?.trim() || null}
-      )
-      RETURNING id, status
-    `;
+    let propertyFields = null;
+    let mediaRequest = [];
+    if (isProperty) {
+      if (body.propertyCategory && !isValidPropertyCategory(body.propertyCategory)) {
+        return NextResponse.json({ error: 'Select a valid property category' }, { status: 400 });
+      }
+      if (body.propertyType && !isValidPropertyType(body.propertyType)) {
+        return NextResponse.json({ error: 'Select a valid property type' }, { status: 400 });
+      }
+      propertyFields = {
+        category: body.propertyCategory || null,
+        type: body.propertyType || null,
+        location: trimTo(body.propertyLocation, 500),
+        notes: trimTo(body.propertyNotes, 2000),
+      };
 
-    // Media rows are inserted after the parent so a failed upload can't leave
-    // an orphaned referral — the referral itself is the thing admins act on.
-    const rows = media
-      .filter((m) => typeof m?.url === 'string' && m.url.startsWith('https://'))
-      .map((m, i) => ({
-        referral_id: referral.id,
-        media_url: m.url,
-        media_type: m.mediaType === 'video' ? 'video' : 'image',
-        category: isValidMediaCategory(m.category) ? m.category : 'other',
-        file_name: typeof m.fileName === 'string' ? m.fileName.slice(0, 255) : null,
-        sort_order: i,
-      }));
-
-    if (rows.length > 0) {
-      await sql`
-        INSERT INTO referral_media ${sql(
-          rows,
-          'referral_id',
-          'media_url',
-          'media_type',
-          'category',
-          'file_name',
-          'sort_order',
-        )}
-      `;
+      // Media is attached by upload id only. The URL, owner and media type all
+      // come from the upload ledger, so a client can't slip in an arbitrary
+      // link (a tracking pixel, a phishing page) for admins to open.
+      const requested = Array.isArray(body.media) ? body.media : [];
+      const seen = new Set();
+      for (const m of requested) {
+        if (!UUID_RE.test(m?.uploadId ?? '') || seen.has(m.uploadId)) continue;
+        seen.add(m.uploadId);
+        mediaRequest.push({
+          uploadId: m.uploadId,
+          category: isValidMediaCategory(m.category) ? m.category : 'other',
+        });
+      }
+      if (mediaRequest.length > MAX_MEDIA_PER_REFERRAL) {
+        return NextResponse.json(
+          { error: `Attach at most ${MAX_MEDIA_PER_REFERRAL} files` },
+          { status: 400 },
+        );
+      }
     }
 
-    return NextResponse.json({ referral }, { status: 201 });
+    const rawPhone = normalizePhone(isProperty ? body.ownerContactNumber : body.referredPhone);
+
+    const result = await sql.begin(async (tx) => {
+      // Checked under a per-number lock: two users submitting the same number at
+      // the same moment would otherwise both find it free.
+      if (isValidPhone(rawPhone)) await lockPhone(tx, rawPhone);
+
+      const phoneCheck = await checkReferablePhone(
+        user,
+        rawPhone,
+        { label: isProperty ? 'owner' : 'client', forProperty: isProperty },
+        tx,
+      );
+      if (!phoneCheck.ok) return phoneCheck;
+      const phone = phoneCheck.phone;
+
+      if (!isProperty) {
+        const [referral] = await tx`
+          INSERT INTO referrals (referrer_id, referral_type, purpose, referred_name, referred_phone, status)
+          VALUES (${user.id}, 'friend', ${purpose}, ${name}, ${phone}, 'pending')
+          RETURNING id, status
+        `;
+        return { ok: true, referral };
+      }
+
+      let uploads = [];
+      if (mediaRequest.length > 0) {
+        const ids = mediaRequest.map((m) => m.uploadId);
+        uploads = await tx`
+          SELECT id, public_url, media_type, file_name
+          FROM referral_uploads
+          WHERE id IN ${tx(ids)}
+            AND user_id = ${user.id}
+            AND referral_id IS NULL
+          FOR UPDATE
+        `;
+        if (uploads.length !== ids.length) {
+          return {
+            ok: false,
+            status: 400,
+            error: 'Some photos or videos could not be attached. Please remove them and upload again.',
+          };
+        }
+      }
+
+      const [referral] = await tx`
+        INSERT INTO referrals (
+          referrer_id, referral_type, purpose,
+          owner_name, owner_contact_number,
+          property_category, property_type, property_location, property_notes
+        ) VALUES (
+          ${user.id}, 'property', ${purpose},
+          ${name}, ${phone},
+          ${propertyFields.category}, ${propertyFields.type},
+          ${propertyFields.location}, ${propertyFields.notes}
+        )
+        RETURNING id, status
+      `;
+
+      if (uploads.length > 0) {
+        const byId = new Map(uploads.map((u) => [u.id, u]));
+        const rows = mediaRequest.map((m, i) => {
+          const upload = byId.get(m.uploadId);
+          return {
+            referral_id: referral.id,
+            media_url: upload.public_url,
+            media_type: upload.media_type,
+            category: m.category,
+            file_name: upload.file_name,
+            sort_order: i,
+          };
+        });
+
+        await tx`
+          INSERT INTO referral_media ${tx(
+            rows,
+            'referral_id',
+            'media_url',
+            'media_type',
+            'category',
+            'file_name',
+            'sort_order',
+          )}
+        `;
+        await tx`
+          UPDATE referral_uploads SET referral_id = ${referral.id}
+          WHERE id IN ${tx(mediaRequest.map((m) => m.uploadId))}
+        `;
+      }
+
+      return { ok: true, referral };
+    });
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.status || 400 });
+    }
+    return NextResponse.json({ referral: result.referral }, { status: 201 });
   } catch (err) {
     console.error('[referrals-mine/POST]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
-
-// Numbers arrive as "+91 98765 43210", "098765 43210", "9876543210" — store the
-// bare 10-digit form so duplicate checks and user lookups actually match.
-function normalizePhone(input) {
-  const digits = String(input ?? '').replace(/\D/g, '');
-  if (digits.length > 10 && digits.startsWith('91')) return digits.slice(-10);
-  if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
-  return digits;
-}
-
-function isValidPhone(digits) {
-  return /^[6-9]\d{9}$/.test(digits);
-}
-
-function isSameNumber(a, b) {
-  return Boolean(a) && a === normalizePhone(b);
 }

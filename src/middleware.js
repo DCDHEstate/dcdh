@@ -10,11 +10,13 @@ import { getSession, SESSION_COOKIE_NAME } from '@/lib/session';
 const REF_COOKIE_NAME = 'dcdh_ref';
 const REF_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 
-function captureReferralCode(request, response) {
-  const raw = request.nextUrl.searchParams.get('ref');
-  if (!raw) return response;
+function readReferralCode(request) {
+  const raw = request.nextUrl.searchParams.get('ref') ?? '';
+  return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+}
 
-  const code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+function captureReferralCode(request, response) {
+  const code = readReferralCode(request);
   if (!code) return response;
 
   response.cookies.set(REF_COOKIE_NAME, code, {
@@ -60,7 +62,41 @@ export async function middleware(request) {
         );
       }
     }
-    return captureReferralCode(request, NextResponse.next());
+
+    // A logged-out visitor on a referral link is there to sign up, so skip the
+    // home page and open the OTP form. New links already point at /auth/login;
+    // this keeps the `/?ref=CODE` links shared before that change working.
+    // The whole query string is carried over so utm_* tags survive.
+    if (readReferralCode(request)) {
+      const signupUrl = new URL(`/auth/login${request.nextUrl.search}`, request.url);
+      return captureReferralCode(request, NextResponse.redirect(signupUrl));
+    }
+
+    return NextResponse.next();
+  }
+
+  // The public "Refer & Earn" entry point (home page buttons link here). The
+  // program lives in each dashboard, so send members straight to theirs — with
+  // the right form open when a button asked for one — and everyone else to
+  // sign in first, returning here afterwards.
+  if (pathname === '/referral') {
+    const cookie = request.cookies.get(SESSION_COOKIE_NAME);
+    const user = cookie?.value ? await getSession(cookie.value) : null;
+    const type = request.nextUrl.searchParams.get('type');
+    const formType = type === 'friend' || type === 'property' ? type : null;
+
+    if (user && user.status !== 'suspended' && user.role) {
+      const dest =
+        user.role === 'admin'
+          ? new URL('/admin/referrals', request.url)
+          : new URL(`/dashboard/${user.role === 'owner' ? 'owner' : 'tenant'}/referrals`, request.url);
+      if (formType && user.role !== 'admin') dest.searchParams.set('new', formType);
+      return NextResponse.redirect(dest);
+    }
+
+    const loginUrl = new URL('/auth/login', request.url);
+    loginUrl.searchParams.set('redirect', formType ? `/referral?type=${formType}` : '/referral');
+    return NextResponse.redirect(loginUrl);
   }
 
   // Find matching protected route — if none, allow through

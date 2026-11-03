@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
+import { getOrCreateWallet } from '@/lib/wallet';
 
 // GET — wallet balance + recent transactions
 export async function GET(request) {
@@ -10,14 +11,8 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Ensure wallet exists
-    let wallet = await sql`SELECT id, balance FROM wallets WHERE user_id = ${user.id}`;
-    if (wallet.length === 0) {
-      wallet = await sql`
-        INSERT INTO wallets (user_id, balance) VALUES (${user.id}, 0)
-        RETURNING id, balance
-      `;
-    }
+    // Two tabs opening the wallet at once must not both try to create it.
+    const wallet = await getOrCreateWallet(sql, user.id);
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
@@ -28,19 +23,19 @@ export async function GET(request) {
       sql`
         SELECT id, transaction_type, amount, reason, description, balance_after, created_at
         FROM wallet_transactions
-        WHERE wallet_id = ${wallet[0].id}
+        WHERE wallet_id = ${wallet.id}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `,
       sql`
         SELECT COUNT(*)::int as total
         FROM wallet_transactions
-        WHERE wallet_id = ${wallet[0].id}
+        WHERE wallet_id = ${wallet.id}
       `,
     ]);
 
     return NextResponse.json({
-      balance: wallet[0].balance,
+      balance: wallet.balance,
       transactions,
       total: countResult[0].total,
       page,

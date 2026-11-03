@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   PURPOSE_LABELS,
   REFERRAL_TYPE_LABELS,
   MEDIA_CATEGORY_LABELS,
+  REFERRAL_STATUSES,
+  REWARD_DEFAULTS,
+  MAX_REWARD_AMOUNT,
 } from "@/lib/referralOptions";
 
 const STATUS_COLORS = {
@@ -15,7 +19,57 @@ const STATUS_COLORS = {
   expired: "bg-gray-100 text-gray-600",
 };
 
-const STATUSES = ["pending", "registered", "deal_closed", "rewarded", "expired"];
+const STATUSES = REFERRAL_STATUSES;
+
+async function patchReferral(payload) {
+  const res = await fetch("/api/admin/referrals", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (res.ok) return null;
+  const d = await res.json().catch(() => ({}));
+  return d.error || "Something went wrong. Please try again.";
+}
+
+const digitsOf = (phone) => String(phone ?? "").replace(/\D/g, "").slice(-10);
+
+// The team's job with a referral is to get in touch, so every number gets
+// one-tap call and WhatsApp actions.
+function ContactActions({ phone }) {
+  const digits = digitsOf(phone);
+  if (digits.length < 10) return null;
+  return (
+    <span className="mt-1 flex gap-2">
+      <a
+        href={`tel:+91${digits}`}
+        className="rounded-lg border border-border px-2 py-0.5 text-xs text-body hover:bg-surface-subtle"
+      >
+        Call
+      </a>
+      <a
+        href={`https://wa.me/91${digits}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-lg border border-[#25d366]/40 px-2 py-0.5 text-xs text-[#128c4a] hover:bg-[#25d366]/10"
+      >
+        WhatsApp
+      </a>
+    </span>
+  );
+}
+
+function MemberFlag({ referral }) {
+  if (!referral.referred_was_member) return null;
+  return (
+    <span
+      title="This person already had an account when they were referred. Current rules don't credit these — review before rewarding."
+      className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+    >
+      Already a member
+    </span>
+  );
+}
 
 // The three flows share one table, so the "Details" column has to say
 // something sensible for each: who was referred, or which owner + property.
@@ -63,7 +117,12 @@ export default function AdminReferralsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [rewardError, setRewardError] = useState("");
+  const [cleanup, setCleanup] = useState(null);
+  const [cleaning, setCleaning] = useState(false);
   const [page, setPage] = useState(1);
   const [rewardModal, setRewardModal] = useState(null);
   const [detailModal, setDetailModal] = useState(null);
@@ -89,31 +148,65 @@ export default function AdminReferralsPage() {
     fetchData();
   }, [fetchData]);
 
+  // Wait for typing to pause — a request per keystroke can also resolve out of
+  // order and leave results for an older query on screen.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const fetchCleanup = useCallback(() => {
+    fetch("/api/admin/referrals/cleanup-uploads")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setCleanup(d))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchCleanup();
+  }, [fetchCleanup]);
+
+  const runCleanup = async () => {
+    setCleaning(true);
+    setActionError("");
+    try {
+      const res = await fetch("/api/admin/referrals/cleanup-uploads", { method: "POST" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) setActionError(d.error || "Cleanup failed.");
+      else if (d.failed > 0) setActionError(`${d.failed} file(s) could not be deleted from storage; they will be retried next time.`);
+    } finally {
+      setCleaning(false);
+      fetchCleanup();
+    }
+  };
+
   useEffect(() => {
     setNotesDraft(detailModal?.admin_notes || "");
   }, [detailModal]);
 
   const updateStatus = async (referralId, newStatus) => {
-    await fetch("/api/admin/referrals", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ referralId, status: newStatus }),
-    });
+    setActionError("");
+    const error = await patchReferral({ referralId, status: newStatus });
+    if (error) setActionError(error);
     fetchData();
   };
 
   const saveNotes = async (referralId, adminNotes) => {
     setNotesSaving(true);
+    setActionError("");
     try {
-      await fetch("/api/admin/referrals", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referralId, adminNotes }),
-      });
+      const error = await patchReferral({ referralId, adminNotes });
+      if (error) {
+        setActionError(error);
+        return;
+      }
       setDetailModal((d) => (d ? { ...d, admin_notes: adminNotes } : d));
       fetchData();
     } catch {
-      // ignore
+      setActionError("Could not save notes. Please try again.");
     } finally {
       setNotesSaving(false);
     }
@@ -122,21 +215,24 @@ export default function AdminReferralsPage() {
   const submitReward = async () => {
     if (!rewardModal || !rewardAmount) return;
     setRewardLoading(true);
+    setRewardError("");
     try {
-      await fetch("/api/admin/referrals", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          referralId: rewardModal.id,
-          status: "rewarded",
-          rewardAmount: Number(rewardAmount),
-        }),
+      const error = await patchReferral({
+        referralId: rewardModal.id,
+        status: "rewarded",
+        rewardAmount: String(rewardAmount).trim(),
       });
+      // Keep the dialog open on failure so the admin sees nothing was paid.
+      if (error) {
+        setRewardError(error);
+        if (/already been rewarded/i.test(error)) fetchData();
+        return;
+      }
       setRewardModal(null);
       setRewardAmount("");
       fetchData();
     } catch {
-      // ignore
+      setRewardError("Could not reach the server. Nothing was credited — please try again.");
     } finally {
       setRewardLoading(false);
     }
@@ -147,14 +243,34 @@ export default function AdminReferralsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-heading sm:text-3xl">Referrals</h1>
         <p className="mt-1 text-sm text-muted">Review and reward referrals from users.</p>
+        {cleanup?.files > 0 && (
+          <p className="mt-3 text-xs text-muted">
+            {cleanup.files} abandoned upload{cleanup.files === 1 ? "" : "s"} (
+            {(cleanup.bytes / (1024 * 1024)).toFixed(1)} MB) from referral forms that were never submitted.{" "}
+            <button
+              onClick={runCleanup}
+              disabled={cleaning}
+              className="font-medium text-accent-dark underline-offset-2 hover:underline disabled:opacity-50"
+            >
+              {cleaning ? "Cleaning up..." : "Delete them"}
+            </button>
+          </p>
+        )}
       </div>
+
+      {actionError && (
+        <div className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError("")} aria-label="Dismiss" className="text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-3">
         <input
           type="text"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search by name, phone, location..."
           className="w-full rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent sm:w-64"
         />
@@ -202,6 +318,7 @@ export default function AdminReferralsPage() {
                   <div className="flex shrink-0 flex-wrap justify-end gap-1">
                     <TypeBadge type={r.referral_type} />
                     <PurposeBadge purpose={r.purpose} />
+                    <MemberFlag referral={r} />
                   </div>
                 </div>
                 <div className="mt-3 text-xs">
@@ -239,7 +356,7 @@ export default function AdminReferralsPage() {
                   </div>
                   {r.status !== "rewarded" && r.status !== "expired" && (
                     <button
-                      onClick={() => { setRewardModal(r); setRewardAmount(""); }}
+                      onClick={() => { setRewardModal(r); setRewardAmount(String(REWARD_DEFAULTS[r.referral_type] ?? "")); setRewardError(""); }}
                       className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
                     >
                       Reward
@@ -289,6 +406,7 @@ export default function AdminReferralsPage() {
                     <div className="flex flex-wrap gap-1">
                       <TypeBadge type={r.referral_type} />
                       <PurposeBadge purpose={r.purpose} />
+                      <MemberFlag referral={r} />
                     </div>
                   </td>
                   <td className="px-5 py-4">
@@ -338,7 +456,7 @@ export default function AdminReferralsPage() {
                       </button>
                       {r.status !== "rewarded" && r.status !== "expired" && (
                         <button
-                          onClick={() => { setRewardModal(r); setRewardAmount(""); }}
+                          onClick={() => { setRewardModal(r); setRewardAmount(String(REWARD_DEFAULTS[r.referral_type] ?? "")); setRewardError(""); }}
                           className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
                         >
                           Reward
@@ -382,6 +500,7 @@ export default function AdminReferralsPage() {
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <TypeBadge type={detailModal.referral_type} />
                   <PurposeBadge purpose={detailModal.purpose} />
+                  <MemberFlag referral={detailModal} />
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[detailModal.status]}`}
                   >
@@ -402,10 +521,16 @@ export default function AdminReferralsPage() {
               <div>
                 <dt className="text-xs text-subtle">Referred by</dt>
                 <dd className="text-body">
-                  {detailModal.referrer_name || "—"}
+                  <Link
+                    href={`/admin/users/${detailModal.referrer_id}`}
+                    className="text-accent-dark underline-offset-2 hover:underline"
+                  >
+                    {detailModal.referrer_name || "View user"}
+                  </Link>
                   <span className="block text-xs text-muted">
                     {detailModal.referrer_phone}
                   </span>
+                  <ContactActions phone={detailModal.referrer_phone} />
                 </dd>
               </div>
               <div>
@@ -430,6 +555,7 @@ export default function AdminReferralsPage() {
                       <span className="block text-xs text-muted">
                         {detailModal.owner_contact_number}
                       </span>
+                      <ContactActions phone={detailModal.owner_contact_number} />
                     </dd>
                   </div>
                   <div>
@@ -457,11 +583,21 @@ export default function AdminReferralsPage() {
                 <div className="sm:col-span-2">
                   <dt className="text-xs text-subtle">Contact</dt>
                   <dd className="text-body">
-                    {detailModal.referred_name || "—"}
+                    {detailModal.referred_user_id ? (
+                      <Link
+                        href={`/admin/users/${detailModal.referred_user_id}`}
+                        className="text-accent-dark underline-offset-2 hover:underline"
+                      >
+                        {detailModal.referred_name || detailModal.referred_user_name || "View user"}
+                      </Link>
+                    ) : (
+                      detailModal.referred_name || "—"
+                    )}
                     <span className="block text-xs text-muted">
                       {detailModal.referred_phone}
-                      {detailModal.referred_user_name && " · already registered"}
+                      {detailModal.referred_user_id && " · signed up"}
                     </span>
+                    <ContactActions phone={detailModal.referred_phone} />
                   </dd>
                 </div>
               )}
@@ -539,14 +675,27 @@ export default function AdminReferralsPage() {
               <label className="mb-1 block text-xs font-medium text-muted">Reward Amount (₹)</label>
               <input
                 type="number"
+                min="1"
+                max={MAX_REWARD_AMOUNT}
+                step="1"
+                inputMode="decimal"
                 value={rewardAmount}
-                onChange={(e) => setRewardAmount(e.target.value)}
-                placeholder="e.g. 5000"
+                onChange={(e) => { setRewardAmount(e.target.value); setRewardError(""); }}
+                placeholder="e.g. 100"
                 className="w-full rounded-xl border border-border bg-surface-white px-4 py-2.5 text-sm text-body outline-none focus:border-accent"
               />
               <p className="mt-2 text-xs text-muted">
                 This will credit ₹{rewardAmount || 0} to {rewardModal.referrer_name}&apos;s wallet.
+                A referral can only be rewarded once.
               </p>
+              {rewardModal.referred_was_member && (
+                <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  This person already had an account when they were referred.
+                </p>
+              )}
+              {rewardError && (
+                <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{rewardError}</p>
+              )}
             </div>
 
             <div className="mt-6 flex gap-3">

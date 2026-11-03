@@ -9,6 +9,9 @@ import {
   PURPOSE_LABELS,
   MEDIA_CATEGORY_LABELS,
   REFERRAL_TYPE_LABELS,
+  REFERRAL_PROPERTY_CATEGORIES,
+  REFERRAL_PROPERTY_TYPES,
+  copyText,
   referralShareMessage,
   referralWhatsAppLink,
 } from "@/lib/referralOptions";
@@ -20,25 +23,6 @@ const STATUS_COLORS = {
   rewarded: "bg-green-100 text-green-700",
   expired: "bg-gray-100 text-gray-600",
 };
-
-const PROPERTY_CATEGORIES = [
-  { value: "residential", label: "Residential" },
-  { value: "commercial", label: "Commercial" },
-  { value: "land", label: "Land / Plot" },
-];
-
-const PROPERTY_TYPES = [
-  { value: "apartment", label: "Apartment" },
-  { value: "independent_house", label: "Independent House" },
-  { value: "villa", label: "Villa" },
-  { value: "builder_floor", label: "Builder Floor" },
-  { value: "studio", label: "Studio" },
-  { value: "1rk", label: "1 RK" },
-  { value: "plot", label: "Plot" },
-  { value: "shop", label: "Shop" },
-  { value: "office", label: "Office" },
-  { value: "warehouse", label: "Warehouse" },
-];
 
 const EMPTY_FORM = {
   referredName: "",
@@ -102,13 +86,24 @@ export default function ReferralPage({ walletHref }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState("");
   const [submitOk, setSubmitOk] = useState(false);
-  const [copied, setCopied] = useState("");
+  const [copied, setCopied] = useState({ key: "", ok: true });
+  const [referrals, setReferrals] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [mediaUploading, setMediaUploading] = useState(false);
+  // Bumped on every reset so the uploader remounts: uploads still running for
+  // the previous referral are then discarded instead of landing in this one.
+  const [uploaderKey, setUploaderKey] = useState(0);
 
   const fetchData = useCallback(() => {
     setIsLoading(true);
-    fetch(`/api/referrals/mine?_t=${Date.now()}`)
+    fetch(`/api/referrals/mine?page=1&_t=${Date.now()}`)
       .then((r) => r.json())
-      .then((d) => setData(d))
+      .then((d) => {
+        setData(d);
+        setReferrals(d.referrals || []);
+        setPage(1);
+      })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
@@ -117,15 +112,47 @@ export default function ReferralPage({ walletHref }) {
     fetchData();
   }, [fetchData]);
 
-  const copy = (text, key) => {
-    navigator.clipboard.writeText(text);
-    setCopied(key);
-    setTimeout(() => setCopied(""), 2000);
+  // The home page "Refer a friend / property" buttons land here with ?new=...
+  useEffect(() => {
+    const type = new URLSearchParams(window.location.search).get("new");
+    if (type === "friend" || type === "property") {
+      setReferralType(type);
+      setShowForm(true);
+    }
+  }, []);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const next = page + 1;
+      const res = await fetch(`/api/referrals/mine?page=${next}&_t=${Date.now()}`);
+      const d = await res.json();
+      if (res.ok) {
+        setReferrals((prev) => [...prev, ...(d.referrals || [])]);
+        setData((prev) => ({ ...prev, hasMore: d.hasMore }));
+        setPage(next);
+      }
+    } catch {
+      // Leave the button in place so they can try again.
+    } finally {
+      setLoadingMore(false);
+    }
   };
+
+  const copy = async (text, key) => {
+    const ok = await copyText(text);
+    setCopied({ key, ok });
+    setTimeout(() => setCopied({ key: "", ok: true }), 2000);
+  };
+
+  const copyLabel = (key, idle) =>
+    copied.key === key ? (copied.ok ? "Copied!" : "Copy failed") : idle;
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
     setMedia([]);
+    setMediaUploading(false);
+    setUploaderKey((k) => k + 1);
   };
 
   const switchType = (type) => {
@@ -156,10 +183,8 @@ export default function ReferralPage({ walletHref }) {
               propertyLocation: form.propertyLocation,
               propertyNotes: form.propertyNotes,
               media: media.map((m) => ({
-                url: m.url,
-                mediaType: m.mediaType,
+                uploadId: m.uploadId,
                 category: m.category,
-                fileName: m.fileName,
               })),
             };
 
@@ -201,8 +226,8 @@ export default function ReferralPage({ walletHref }) {
             Refer &amp; Earn
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Share your link, refer a client, or refer a property owner — you
-            earn on every one that closes.
+            Share your link, refer a client, or refer a property owner. Our
+            team reviews every referral and rewards the ones that work out.
           </p>
         </div>
         <button
@@ -267,13 +292,13 @@ export default function ReferralPage({ walletHref }) {
                 onClick={() => copy(data.referralLink, "link")}
                 className="rounded-xl border border-accent/30 bg-white px-4 py-2.5 text-sm font-medium text-accent-dark transition hover:bg-accent/5"
               >
-                {copied === "link" ? "Copied!" : "Copy link"}
+                {copyLabel("link", "Copy link")}
               </button>
               <button
                 onClick={() => copy(shareMessage, "msg")}
                 className="rounded-xl border border-accent/30 bg-white px-4 py-2.5 text-sm font-medium text-accent-dark transition hover:bg-accent/5"
               >
-                {copied === "msg" ? "Copied!" : "Copy message"}
+                {copyLabel("msg", "Copy message")}
               </button>
               <a
                 href={referralWhatsAppLink(data.referralCode)}
@@ -401,8 +426,8 @@ export default function ReferralPage({ walletHref }) {
                 </select>
               </div>
               <p className="text-xs text-muted">
-                Our team contacts them directly. You earn when they sign up and
-                again when a deal closes.
+                Our team contacts them directly. You&apos;re rewarded once the
+                referral works out — the reward goes straight to your wallet.
               </p>
             </div>
           ) : (
@@ -463,7 +488,7 @@ export default function ReferralPage({ walletHref }) {
                     className={inputClass}
                   >
                     <option value="">Select</option>
-                    {PROPERTY_CATEGORIES.map((c) => (
+                    {REFERRAL_PROPERTY_CATEGORIES.map((c) => (
                       <option key={c.value} value={c.value}>
                         {c.label}
                       </option>
@@ -480,7 +505,7 @@ export default function ReferralPage({ walletHref }) {
                     className={inputClass}
                   >
                     <option value="">Select</option>
-                    {PROPERTY_TYPES.map((t) => (
+                    {REFERRAL_PROPERTY_TYPES.map((t) => (
                       <option key={t.value} value={t.value}>
                         {t.label}
                       </option>
@@ -515,7 +540,13 @@ export default function ReferralPage({ walletHref }) {
                 />
               </div>
 
-              <ReferralMediaUploader media={media} onChange={setMedia} />
+              <ReferralMediaUploader
+                key={uploaderKey}
+                media={media}
+                onChange={setMedia}
+                onUploadingChange={setMediaUploading}
+                ownerPhone={form.ownerContactNumber}
+              />
             </div>
           )}
 
@@ -537,10 +568,14 @@ export default function ReferralPage({ walletHref }) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || mediaUploading}
               className="rounded-xl bg-accent-dark px-6 py-2.5 text-sm font-medium text-white transition hover:bg-accent-dark/90 disabled:opacity-50"
             >
-              {submitting ? "Submitting..." : "Submit Referral"}
+              {submitting
+                ? "Submitting..."
+                : mediaUploading
+                  ? "Waiting for uploads..."
+                  : "Submit Referral"}
             </button>
           </div>
         </div>
@@ -555,7 +590,7 @@ export default function ReferralPage({ walletHref }) {
               className="h-20 animate-pulse rounded-2xl border border-border bg-surface-white"
             />
           ))
-        ) : !data?.referrals?.length ? (
+        ) : !referrals.length ? (
           <div className="rounded-2xl border border-border bg-surface-white p-12 text-center shadow-soft">
             <p className="text-sm text-muted">No referrals yet.</p>
             <p className="mt-1 text-xs text-muted">
@@ -564,7 +599,7 @@ export default function ReferralPage({ walletHref }) {
             </p>
           </div>
         ) : (
-          data.referrals.map((r) => (
+          referrals.map((r) => (
             <div
               key={r.id}
               className="rounded-2xl border border-border bg-surface-white p-5 shadow-soft"
@@ -670,6 +705,18 @@ export default function ReferralPage({ walletHref }) {
           ))
         )}
       </div>
+
+      {!isLoading && data?.hasMore && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-body transition hover:bg-surface-subtle disabled:opacity-50"
+          >
+            {loadingMore ? "Loading..." : "Load older referrals"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

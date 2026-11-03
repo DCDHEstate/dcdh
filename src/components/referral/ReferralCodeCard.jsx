@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ATTACH_WINDOW_DAYS, copyText } from "@/lib/referralOptions";
 
 /**
  * Profile-page card for the link-based referral flow.
  *
  * Someone who signed up without following a referral link can still enter the
- * code afterwards — which is the whole point of this card. Once a referral is
+ * code afterwards, within ATTACH_WINDOW_DAYS of signing up. Once a referral is
  * attached it becomes read-only; attribution is single-use by design, so there
  * is nothing to edit.
  */
@@ -16,7 +17,7 @@ export default function ReferralCodeCard() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     fetch("/api/referrals/attach-code")
@@ -50,6 +51,7 @@ export default function ReferralCodeCard() {
       );
       setState((s) => ({
         ...s,
+        canAttach: false,
         referredBy: { code: code.toUpperCase(), name: d.referrerName },
       }));
       setCode("");
@@ -79,14 +81,13 @@ export default function ReferralCodeCard() {
           />
           <button
             type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(state.myLink);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
+            onClick={async () => {
+              setCopied((await copyText(state.myLink)) ? "Copied!" : "Copy failed");
+              setTimeout(() => setCopied(""), 2000);
             }}
             className="shrink-0 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-body transition hover:bg-surface-subtle"
           >
-            {copied ? "Copied!" : "Copy"}
+            {copied || "Copy"}
           </button>
         </div>
         <p className="mt-1 text-xs text-muted">
@@ -105,6 +106,11 @@ export default function ReferralCodeCard() {
               <span className="text-muted">({state.referredBy.code})</span>
             </p>
           </div>
+        ) : !state.canAttach ? (
+          <p className="text-xs text-muted">
+            Referral codes can be added within {ATTACH_WINDOW_DAYS} days of
+            signing up, so one can no longer be added to this account.
+          </p>
         ) : (
           <form onSubmit={submit}>
             <label className="mb-1 block text-xs font-medium text-muted">
@@ -112,7 +118,13 @@ export default function ReferralCodeCard() {
             </label>
             <p className="mb-2 text-xs text-muted">
               Enter their referral code to link your account. This can only be
-              set once.
+              set once, and only until{" "}
+              {new Date(state.attachWindowEndsAt).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+              .
             </p>
             <div className="flex gap-2">
               <input

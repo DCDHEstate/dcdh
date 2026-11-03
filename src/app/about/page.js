@@ -53,6 +53,13 @@ const founders = [
     image: "/images/founders/Rudrakshi.jpeg",
     linkedin: null,
   },
+  {
+    name: "Riteeka Pandey",
+    role: "Vice President - Marketing & Business Growth",
+    bio: "Riteeka brings 6–7 years of professional experience across media, communication, marketing and leadership. With experience as a news anchor at News 21, she brings strong communication and audience-engagement capabilities. At DCDH Empire, she guides marketing strategy, business growth, brand communication and team coordination.",
+    image: "/images/founders/Reetika.jpg",
+    linkedin: null,
+  },
 ];
 
 const stats = [
@@ -644,7 +651,7 @@ export default function AboutPage() {
               <div className="divider-elegant mx-auto mt-6 max-w-xs" />
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {founders.map((founder, i) => (
                 <div
                   key={i}

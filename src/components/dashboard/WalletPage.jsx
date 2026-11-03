@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import WithdrawalPanel from "@/components/dashboard/WithdrawalPanel";
 
 const REASON_LABELS = {
   referral_reward: "Referral Reward",
@@ -14,9 +15,10 @@ export default function WalletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
 
+  // The loading flag is raised by whoever changes the page, not here: this runs
+  // from an effect, where a synchronous setState triggers an extra render.
   const fetchData = useCallback(() => {
-    setIsLoading(true);
-    fetch(`/api/wallet?page=${page}&limit=20`)
+    fetch(`/api/wallet?page=${page}&limit=20&_t=${Date.now()}`)
       .then((r) => r.json())
       .then((d) => setData(d))
       .catch(() => {})
@@ -44,6 +46,8 @@ export default function WalletPage() {
           Earned from referral rewards and bonuses
         </p>
       </div>
+
+      <WithdrawalPanel onBalanceChange={fetchData} />
 
       {/* Transactions */}
       <div className="rounded-2xl border border-border bg-surface-white shadow-soft">
@@ -104,8 +108,8 @@ export default function WalletPage() {
           <div className="flex items-center justify-between border-t border-border px-6 py-3 text-sm">
             <p className="text-muted">Page {page} of {Math.ceil(data.total / 20)}</p>
             <div className="flex gap-2">
-              <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-border px-3 py-1.5 text-muted hover:bg-surface-subtle disabled:opacity-40">Prev</button>
-              <button disabled={page * 20 >= data.total} onClick={() => setPage(page + 1)} className="rounded-lg border border-border px-3 py-1.5 text-muted hover:bg-surface-subtle disabled:opacity-40">Next</button>
+              <button disabled={page <= 1} onClick={() => { setIsLoading(true); setPage(page - 1); }} className="rounded-lg border border-border px-3 py-1.5 text-muted hover:bg-surface-subtle disabled:opacity-40">Prev</button>
+              <button disabled={page * 20 >= data.total} onClick={() => { setIsLoading(true); setPage(page + 1); }} className="rounded-lg border border-border px-3 py-1.5 text-muted hover:bg-surface-subtle disabled:opacity-40">Next</button>
             </div>
           </div>
         )}

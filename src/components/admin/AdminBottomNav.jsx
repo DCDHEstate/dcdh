@@ -14,6 +14,7 @@ const allNav = [
   { name: "Rent", href: "/admin/rent-payments", icon: CurrencyIcon },
   { name: "Complaints", href: "/admin/complaints", icon: ExclamationIcon },
   { name: "Referrals", href: "/admin/referrals", icon: GiftIcon },
+  { name: "Payouts", href: "/admin/payouts", icon: WalletIcon },
   { name: "Settings", href: "/admin/settings", icon: CogIcon },
 ];
 
@@ -215,6 +216,14 @@ function LogoutIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+    </svg>
+  );
+}
+
+function WalletIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 110-6h5.25A2.25 2.25 0 0121 6v6zm0 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v6z" />
     </svg>
   );
 }

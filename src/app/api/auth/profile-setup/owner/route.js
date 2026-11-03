@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
-import { attachReferralCode, ensureReferralCode } from '@/lib/referral';
+import { attachReferralCode } from '@/lib/referral';
 
 export async function GET(request) {
   try {
@@ -123,8 +123,7 @@ export async function POST(request) {
     // worth failing profile setup over; the user can retry from their profile.
     if (referralCode?.trim()) {
       try {
-        const myCode = await ensureReferralCode(user.id, user.referral_code);
-        await attachReferralCode({ ...user, referral_code: myCode }, referralCode);
+        await attachReferralCode(user, referralCode);
       } catch (refErr) {
         console.error('[profile-setup] referral attach failed', refErr);
       }

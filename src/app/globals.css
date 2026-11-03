@@ -915,3 +915,29 @@ body {
 
    For questions or updates, consult the design system documentation.
    ============================================================================= */
+
+/* =============================================================================
+   PROJECT LANDING THEMES — per-project palettes sampled from each brochure
+   accent: on dark backgrounds · accent-strong: readable text on light backgrounds
+   ============================================================================= */
+
+.project-theme-sarayu {
+  --project-dark: #3a2416;
+  --project-accent: #e0b27a;
+  --project-accent-strong: #8f5a25;
+  --project-tint: #f8efe6;
+}
+
+.project-theme-cruise {
+  --project-dark: #0b3f42;
+  --project-accent: #6fd0c8;
+  --project-accent-strong: #0c7470;
+  --project-tint: #eef6f5;
+}
+
+.project-theme-nestoria {
+  --project-dark: #0b2a55;
+  --project-accent: #8fbdf0;
+  --project-accent-strong: #1d5fb0;
+  --project-tint: #eef3fa;
+}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { verifyOTP } from '@/lib/otp';
 import { createSession, setSessionCookie } from '@/lib/session';
-import { attachReferralCode, ensureReferralCode, normalizeCode } from '@/lib/referral';
+import { linkNewUser, ensureReferralCode, normalizeCode } from '@/lib/referral';
 
 const MAX_ATTEMPTS = 5;
 const REF_COOKIE_NAME = 'dcdh_ref';
@@ -92,25 +92,25 @@ export async function POST(request) {
     // Detect new user: full_name and email are both null only for freshly created users
     const isNewUser = !user.full_name && !user.email;
 
-    // Link-based referral: the code was parked in a cookie by middleware when
-    // the invitee opened /?ref=CODE. Only ever applied to a brand-new account —
-    // an existing user following a link is not a new referral. Failures are
-    // swallowed on purpose: a stale or bogus code must never block a login.
+    // Referral attribution for a brand-new account. Runs even without a code:
+    // if someone submitted a person referral for this number before it signed
+    // up, that referrer is credited (first claim wins). Otherwise the link's
+    // code applies — parked in a cookie by middleware when the invitee opened
+    // the link, and sent in the body as a fallback for blocked cookies.
+    // An existing user following a link is not a new referral. Failures are
+    // logged and swallowed: attribution must never block a login.
     const referralCode =
       normalizeCode(body.referralCode) ||
       normalizeCode(request.cookies.get(REF_COOKIE_NAME)?.value);
 
     let referredBy = null;
-    if (isNewUser && referralCode) {
+    if (isNewUser) {
       try {
-        const myCode = await ensureReferralCode(user.id, null);
-        const result = await attachReferralCode(
-          { ...user, referral_code: myCode },
-          referralCode,
-        );
+        await ensureReferralCode(user.id, null);
+        const result = await linkNewUser(user, referralCode);
         if (result.ok) referredBy = result.referrerName || 'a DCDH member';
       } catch (refErr) {
-        console.error('[verify-otp] referral attach failed', refErr);
+        console.error('[verify-otp] referral attribution failed', refErr);
       }
     }
 
@@ -145,9 +145,9 @@ export async function POST(request) {
 
     setSessionCookie(response, token, expiresAt);
 
-    // The code has done its job — drop it so a later signup on the same device
-    // isn't silently credited to the same referrer.
-    if (referredBy) {
+    // Attribution is decided once per new account — drop the code either way so
+    // a later signup on the same device isn't silently credited to this referrer.
+    if (isNewUser && referralCode) {
       response.cookies.set(REF_COOKIE_NAME, '', { path: '/', expires: new Date(0) });
     }
 
